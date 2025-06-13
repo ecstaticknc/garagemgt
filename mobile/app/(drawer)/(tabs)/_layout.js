@@ -54,7 +54,7 @@ export default function TabLayout() {
       />
       
       <Tabs.Screen
-        name="customeradd"
+        name="CustomerDetailScreen"
         options={{
           title: 'ग्राहक नोंदणी',
           tabBarIcon: ({ color, size }) => (
@@ -63,7 +63,7 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="customerlist"
+        name="CustomerFormScreen"
         options={{
           title: 'आगामी बुकिंग',
           tabBarIcon: ({ color, size }) => (
@@ -72,31 +72,10 @@ export default function TabLayout() {
           ),
         }}
       />
-      <Tabs.Screen
-        name="CompletedEvents"
-        options={{
-          title: 'पूर्ण कार्यक्रम',
-          headerShown: true,
-          tabBarShowLabel: true,
-          tabBarIcon: ({ color, size }) => (
-           <MaterialIcons name="event-busy" size={28} color={color} />
-            // <MaterialCommunityIcons name="playlist-check" size={28} color={color} />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="ItemManagement"
-        options={{
-          href:null,
-          title: 'सामग्री व्यवस्थापन',
-          tabBarIcon: ({ color, size }) => (
-            <Entypo name="add-to-list" size={28} color={color} />
-          ),
-        }}
-      />
+    
 
 <Tabs.Screen
-        name="ResetDatabaseScreen"
+        name="HomeScreen"
         options={{
           href:null,
           title: 'डेटाबेस रीसेट करा',
