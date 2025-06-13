@@ -1,0 +1,704 @@
+[    
+  {
+    "name": "साखर ",
+    "quantity": 0,
+    "unit": "किलो",
+    "category": "किराणा"
+  },
+  {
+    "name": "गूळ ",
+    "quantity": 0,
+    "unit": "किलो",
+    "category": "किराणा"
+  },
+  {
+    "name": "पिटी साखर ",
+    "quantity": 0,
+    "unit": "किलो",
+    "category": "किराणा"
+  },
+  {
+    "name": "तेल ",
+    "quantity": 0,
+    "unit": "किलो",
+    "category": "किराणा"
+  },
+  {
+    "name": "डालडा ",
+    "quantity": 0,
+    "unit": "किलो",
+    "category": "किराणा"
+  },
+  {
+    "name": "गहू (पीठ) ",
+    "quantity": 0,
+    "unit": "किलो",
+    "category": "किराणा"
+  },
+  {
+    "name": "तांदूळ (चाँदतारा) ",
+    "quantity": 0,
+    "unit": "किलो",
+    "category": "किराणा"
+  },
+  {
+    "name": "मुगडाळ",
+    "quantity": 0,
+    "unit": "किलो",
+    "category": "किराणा"
+  },
+  {
+    "name": "तुरडाळ",
+    "quantity": 0,
+    "unit": "किलो",
+    "category": "किराणा"
+  },
+  {
+    "name": "मसूर डाळ",
+    "quantity": 0,
+    "unit": "किलो",
+    "category": "किराणा"
+  },
+  {
+    "name": "साधे बेसन",
+    "quantity": 0,
+    "unit": "किलो",
+    "category": "किराणा"
+  },
+  {
+    "name": "हिरा बेसन",
+    "quantity": 0,
+    "unit": "किलो",
+    "category": "किराणा"
+  },
+  {
+    "name": "मैदा",
+    "quantity": 0,
+    "unit": "किलो",
+    "category": "किराणा"
+  },
+  {
+    "name": "रवा",
+    "quantity": 0,
+    "unit": "किलो",
+    "category": "किराणा"
+  },
+  {
+    "name": "शेंगदाणे भाजके",
+    "quantity": 0,
+    "unit": "किलो",
+    "category": "किराणा"
+  },
+  {
+    "name": "ब्याडगी चटणी सुहाना",
+    "quantity": 0,
+    "unit": "किलो",
+    "category": "किराणा"
+  },
+  {
+    "name": "लाल तिखट अंबारी",
+    "quantity": 0,
+    "unit": "किलो",
+    "category": "किराणा"
+  },
+  {
+    "name": "काळा तिखट",
+    "quantity": 0,
+    "unit": "किलो",
+    "category": "किराणा"
+  },
+  {
+    "name": "मोहरी",
+    "quantity": 0,
+    "unit": "किलो",
+    "category": "किराणा"
+  },
+  {
+    "name": "जिरे",
+    "quantity": 0,
+    "unit": "किलो",
+    "category": "किराणा"
+  },
+  {
+    "name": "हळद",
+    "quantity": 0,
+    "unit": "किलो",
+    "category": "किराणा"
+  },
+  {
+    "name": "लवंग",
+    "quantity": 0,
+    "unit": "ग्राम",
+    "category": "किराणा"
+  },
+  {
+    "name": "दालचिनी",
+    "quantity": 0,
+    "unit": "ग्राम",
+    "category": "किराणा"
+  },
+  {
+    "name": "तीळ",
+    "quantity": 0,
+    "unit": "किलो",
+    "category": "किराणा"
+  },
+  {
+    "name": "पापड जिरा",
+    "quantity": 0,
+    "unit": "नग",
+    "category": "किराणा"
+  },
+  {
+    "name": "छोले मसाला",
+    "quantity": 0,
+    "unit": "नग",
+    "category": "किराणा"
+  },
+  {
+    "name": "बादशहा सब्जी मसाला",
+    "quantity": 0,
+    "unit": "नग",
+    "category": "किराणा"
+  },
+  {
+    "name": "किचन किंग",
+    "quantity": 0,
+    "unit": "नग",
+    "category": "किराणा"
+  },
+  {
+    "name": "आशिर्वाद आटा",
+    "quantity": 0,
+    "unit": "किलो",
+    "category": "किराणा"
+  },
+  {
+    "name": "मगर बी",
+    "quantity": 0,
+    "unit": "किलो",
+    "category": "किराणा"
+  },
+  {
+    "name": "डाळी",
+    "quantity": 0,
+    "unit": "किलो",
+    "category": "किराणा"
+  },
+  {
+    "name": "गोडा मसाला",
+    "quantity": 0,
+    "unit": "नग",
+    "category": "किराणा"
+  },
+  {
+    "name": "बदाम",
+    "quantity": 0,
+    "unit": "किलो",
+    "category": "किराणा"
+  },
+  {
+    "name": "मठ्ठा मसाला",
+    "quantity": 0,
+    "unit": "नग",
+    "category": "किराणा"
+  },
+  {
+    "name": "सांभार मसाला बादशहा",
+    "quantity": 0,
+    "unit": "नग",
+    "category": "किराणा"
+  },
+  {
+    "name": "हिंग",
+    "quantity": 0,
+    "unit": "डब्बी",
+    "category": "किराणा"
+  },
+  {
+    "name": "खसखस",
+    "quantity": 0,
+    "unit": "ग्राम",
+    "category": "किराणा"
+  },
+  {
+    "name": "कस्तुरी मेथी",
+    "quantity": 0,
+    "unit": "ग्राम",
+    "category": "किराणा"
+  },
+  {
+    "name": "काजू कानी",
+    "quantity": 0,
+    "unit": "किलो",
+    "category": "किराणा"
+  },
+  {
+    "name": "खोबरे (अख्खे)",
+    "quantity": 0,
+    "unit": "नग",
+    "category": "किराणा"
+  },
+  {
+    "name": "मनुके",
+    "quantity": 0,
+    "unit": "किलो",
+    "category": "किराणा"
+  },
+  {
+    "name": "काजू चार तुकडा",
+    "quantity": 0,
+    "unit": "किलो",
+    "category": "किराणा"
+  },
+  {
+    "name": "खोबरे पावडर",
+    "quantity": 0,
+    "unit": "किलो",
+    "category": "किराणा"
+  },
+  {
+    "name": "पनीर मसाला",
+    "quantity": 0,
+    "unit": "नग",
+    "category": "किराणा"
+  },
+  {
+    "name": "चिंच",
+    "quantity": 0,
+    "unit": "किलो",
+    "category": "किराणा"
+  },
+  {
+    "name": "सोडा",
+    "quantity": 0,
+    "unit": "ग्राम",
+    "category": "किराणा"
+  },
+  {
+    "name": "बारीक मीठ",
+    "quantity": 0,
+    "unit": "किलो",
+    "category": "किराणा"
+  },
+  {
+    "name": "मोठे मीठ",
+    "quantity": 0,
+    "unit": "किलो",
+    "category": "किराणा"
+  },
+  {
+    "name": "काबुली चणा",
+    "quantity": 0,
+    "unit": "किलो",
+    "category": "किराणा"
+  },
+  {
+    "name": "वटाणा ग्रीन पिस",
+    "quantity": 0,
+    "unit": "किलो",
+    "category": "किराणा"
+  },
+  {
+    "name": "अमोल मिल्क पावडर",
+    "quantity": 0,
+    "unit": "किलो",
+    "category": "किराणा"
+  },
+  {
+    "name": "जंगली विलायची",
+    "quantity": 0,
+    "unit": "ग्राम",
+    "category": "किराणा"
+  },
+  {
+    "name": "चक्री फुल",
+    "quantity": 0,
+    "unit": "ग्राम",
+    "category": "किराणा"
+  },
+  {
+    "name": "मसाला पुल लाल",
+    "quantity": 0,
+    "unit": "ग्राम",
+    "category": "किराणा"
+  },
+  {
+    "name": "तमल पत्र",
+    "quantity": 0,
+    "unit": "ग्राम",
+    "category": "किराणा"
+  },
+  {
+    "name": "केशरी कलर",
+    "quantity": 0,
+    "unit": "डब्बी",
+    "category": "किराणा"
+  },
+  {
+    "name": "डाळिंब कलर",
+    "quantity": 0,
+    "unit": "डब्बी",
+    "category": "किराणा"
+  },
+  {
+    "name": "पिवळा कलर",
+    "quantity": 0,
+    "unit": "डब्बी",
+    "category": "किराणा"
+  },
+  {
+    "name": "हिरवा कलर",
+    "quantity": 0,
+    "unit": "डब्बी",
+    "category": "किराणा"
+  },
+  {
+    "name": "धणे",
+    "quantity": 0,
+    "unit": "ग्राम",
+    "category": "किराणा"
+  },
+  {
+    "name": "नॅपकिन कापड",
+    "quantity": 0,
+    "unit": "किलो",
+    "category": "किराणा"
+  },
+  {
+    "name": "निरमा",
+    "quantity": 0,
+    "unit": "पाकीट",
+    "category": "किराणा"
+  },
+  {
+    "name": "साबण",
+    "quantity": 0,
+    "unit": "नग",
+    "category": "किराणा"
+  },
+  {
+    "name": "घासणी",
+    "quantity": 0,
+    "unit": "नग",
+    "category": "किराणा"
+  },
+  {
+    "name": "चहा पावडर",
+    "quantity": 0,
+    "unit": "किलो",
+    "category": "किराणा"
+  },
+  {
+    "name": "टेस्टिंग पावडर",
+    "quantity": 0,
+    "unit": "ग्राम",
+    "category": "किराणा"
+  },
+  {
+    "name": "हरभरा डाळ",
+    "quantity": 0,
+    "unit": "किलो",
+    "category": "किराणा"
+  },
+  {
+    "name": "शाहजिरे",
+    "quantity": 0,
+    "unit": "ग्राम",
+    "category": "किराणा"
+  },
+  {
+    "name": "रोझ इसेन्स",
+    "quantity": 0,
+    "unit": "डब्बी",
+    "category": "किराणा"
+  },
+  {
+    "name": "वेलदोडे",
+    "quantity": 0,
+    "unit": "डब्बी",
+    "category": "किराणा"
+  },
+  {
+    "name": "जायफळ",
+    "quantity": 0,
+    "unit": "ग्राम",
+    "category": "किराणा"
+  },
+  {
+    "name": "कांदा लसूण मसाला",
+    "quantity": 0,
+    "unit": "किलो",
+    "category": "किराणा"
+  },
+  {
+    "name": "फुटाणे",
+    "quantity": 0,
+    "unit": "किलो",
+    "category": "किराणा"
+  },
+  {
+    "name": "पापड खार",
+    "quantity": 0,
+    "unit": "किलो",
+    "category": "किराणा"
+  },
+  {
+    "name": "लिंबू सत्व",
+    "quantity": 0,
+    "unit": "ग्राम",
+    "category": "किराणा"
+  },
+  {
+    "name": "मिरे",
+    "quantity": 0,
+    "unit": "ग्राम",
+    "category": "किराणा"
+  },
+  {
+    "name": "धणे पावडर",
+    "quantity": 0,
+    "unit": "किलो",
+    "category": "किराणा"
+  },
+  {
+    "name": "ओवा",
+    "quantity": 0,
+    "unit": "ग्राम",
+    "category": "किराणा"
+  },
+  {
+    "name": "गॅस टाकी",
+    "quantity": 0,
+    "unit": "नग",
+    "category": "किराणा"
+  },
+  {
+    "name": "मिक्सर",
+    "quantity": 0,
+    "unit": "नग",
+    "category": "किराणा"
+  },
+  {
+    "name": "पाण्याचे ग्लास",
+    "quantity": 0,
+    "unit": "डझन",
+    "category": "किराणा"
+  },
+  {
+    "name": "चहाचे कप",
+    "quantity": 0,
+    "unit": "डझन",
+    "category": "किराणा"
+  },
+  {
+    "name": "पत्रावळी",
+    "quantity": 0,
+    "unit": "डझन",
+    "category": "किराणा"
+  },
+  {
+    "name": "अमोल क्रीम",
+    "quantity": 0,
+    "unit": "नग",
+    "category": "डेअरी उत्पादने"
+  },
+  {
+    "name": "खवा",
+    "quantity": 0,
+    "unit": "किलो",
+    "category": "डेअरी उत्पादने"
+  },
+  {
+    "name": "तूप ",
+    "quantity": 0,
+    "unit": "किलो",
+    "category": "डेअरी उत्पादने"
+  },
+  {
+    "name": "दही / मलई",
+    "quantity": 0,
+    "unit": "लिटर",
+    "category": "डेअरी उत्पादने"
+  },
+  {
+    "name": "दूध",
+    "quantity": 0,
+    "unit": "लिटर",
+    "category": "डेअरी उत्पादने"
+  },
+  {
+    "name": "पनीर",
+    "quantity": 0,
+    "unit": "किलो",
+    "category": "डेअरी उत्पादने"
+  },
+  {
+    "name": "फ्लॉवर",
+    "quantity": 0,
+    "unit": "नग",
+    "category": "भाजीपाला"
+  },
+  {
+    "name": "शिमला मिरची",
+    "quantity": 0,
+    "unit": "किलो ",
+    "category": "भाजीपाला"
+  },
+  {
+    "name": "घेवडा",
+    "quantity": 0,
+    "unit": "किलो",
+    "category": "भाजीपाला"
+  },
+  {
+    "name": "भेंडी",
+    "quantity": 0,
+    "unit": "किलो",
+    "category": "भाजीपाला"
+  },
+  {
+    "name": "पत्ता कोबी",
+    "quantity": 0,
+    "unit": "किलो ",
+    "category": "भाजीपाला"
+  },
+  {
+    "name": "वांगी",
+    "quantity": 0,
+    "unit": "किलो",
+    "category": "भाजीपाला"
+  },
+  {
+    "name": "बटाटा",
+    "quantity": 0,
+    "unit": "किलो",
+    "category": "भाजीपाला"
+  },
+  {
+    "name": "कांदा",
+    "quantity": 0,
+    "unit": "किलो",
+    "category": "भाजीपाला"
+  },
+  {
+    "name": "वैशाली टोमॅटो",
+    "quantity": 0,
+    "unit": "किलो",
+    "category": "भाजीपाला"
+  },
+  {
+    "name": "हिरवी मिरची",
+    "quantity": 0,
+    "unit": "किलो",
+    "category": "भाजीपाला"
+  },
+  {
+    "name": "आले",
+    "quantity": 0,
+    "unit": "किलो",
+    "category": "भाजीपाला"
+  },
+  {
+    "name": "लसूण",
+    "quantity": 0,
+    "unit": "किलो",
+    "category": "भाजीपाला"
+  },
+  {
+    "name": "कढीपत्ता",
+    "quantity": 0,
+    "unit": "पेंडी",
+    "category": "भाजीपाला"
+  },
+  {
+    "name": "कोथिंबीर",
+    "quantity": 0,
+    "unit": "पेंडी",
+    "category": "भाजीपाला"
+  },
+  {
+    "name": "मटार शेंगा",
+    "quantity": 0,
+    "unit": "किलो",
+    "category": "भाजीपाला"
+  },
+  {
+    "name": "दोडका",
+    "quantity": 0,
+    "unit": "किलो",
+    "category": "भाजीपाला"
+  },
+  {
+    "name": "गावरान टोमॅटो",
+    "quantity": 0,
+    "unit": "किलो",
+    "category": "भाजीपाला"
+  },
+  {
+    "name": "गाजर",
+    "quantity": 0,
+    "unit": "किलो",
+    "category": "भाजीपाला"
+  },
+  {
+    "name": "काकडी",
+    "quantity": 0,
+    "unit": "किलो",
+    "category": "भाजीपाला"
+  },
+  {
+    "name": "लिंबू",
+    "quantity": 0,
+    "unit": "नग",
+    "category": "भाजीपाला"
+  },
+  {
+    "name": "मुळा",
+    "quantity": 0,
+    "unit": "नग",
+    "category": "भाजीपाला"
+  },
+  {
+    "name": "दुधी भोपळा",
+    "quantity": 0,
+    "unit": "नग",
+    "category": "भाजीपाला"
+  },
+  {
+    "name": "कारले",
+    "quantity": 0,
+    "unit": "किलो",
+    "category": "भाजीपाला"
+  },
+  {
+    "name": "डाळिंब",
+    "quantity": 0,
+    "unit": "नग",
+    "category": "भाजीपाला"
+  },
+  {
+    "name": "पालक पेंडी",
+    "quantity": 0,
+    "unit": "पेंडी",
+    "category": "भाजीपाला"
+  },
+  {
+    "name": "चुका पेंडी",
+    "quantity": 0,
+    "unit": "पेंडी",
+    "category": "भाजीपाला"
+  },
+  {
+    "name": "मेथी पेंडी",
+    "quantity": 0,
+    "unit": "पेंडी",
+    "category": "भाजीपाला"
+  },
+  {
+    "name": "पुदीना पेंडी",
+    "quantity": 0,
+    "unit": "पेंडी",
+    "category": "भाजीपाला"
+  }
+]

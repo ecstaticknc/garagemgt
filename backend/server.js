@@ -1,37 +1,39 @@
+// server.js
+require('dotenv').config();
+
 const express = require('express');
-const cors = require('cors');
-const db = require('./database');
-
 const app = express();
-const PORT = 5000;
+const PORT = process.env.PORT || 5000;
 
-app.use(cors());
+const db = require('./config/db'); // Import the database connection pool
+const apiRoutes = require('./routes/apiRoutes'); // Import the single API routes file
+const authRoutes = require('./routes/authRoute');
+
+// Middleware to parse JSON bodies
 app.use(express.json());
 
-// Create a visit
-app.post('/visits', (req, res) => {
-  const { salesperson_name, client_name, visit_date, purpose } = req.body;
-  const sql = `INSERT INTO visits (salesperson_name, client_name, visit_date, purpose) VALUES (?, ?, ?, ?)`;
-  db.run(sql, [salesperson_name, client_name, visit_date, purpose], function (err) {
-    if (err) {
-      return res.status(500).json({ error: err.message });
-    }
-    res.json({ id: this.lastID });
-  });
+// Basic route for home page
+app.get('/', (req, res) => {
+  res.send('Welcome to the Generic AutoGarage Bike Service Center Backend!');
 });
 
-// Get all visits
-app.get('/visits', (req, res) => {
-  const sql = `SELECT * FROM visits`;
-  db.all(sql, [], (err, rows) => {
-    if (err) {
-      return res.status(500).json({ error: err.message });
-    }
-    res.json(rows);
+// Use the consolidated API routes
+app.use('/api', apiRoutes); // All routes will be prefixed with /api/resourceName
+
+app.use('/api', authRoutes);
+
+// Test DB connection
+db.getConnection()
+  .then(connection => {
+    console.log('MySQL database pool connected successfully to autogarage!');
+    connection.release();
+  })
+  .catch(err => {
+    console.error('MySQL database connection error:', err.message);
+    process.exit(1);
   });
-});
 
 // Start the server
 app.listen(PORT, () => {
-  console.log(`Server is running on http://localhost:${PORT}`);
+  console.log(`Generic AutoGarage Backend Server running on port ${PORT}`);
 });
