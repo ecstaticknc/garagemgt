@@ -1,0 +1,49 @@
+import { View, Text, ActivityIndicator } from 'react-native'
+import axios from 'axios';
+
+
+// const BASE_URL = 'https://jsonplaceholder.typicode.com';
+ const BASE_URL = 'http://192.168.1.24:3000/api';
+//const BASE_URL = 'https://lsbackend.laxmipanditservices.com/api';
+//const BASE_URL = 'http://ecogas.luknos.com/api';
+
+
+const apiClient = axios.create({
+  baseURL: BASE_URL,
+  headers: {
+    'Content-Type': 'application/json',
+  },
+});
+
+const apiClient1 = axios.create({
+  baseURL: BASE_URL,
+  headers: {
+     'Content-Type': 'multipart/form-data',
+  },
+});
+
+// Define common API methods
+const _get = (url, config = {}) => {
+  return apiClient.get(url, config);
+};
+
+const _delete = (url, config = {}) => {
+  return apiClient.delete(url, config);
+};
+
+const _put = (url, data = {}, config = {}) => {
+  return apiClient.put(url, data, config);
+};
+
+const _post = (url, data = {}, config = {}) => {
+  return apiClient.post(url, data, config);
+};
+
+const _postCustom = (url, data = {}, config = {}) => {
+  return apiClient1.post(url, data, config);
+};
+
+// Loader function
+
+// Export API methods
+export default { _get, _delete, _put, _post, _postCustom };

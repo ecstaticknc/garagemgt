@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, StyleSheet, Alert, ScrollView } from 'react-native';
 import { Appbar, Card, Title, Paragraph, ActivityIndicator, Text, Button } from 'react-native-paper';
-import { _get } from '../../config/axiosInstance';
+import { _get } from '../../../../config/axiosInstance';
 
 const CustomerDetailScreen = ({ navigation, route }) => {
   const { customerId } = route.params;

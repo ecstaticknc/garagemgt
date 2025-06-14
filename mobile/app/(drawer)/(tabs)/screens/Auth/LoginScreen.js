@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { View, StyleSheet, Alert, ImageBackground } from 'react-native';
 import { TextInput, Button, ActivityIndicator, Text } from 'react-native-paper';
-import { useAuth } from '../../context/AuthContext';
+import { useAuth } from '../../../../context/AuthContext'; // Adjust the import path as necessary
 
 const LoginScreen = ({ navigation }) => {
   const [username, setUsername] = useState(''); // Corresponds to proprietorMobile

@@ -3,7 +3,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { View, FlatList, StyleSheet, Alert, RefreshControl } from 'react-native';
 import { Appbar, List, FAB, ActivityIndicator, Text, Button } from 'react-native-paper';
 import { useFocusEffect } from '@react-navigation/native';
-import { _delete, _get } from '../../config/axiosInstance';
+import { _delete, _get } from '../../../../config/axiosInstance';
 
 const ServiceHistoryListScreen = ({ navigation, route }) => {
   const { customerId } = route.params || {}; // Get customerId if navigated from CustomerDetailScreen

@@ -504,7 +504,6 @@
 import React, { useState } from 'react';
 import { View, StyleSheet, Alert, ImageBackground } from 'react-native';
 import { TextInput, Button, ActivityIndicator, Text } from 'react-native-paper';
-import { useAuth } from '../../context/AuthContext';
 
 const LoginScreen = ({ navigation }) => {
   const [username, setUsername] = useState(''); // Corresponds to proprietorMobile

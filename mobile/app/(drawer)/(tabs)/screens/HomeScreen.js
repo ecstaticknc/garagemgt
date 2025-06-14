@@ -2,8 +2,8 @@
 import React, { useEffect, useState } from 'react';
 import { View, StyleSheet, ActivityIndicator } from 'react-native';
 import { Appbar, List, Divider, Text, Card } from 'react-native-paper';
-import { useAuth } from '../context/AuthContext'; // To get userScId
-import { _get } from '../config/axiosInstance'; // To make API calls
+import { useAuth } from '../../../context/AuthContext'; // To get userScId
+import { _get } from '../../../config/axiosInstance'; // To make API calls
 
 const HomeScreen = ({ navigation }) => {
   const { userScId, logout } = useAuth(); // Get userScId and logout function

@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, StyleSheet, Alert, ScrollView } from 'react-native';
 import { Appbar, TextInput, Button, ActivityIndicator, Text } from 'react-native-paper';
-import { _post, _put } from '../../config/axiosInstance';
+import { _post, _put } from '../../../../config/axiosInstance';
 
 
 const CustomerFormScreen = ({ navigation, route }) => { // It must be a function component
