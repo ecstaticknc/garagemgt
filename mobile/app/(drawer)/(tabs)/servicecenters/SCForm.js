@@ -2,10 +2,14 @@
 import React, { useState, useEffect } from 'react';
 import { View, StyleSheet, Alert, ScrollView } from 'react-native';
 import { Appbar, TextInput, Button, ActivityIndicator, Text } from 'react-native-paper';
-import { _post, _put } from '../../../../config/axiosInstance';
+import API from '../../../config/axiosInstance';
+import { useLocalSearchParams, useNavigation } from 'expo-router'; 
 
-const ServiceCenterFormScreen = ({ navigation, route }) => {
-  const existingServiceCenter = route.params?.serviceCenter;
+const ServiceCenterFormScreen = () => {
+  // const existingServiceCenter = route.params?.serviceCenter;
+  const navigation = useNavigation(); // Get navigation object from hook
+    const localSearchParams = useLocalSearchParams();
+  const existingServiceCenter = localSearchParams?.serviceCenter ? JSON.parse(localSearchParams.serviceCenter) : null;
 
   // Adjust useState initial values to use correct backend keys
   const [centerName, setCenterName] = useState(existingServiceCenter?.serviceCenterName || ''); // Corrected key
@@ -45,10 +49,10 @@ const ServiceCenterFormScreen = ({ navigation, route }) => {
       };
 
       if (existingServiceCenter) {
-        await _put(`/servicecenters/${existingServiceCenter.id}`, serviceCenterData);
+        await API._put(`/servicecenters/${existingServiceCenter.id}`, serviceCenterData);
         Alert.alert('Success', 'Service Center updated successfully!');
       } else {
-        await _post('/servicecenters', serviceCenterData);
+        await API._post('/servicecenters', serviceCenterData);
         Alert.alert('Success', 'Service Center added successfully!');
       }
       navigation.goBack();

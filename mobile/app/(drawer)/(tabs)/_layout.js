@@ -33,57 +33,49 @@ export default function TabLayout() {
         headerLeft: drawerButton,
       }}>
       <Tabs.Screen
-        name="home"
+        name="Home"
         options={{
-          title: 'डॅशबोर्ड',
+          title: 'Home',
           tabBarIcon: ({ color, size }) => (
             <MaterialIcons name="home" size={size} color={color} />
           ),
         }}
       />
 
-      <Tabs.Screen
-        name="BookingView"       
+       <Tabs.Screen
+        name="customers" // Points to app/(tabs)/customers/_layout.js
         options={{
-          title: 'बुकिंग व्यवस्थापन',         
-   
+          title: 'ग्राहक', // A more general title for the Customer tab
           tabBarIcon: ({ color, size }) => (
-           <FontAwesome5 name="calendar-alt" size={28} color={color} />
+            <FontAwesome name="users" size={size} color={color} /> // Changed to a more suitable icon for "Customers"
           ),
-        }}
-      />
-      
-      <Tabs.Screen
-        name="CustomerDetailScreen"
-        options={{
-          title: 'ग्राहक नोंदणी',
-          tabBarIcon: ({ color, size }) => (
-            <FontAwesome name="user-plus" size={size} color={color} />
-          ),
+          headerShown: false, // The nested stack will handle its own headers
         }}
       />
       <Tabs.Screen
-        name="CustomerFormScreen"
+        name="servicecenters" // Points to app/(tabs)/servicecenters/_layout.js
         options={{
-          title: 'आगामी बुकिंग',
+          title: 'सेवा केन्द्र',
           tabBarIcon: ({ color, size }) => (
-            // <FontAwesome name="list-alt" size={28} color={color} />
-            <MaterialIcons name="event-available" size={28} color={color} />
+            <MaterialCommunityIcons name="garage" size={size} color={color} />
           ),
+          headerShown: false, // The nested stack will handle its own headers
         }}
       />
+      <Tabs.Screen
+        name="servicehistory" // Points to app/(tabs)/servicehistory/_layout.js
+        options={{
+          title: 'सेवा इतिहास',
+          tabBarIcon: ({ color, size }) => (
+            <FontAwesome5 name="history" size={size} color={color} />
+          ),
+          headerShown: false, // The nested stack will handle its own headers
+        }}
+      />
+     
     
 
-<Tabs.Screen
-        name="HomeScreen"
-        options={{
-          href:null,
-          title: 'डेटाबेस रीसेट करा',
-          tabBarIcon: ({ color, size }) => (
-            <Entypo name="add-to-list" size={28} color={color} />
-          ),
-        }}
-      />
+
        
     </Tabs>
   );

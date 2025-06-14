@@ -1,12 +1,18 @@
-// screens/ServiceHistory/ServiceHistoryFormScreen.js
 import React, { useState, useEffect } from 'react';
 import { View, StyleSheet, Alert, ScrollView } from 'react-native';
 import { Appbar, TextInput, Button, ActivityIndicator, Text } from 'react-native-paper';
-import { _post, _put } from '../../../../config/axiosInstance';
+// Corrected API import: use named imports for _post and _put
+import { _post, _put } from '../../../config/axiosInstance'; // Adjusted path
+import { useLocalSearchParams, useNavigation } from 'expo-router';
 
-const ServiceHistoryFormScreen = ({ navigation, route }) => {
-  const existingServiceHistory = route.params?.serviceHistory;
-  const initialCustomerId = route.params?.customerId || ''; // If navigated from CustomerDetail
+// Removed 'route' from props as useLocalSearchParams is now used
+const ServiceHistoryFormScreen = () => {
+  const navigation = useNavigation();
+  const localSearchParams = useLocalSearchParams();
+
+  // Corrected: use localSearchParams for both serviceHistory and customerId
+  const existingServiceHistory = localSearchParams?.serviceHistory ? JSON.parse(localSearchParams.serviceHistory) : null;
+  const initialCustomerId = localSearchParams?.customerId || ''; // If navigated from CustomerDetail or FAB
 
   const [vehicleNo, setVehicleNo] = useState(existingServiceHistory?.vehicleNo || '');
   const [services, setServices] = useState(existingServiceHistory?.services || '');
@@ -41,9 +47,11 @@ const ServiceHistoryFormScreen = ({ navigation, route }) => {
       };
 
       if (existingServiceHistory) {
+        // Corrected API call: use _put directly
         await _put(`/servicehistory/${existingServiceHistory.id}`, serviceHistoryData);
         Alert.alert('Success', 'Service entry updated successfully!');
       } else {
+        // Corrected API call: use _post directly
         await _post('/servicehistory', serviceHistoryData);
         Alert.alert('Success', 'Service entry added successfully!');
       }

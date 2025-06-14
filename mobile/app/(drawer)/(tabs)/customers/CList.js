@@ -3,9 +3,12 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { View, FlatList, StyleSheet, Alert, RefreshControl } from 'react-native';
 import { Appbar, List, FAB, ActivityIndicator, Text, Button } from 'react-native-paper';
 import { useFocusEffect } from '@react-navigation/native';
-import { _delete, _get } from '../../../../config/axiosInstance';
+import API from '../../../config/axiosInstance';
+import { useRouter, useNavigation } from 'expo-router';
 
-const CustomerListScreen = ({ navigation }) => {
+const CustomerListScreen = () => {
+  const router = useRouter();
+  const navigation = useNavigation();
   const [customers, setCustomers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -15,7 +18,7 @@ const CustomerListScreen = ({ navigation }) => {
     setLoading(true);
     setError(null);
     try {
-      const response = await _get(`/customers`);
+      const response = await API._get(`/customers`);
       setCustomers(response.data.data);
     } catch (err) {
       console.error('Error fetching customers:', err);
@@ -67,11 +70,14 @@ const CustomerListScreen = ({ navigation }) => {
       left={props => <List.Icon {...props} icon="account" />}
       right={props => (
         <View style={styles.actions}>
-          <Button icon="pencil" onPress={() => navigation.navigate('CustomerForm', { customer: item })} />
+          <Button icon="pencil" onPress={() =>  router.push({
+                pathname: '/customers/CForm', // Path to CustomerFormScreen within the stack
+                params: { customer: JSON.stringify(item) }, // Pass the customer object as a string
+              })} />
           <Button icon="delete" onPress={() => handleDeleteCustomer(item.id)} />
         </View>
       )}
-      onPress={() => navigation.navigate('CustomerDetail', { customerId: item.id })}
+      onPress={() => navigation.navigate('CDetail', { customerId: item.id })}
       style={styles.listItem}
     />
   );
@@ -113,7 +119,7 @@ const CustomerListScreen = ({ navigation }) => {
       <FAB
         style={styles.fab}
         icon="plus"
-        onPress={() => navigation.navigate('CustomerForm')}
+        onPress={() => navigation.navigate('CForm')}
       />
     </View>
   );

@@ -2,10 +2,13 @@
 import React, { useState, useEffect } from 'react';
 import { View, StyleSheet, Alert, ScrollView } from 'react-native';
 import { Appbar, Card, Title, Paragraph, ActivityIndicator, Text, Button } from 'react-native-paper';
-import { _get } from '../../../../config/axiosInstance';
+import API from '../../../config/axiosInstance';
+import { useNavigation, useRouter } from 'expo-router';
 
-const CustomerDetailScreen = ({ navigation, route }) => {
-  const { customerId } = route.params;
+const CustomerDetailScreen = () => {
+ // const { customerId } = route.params;
+  const navigation = useNavigation(); 
+ const customerId = 4; // Replace with actual customer ID from route params or context
   const [customer, setCustomer] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -15,7 +18,7 @@ const CustomerDetailScreen = ({ navigation, route }) => {
       setLoading(true);
       setError(null);
       try {
-        const response = await _get(`/customers/${customerId}`);
+        const response = await API._get(`/customers/${customerId}`);
         setCustomer(response.data.data);
       } catch (err) {
         console.error('Error fetching customer details:', err);

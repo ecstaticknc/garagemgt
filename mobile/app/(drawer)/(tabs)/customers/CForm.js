@@ -2,11 +2,14 @@
 import React, { useState, useEffect } from 'react';
 import { View, StyleSheet, Alert, ScrollView } from 'react-native';
 import { Appbar, TextInput, Button, ActivityIndicator, Text } from 'react-native-paper';
-import { _post, _put } from '../../../../config/axiosInstance';
+import API from '../../../config/axiosInstance';
+import { useLocalSearchParams, useNavigation } from 'expo-router'; 
 
-
-const CustomerFormScreen = ({ navigation, route }) => { // It must be a function component
-  const existingCustomer = route.params?.customer;
+const CustomerFormScreen = () => { // It must be a function component
+  const navigation = useNavigation(); // Get navigation object from hook
+  const localSearchParams = useLocalSearchParams(); // Get local search parameters
+  const existingCustomer = localSearchParams?.customer ? JSON.parse(localSearchParams.customer) : null;
+  //const existingCustomer = route.params?.customer;
 
   const [customerName, setCustomerName] = useState(existingCustomer?.customerName || '');
   const [mobile, setMobile] = useState(existingCustomer?.mobile || '');
@@ -35,10 +38,10 @@ const CustomerFormScreen = ({ navigation, route }) => { // It must be a function
       const customerData = { customerName, mobile, vehicles, regDate, scId: scId ? parseInt(scId) : null };
 
       if (existingCustomer) {
-        await _put(`/customers/${existingCustomer.id}`, customerData); // Using _put
+        await API._put(`/customers/${existingCustomer.id}`, customerData); // Using _put
         Alert.alert('Success', 'Customer updated successfully!');
       } else {
-        await _post('/customers', customerData); // Using _post
+        await API._post('/customers', customerData); // Using _post
         Alert.alert('Success', 'Customer added successfully!');
       }
       navigation.goBack();
@@ -88,14 +91,7 @@ const CustomerFormScreen = ({ navigation, route }) => { // It must be a function
           placeholder="e.g., 2024-01-15"
           style={styles.input}
         />
-        <TextInput
-          label="Service Center ID"
-          value={scId}
-          onChangeText={setScId}
-          keyboardType="numeric"
-          mode="outlined"
-          style={styles.input}
-        />
+      
         {error && <Text style={styles.errorText}>{error}</Text>}
         <Button
           mode="contained"

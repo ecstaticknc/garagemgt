@@ -3,9 +3,14 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { View, FlatList, StyleSheet, Alert, RefreshControl } from 'react-native';
 import { Appbar, List, FAB, ActivityIndicator, Text, Button } from 'react-native-paper';
 import { useFocusEffect } from '@react-navigation/native';
-import { _delete, _get } from '../../../../config/axiosInstance';
+import API from '../../../config/axiosInstance';
+import { router, useLocalSearchParams, useNavigation } from 'expo-router'; 
 
-const ServiceCenterListScreen = ({ navigation }) => {
+const ServiceCenterListScreen = () => {
+   const navigation = useNavigation(); // Get navigation object from hook
+      const localSearchParams = useLocalSearchParams(); // Get local search parameters
+      const customerId = localSearchParams?.customerId ? JSON.parse(localSearchParams.customerId) : null;
+
   const [serviceCenters, setServiceCenters] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -15,7 +20,7 @@ const ServiceCenterListScreen = ({ navigation }) => {
     setLoading(true);
     setError(null);
     try {
-      const response = await _get('/servicecenters');
+      const response = await API._get('/servicecenters');
       //console.log("first response", response.data);
       setServiceCenters(response.data.data);
     } catch (err) {
@@ -47,7 +52,7 @@ const ServiceCenterListScreen = ({ navigation }) => {
           text: 'Delete',
           onPress: async () => {
             try {
-              await _delete(`/servicecenters/${id}`);
+              await API._delete(`/servicecenters/${id}`);
               Alert.alert('Success', 'Service Center deleted successfully!');
               fetchServiceCenters(); // Refresh the list
             } catch (err) {
@@ -70,7 +75,11 @@ const ServiceCenterListScreen = ({ navigation }) => {
       left={props => <List.Icon {...props} icon="tools" />}
       right={props => (
         <View style={styles.actions}>
-          <Button icon="pencil" onPress={() => navigation.navigate('ServiceCenterForm', { serviceCenter: item })} />
+          {/* <Button icon="pencil" onPress={() => navigation.navigate('ServiceCenterForm', { serviceCenter: item })} /> */}
+             <Button icon="pencil" onPress={() => router.push({
+                pathname: 'servicecenters/SCForm',
+            params: { serviceCenter: JSON.stringify(item) } // Pass the service center data to the form
+             })} />
           <Button icon="delete" onPress={() => handleDeleteServiceCenter(item.id)} />
         </View>
       )}
@@ -115,7 +124,7 @@ const ServiceCenterListScreen = ({ navigation }) => {
       <FAB
         style={styles.fab}
         icon="plus"
-        onPress={() => navigation.navigate('ServiceCenterForm')}
+        onPress={() => navigation.navigate('SCForm')}
       />
     </View>
   );

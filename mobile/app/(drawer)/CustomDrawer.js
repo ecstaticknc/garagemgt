@@ -5,7 +5,7 @@ import { StyleSheet, View, Text, Image, Alert, BackHandler } from 'react-native'
 import { Feather, Entypo, MaterialIcons, FontAwesome5, MaterialCommunityIcons } from '@expo/vector-icons';
 import { usePathname } from 'expo-router';
 import { BlurView } from 'expo-blur';
-import { useAuth } from './AuthContext';
+import { useAuth } from './../../context/AuthContext'; // Adjust the import path as necessary
 
 export default function CustomDrawer(props) {
   const router = useRouter();

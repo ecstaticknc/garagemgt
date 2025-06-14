@@ -1,53 +1,57 @@
-import { Slot } from 'expo-router';
-import { SQLiteProvider, useSQLiteContext } from 'expo-sqlite';
-import { initializeDatabase } from '../assets/DatabaseInit';
-import { useEffect } from 'react';
-import * as FileSystem from 'expo-file-system';
-import { Asset } from 'expo-asset';
-import { AuthProvider } from './(drawer)/AuthContext';
+// app/_layout.js
+import { Slot, Stack } from 'expo-router'; // Removed Redirect, will use Stack for conditional rendering
+import { AuthProvider, useAuth } from './../context/AuthContext';
+import { ActivityIndicator, View, StyleSheet } from 'react-native';
 
-const loadDatabase = async () => {
-  const dbName = 'samarthcatersdatabase.db';
-  const dbAsset = require('../assets/samarthcatersdatabase.db');
-  const dbUri = Asset.fromModule(dbAsset).uri;
-  const dbFilePath = `${FileSystem.documentDirectory}SQLite/${dbName}`;
+// Define the Unauthenticated Stack for login/signup etc.
+const AuthStack = () => (
+  <Stack screenOptions={{ headerShown: false }}>
+    {/* This refers to the file app/LoginScreen.js */}
+    <Stack.Screen name="LoginScreen" />
+    {/* Add other unauthenticated screens here if you have them, e.g., <Stack.Screen name="Signup" component={SignupScreen} /> */}
+  </Stack>
+);
 
-  const fileInfo = await FileSystem.getInfoAsync(dbFilePath);
-  if (!fileInfo.exists) {
-    await FileSystem.makeDirectoryAsync(`${FileSystem.documentDirectory}SQLite`, {
-      intermediates: true,
-    });
-    await FileSystem.downloadAsync(dbUri, dbFilePath);
+// Define the Authenticated App entry point
+// This Slot will render whatever is defined in your app/(drawer)/_layout.js
+// because that's the next level in your file-based routing for authenticated users.
+const AuthenticatedApp = () => (
+  <Slot />
+);
+
+function RootLayoutContent() {
+  const { userScId, isLoading } = useAuth();
+
+  // Uncomment these logs if you want to verify state changes after this fix
+  // console.log("isLoading in RootLayoutContent:", isLoading);
+  // console.log("userScId in RootLayoutContent:", userScId);
+
+  if (isLoading) {
+    // Show a loading indicator while checking auth state from AsyncStorage
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#0000ff" />
+      </View>
+    );
   }
-};
 
-function DatabaseInitializer({ children }) {
-  const db = useSQLiteContext();
-
-  useEffect(() => {
-    const init = async () => {
-      try {
-        await loadDatabase();
-        await initializeDatabase(db);
-        console.log('DB initialized successfully');
-      } catch (err) {
-        console.error('DB initialization error:', err);
-      }
-    };
-    init();
-  }, [db]);
-
-  return children;
+  // If userScId exists, render the AuthenticatedApp (which loads the drawer/tabs).
+  // Otherwise, render the AuthStack (LoginScreen).
+  return userScId ? <AuthenticatedApp /> : <AuthStack />;
 }
 
 export default function RootLayout() {
   return (
-    <SQLiteProvider databaseName="samarthcatersdatabase.db">
-      <AuthProvider>
-      <DatabaseInitializer>
-        <Slot />
-      </DatabaseInitializer>
-      </AuthProvider>
-    </SQLiteProvider>
+    <AuthProvider>
+      <RootLayoutContent />
+    </AuthProvider>
   );
 }
+
+const styles = StyleSheet.create({
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+});

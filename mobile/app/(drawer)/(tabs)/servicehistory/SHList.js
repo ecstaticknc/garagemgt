@@ -3,10 +3,17 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { View, FlatList, StyleSheet, Alert, RefreshControl } from 'react-native';
 import { Appbar, List, FAB, ActivityIndicator, Text, Button } from 'react-native-paper';
 import { useFocusEffect } from '@react-navigation/native';
-import { _delete, _get } from '../../../../config/axiosInstance';
+import API from '../../../config/axiosInstance';
+import { router, useLocalSearchParams, useNavigation } from 'expo-router'; 
 
-const ServiceHistoryListScreen = ({ navigation, route }) => {
-  const { customerId } = route.params || {}; // Get customerId if navigated from CustomerDetailScreen
+
+
+const ServiceHistoryListScreen = () => {
+  const navigation = useNavigation(); // Get navigation object from hook
+    const localSearchParams = useLocalSearchParams(); // Get local search parameters
+    const customerId = localSearchParams?.customerId ? JSON.parse(localSearchParams.customerId) : null;
+
+ // const { customerId } = route.params || {}; // Get customerId if navigated from CustomerDetailScreen
   const [serviceHistory, setServiceHistory] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -18,7 +25,7 @@ const ServiceHistoryListScreen = ({ navigation, route }) => {
     try {
       // You might want to filter by customerId if provided
       const url = customerId ? `/servicehistory?customerId=${customerId}` : '/servicehistory';
-      const response = await _get(url);
+      const response = await API._get(url);
       console.log("fiservicehistoryrst response", response.data.data);
       setServiceHistory(response.data.data);
     } catch (err) {
@@ -50,7 +57,7 @@ const ServiceHistoryListScreen = ({ navigation, route }) => {
           text: 'Delete',
           onPress: async () => {
             try {
-              await _delete(`/servicehistory/${id}`);
+              await API._delete(`/servicehistory/${id}`);
               Alert.alert('Success', 'Service entry deleted successfully!');
               fetchServiceHistory(); // Refresh the list
             } catch (err) {
@@ -73,7 +80,11 @@ const ServiceHistoryListScreen = ({ navigation, route }) => {
       left={props => <List.Icon {...props} icon="calendar-check" />}
       right={props => (
         <View style={styles.actions}>
-          <Button icon="pencil" onPress={() => navigation.navigate('ServiceHistoryForm', { serviceHistory: item })} />
+          {/* <Button icon="pencil" onPress={() => navigation.navigate('ServiceHistoryForm', { serviceHistory: item })} /> */}
+             <Button icon="pencil" onPress={() => router.push({
+                pathname: 'servicehistory/SHForm',
+                params: { serviceHistory: JSON.stringify(item), customerId: customerId } // Pass the service
+             })} />
           <Button icon="delete" onPress={() => handleDeleteServiceEntry(item.id)} />
         </View>
       )}
@@ -119,7 +130,7 @@ const ServiceHistoryListScreen = ({ navigation, route }) => {
       <FAB
         style={styles.fab}
         icon="plus"
-        onPress={() => navigation.navigate('ServiceHistoryForm', { customerId: customerId })} // Pass customerId if applicable
+        onPress={() => navigation.navigate('SHForm', { customerId: customerId })} // Pass customerId if applicable
       />
     </View>
   );
