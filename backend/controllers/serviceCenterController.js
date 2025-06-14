@@ -2,7 +2,7 @@
 const createGenericController = require('./genericController');
 const GenericModel = require('../models/GenericModel');
 const db = require('../config/db'); // This should be your mysql2 pool
-const bcrypt = require('bcrypt'); // Import bcrypt
+// const bcrypt = require('bcrypt'); // REMOVED: bcrypt import
 
 const serviceCenterModel = new GenericModel('servicecenters');
 
@@ -63,19 +63,18 @@ const serviceCenterController = {
       const newServiceCenterId = createdServiceCenter.id;
       const proprietorMobile = newServiceCenterData.proprietorMobile;
 
-      // --- HASH THE DEFAULT PASSWORD ---
-      const DEFAULT_USER_PASSWORD = '1234';
-      const hashedPassword = await bcrypt.hash(DEFAULT_USER_PASSWORD, 10); // Hash the password with 10 salt rounds
-      console.log('Default password hashed.');
+      // --- NO PASSWORD HASHING ---
+      const DEFAULT_USER_PASSWORD = '1234'; // Default password directly used
+      console.log('Default password (not hashed) will be used.'); // Logging for clarity
 
       try {
         console.log("In user creation step.");
-        // 2. Create a default user for this service center with the HASHED password
+        // 2. Create a default user for this service center with the plain password
         const insertUserQuery = `
           INSERT INTO users (username, password, scId, firstLoginDone)
           VALUES (?, ?, ?, 0);
         `;
-        const [userResult] = await connection.execute(insertUserQuery, [proprietorMobile, hashedPassword, newServiceCenterId]); // Use hashed password
+        const [userResult] = await connection.execute(insertUserQuery, [proprietorMobile, DEFAULT_USER_PASSWORD, newServiceCenterId]); // Use plain password
         console.log("User created result:", userResult);
 
         await connection.commit(); // Commit transaction if both successful
@@ -86,9 +85,8 @@ const serviceCenterController = {
           msg: 'Service Center registered and default user created successfully!',
           serviceCenterId: newServiceCenterId,
           defaultUsername: proprietorMobile,
-          // DO NOT send defaultPassword in production responses.
-          // For development/testing, it's ok, but comment out for live systems.
-          // defaultPassword: DEFAULT_USER_PASSWORD
+          // WARNING: Sending defaultPassword in production responses is a major security risk.
+          defaultPassword: DEFAULT_USER_PASSWORD // Included for debugging/testing as requested
         });
 
       } catch (userErr) {
