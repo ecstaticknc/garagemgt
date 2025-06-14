@@ -1,17 +1,46 @@
 // CustomDrawer.js
+import React, { useEffect, useState } from 'react';
 import { DrawerContentScrollView, DrawerItem } from '@react-navigation/drawer';
 import { useRouter } from 'expo-router';
 import { StyleSheet, View, Text, Image, Alert, BackHandler } from 'react-native';
 import { Feather, Entypo, MaterialIcons, FontAwesome5, MaterialCommunityIcons } from '@expo/vector-icons';
 import { usePathname } from 'expo-router';
 import { BlurView } from 'expo-blur';
-import { useAuth } from './../../context/AuthContext'; // Adjust the import path as necessary
+import { useAuth } from './../../context/AuthContext'; 
+import API from '../config/axiosInstance'; 
 
 export default function CustomDrawer(props) {
   const router = useRouter();
   const pathname = usePathname();
+
+  const { userScId, loggedInUser, logout } = useAuth();
+
+  const [serviceCenterInfo, setServiceCenterInfo] = useState(null);
+    const [loadingInfo, setLoadingInfo] = useState(true);
+    const [errorInfo, setErrorInfo] = useState(null);
+
+   useEffect(() => {
+      const fetchServiceCenterData = async () => {
+        if (userScId) {
+          try {
+            setLoadingInfo(true);
+            setErrorInfo(null);
+            const response = await API._get(`/servicecenters/${userScId}`);
+            setServiceCenterInfo(response.data.data);
+          } catch (error) {
+            console.error("Failed to fetch service center data for dashboard:", error);
+            setErrorInfo("Failed to load service center details.");
+          } finally {
+            setLoadingInfo(false);
+          }
+        } else {
+          setServiceCenterInfo(null);
+          setLoadingInfo(false);
+        }
+      };
   
-const { loggedInUser, logout } = useAuth();
+      fetchServiceCenterData();
+    }, [userScId]);
 
   const handleExitApp = () => {
     Alert.alert(
@@ -19,19 +48,26 @@ const { loggedInUser, logout } = useAuth();
       "तुम्हाला अ‍ॅप बंद करायचे आहे का?",
       [
         { text: "रद्द करा", style: "cancel" },
-        { text: "होय", 
-           onPress: () => {
-          logout(); // Clears AuthContext
-          router.replace('/'); // Navigates to login screen
+        {
+          text: "होय",
+          onPress: () => {
+            logout(); // Clears AuthContext
+            router.replace('/'); // Navigates to login screen
+            // Optional: If you need to forcefully exit the app, though generally not recommended in React Native
+            // BackHandler.exitApp();
+          }
         }
-         }
       ],
       { cancelable: false }
     );
   };
 
-  
+  // Helper function to check if the current route is active
+  // This now checks against the full path or a significant part of it
   const isRouteActive = (routePath) => {
+    // pathname example: / (for index), /Home, /CustomerDetailScreen, /CustomerListScreen etc.
+    // Ensure `routePath` matches the expected segment of your Expo Router file system routing.
+    // For example, if your file is `app/(drawer)/(tabs)/CustomerListScreen.js`, the pathname segment is 'CustomerListScreen'.
     return pathname.includes(routePath);
   };
 
@@ -39,7 +75,7 @@ const { loggedInUser, logout } = useAuth();
   const ACTIVE_COLOR = "#FF8C00"; // Saffron color
   const INACTIVE_COLOR = "#4a4a4a";
 
-const showAdminFeatures = loggedInUser && loggedInUser.role === 'admin';
+  const showAdminFeatures = loggedInUser && loggedInUser.role === 'admin';
 
   return (
     <View style={styles.container}>
@@ -52,13 +88,22 @@ const showAdminFeatures = loggedInUser && loggedInUser.role === 'admin';
         {/* User Profile Section */}
         <View style={styles.header}>
           <Image
-            source={require('../../assets/logo.png')}
+            source={require('../../assets/logo1.png')}
             style={styles.avatar}
           />
-          <Text style={styles.username}>समर्थ केटरर्स</Text>
- {loggedInUser && (
-            <Text style={styles.userEmail}>
-              {loggedInUser.username} ({loggedInUser.role})
+          <Text style={styles.appNameHeader}>बाईक क्लिनिक</Text>
+          {loggedInUser ? (
+            <>
+              <Text style={styles.loggedInUserName}>
+                नमस्कार, {loggedInUser.username}!
+              </Text>
+              <Text style={styles.loggedInUserRole}>
+                पद: {loggedInUser.role}
+              </Text>
+            </>
+          ) : (
+            <Text style={styles.loggedInUserName}>
+              {serviceCenterInfo?.proprietorName}
             </Text>
           )}
         </View>
@@ -71,17 +116,17 @@ const showAdminFeatures = loggedInUser && loggedInUser.role === 'admin';
               <Feather
                 name="home"
                 size={size}
-                color={isRouteActive('home') ? ACTIVE_COLOR : INACTIVE_COLOR}
+                color={isRouteActive('Home') ? ACTIVE_COLOR : INACTIVE_COLOR} // Corrected to 'Home' (capital H)
               />
             )}
-            onPress={() => router.navigate('/(drawer)/(tabs)/home')}
+            onPress={() => router.navigate('/(drawer)/(tabs)/Home')} // Corrected to 'Home' (capital H)
             labelStyle={[
               styles.label,
-              { color: isRouteActive('home') ? ACTIVE_COLOR : INACTIVE_COLOR }
+              { color: isRouteActive('Home') ? ACTIVE_COLOR : INACTIVE_COLOR }
             ]}
             style={[
               styles.menuItem,
-              isRouteActive('home') && styles.activeItem
+              isRouteActive('Home') && styles.activeItem
             ]}
           />
 
@@ -91,45 +136,45 @@ const showAdminFeatures = loggedInUser && loggedInUser.role === 'admin';
               <Feather
                 name="user-plus"
                 size={size}
-                color={isRouteActive('customeradd') ? ACTIVE_COLOR : INACTIVE_COLOR}
+                color={isRouteActive('CustomerDetailScreen') ? ACTIVE_COLOR : INACTIVE_COLOR} // Aligned with _layout.js tab name
               />
             )}
-            onPress={() => router.navigate('/(drawer)/(tabs)/customeradd')}
+            onPress={() => router.navigate('/(drawer)/(tabs)/CustomerDetailScreen')} // Aligned with _layout.js tab name
             labelStyle={[
               styles.label,
-              { color: isRouteActive('customeradd') ? ACTIVE_COLOR : INACTIVE_COLOR }
+              { color: isRouteActive('CustomerDetailScreen') ? ACTIVE_COLOR : INACTIVE_COLOR }
             ]}
             style={[
               styles.menuItem,
-              isRouteActive('customeradd') && styles.activeItem
+              isRouteActive('CustomerDetailScreen') && styles.activeItem
             ]}
           />
 
           <DrawerItem
             label="ग्राहक यादी"
             icon={({ size }) => (
-               <MaterialIcons
-                name="event-available"
+              <MaterialIcons
+                name="groups" // Corrected icon for customer list
                 size={size}
-                color={isRouteActive('customerlist') ? ACTIVE_COLOR : INACTIVE_COLOR}
+                color={isRouteActive('CustomerListScreen') ? ACTIVE_COLOR : INACTIVE_COLOR} // Corrected to 'CustomerListScreen'
               />
             )}
-            onPress={() => router.navigate('/(drawer)/(tabs)/customerlist')}
+            onPress={() => router.navigate('/(drawer)/(tabs)/CustomerListScreen')} // Corrected to 'CustomerListScreen'
             labelStyle={[
               styles.label,
-              { color: isRouteActive('customerlist') ? ACTIVE_COLOR : INACTIVE_COLOR }
+              { color: isRouteActive('CustomerListScreen') ? ACTIVE_COLOR : INACTIVE_COLOR }
             ]}
             style={[
               styles.menuItem,
-              isRouteActive('customerlist') && styles.activeItem
+              isRouteActive('CustomerListScreen') && styles.activeItem
             ]}
           />
 
           <DrawerItem
             label="पूर्ण कार्यक्रम"
             icon={({ size }) => (
-               <MaterialIcons
-                name="event-busy"
+              <MaterialIcons
+                name="event-available" // Corrected icon for completed events
                 size={size}
                 color={isRouteActive('CompletedEvents') ? ACTIVE_COLOR : INACTIVE_COLOR}
               />
@@ -145,7 +190,7 @@ const showAdminFeatures = loggedInUser && loggedInUser.role === 'admin';
             ]}
           />
 
-           <DrawerItem
+          <DrawerItem
             label="बुकिंग व्यवस्थापन"
             icon={({ size }) => (
               <FontAwesome5
@@ -185,28 +230,69 @@ const showAdminFeatures = loggedInUser && loggedInUser.role === 'admin';
             ]}
           />
 
-         
-          {/* New "Reset Database" Drawer Item */}
-            {showAdminFeatures && (
-         <DrawerItem
-            label="डेटाबेस रीसेट करा"
+          {/* Service Center Management - Re-added as per Home.js options */}
+          <DrawerItem
+            label="सर्व्हिस सेंटर व्यवस्थापन"
             icon={({ size }) => (
-              <MaterialCommunityIcons // Using MaterialCommunityIcons for 'database-remove'
-                name="database-remove"
+              <MaterialCommunityIcons
+                name="car-wrench" // Icon for service center
                 size={size}
-                color={isRouteActive('reset-database') ? ACTIVE_COLOR : INACTIVE_COLOR}
+                color={isRouteActive('ServiceCenterListScreen') ? ACTIVE_COLOR : INACTIVE_COLOR}
               />
             )}
-            onPress={() => router.navigate('/(drawer)/(tabs)/ResetDatabaseScreen')} // Navigate to the new screen
+            onPress={() => router.navigate('/(drawer)/(tabs)/ServiceCenterListScreen')}
             labelStyle={[
               styles.label,
-              { color: isRouteActive('reset-database') ? ACTIVE_COLOR : INACTIVE_COLOR }
+              { color: isRouteActive('ServiceCenterListScreen') ? ACTIVE_COLOR : INACTIVE_COLOR }
             ]}
             style={[
               styles.menuItem,
-              isRouteActive('reset-database') && styles.activeItem
+              isRouteActive('ServiceCenterListScreen') && styles.activeItem
             ]}
           />
+
+          {/* Service History List - Re-added as per Home.js options */}
+          <DrawerItem
+            label="सेवा इतिहास"
+            icon={({ size }) => (
+              <MaterialIcons
+                name="history" // Icon for service history
+                size={size}
+                color={isRouteActive('ServiceHistoryListScreen') ? ACTIVE_COLOR : INACTIVE_COLOR}
+              />
+            )}
+            onPress={() => router.navigate('/(drawer)/(tabs)/ServiceHistoryListScreen')}
+            labelStyle={[
+              styles.label,
+              { color: isRouteActive('ServiceHistoryListScreen') ? ACTIVE_COLOR : INACTIVE_COLOR }
+            ]}
+            style={[
+              styles.menuItem,
+              isRouteActive('ServiceHistoryListScreen') && styles.activeItem
+            ]}
+          />
+
+          {/* New "Reset Database" Drawer Item */}
+          {showAdminFeatures && (
+            <DrawerItem
+              label="डेटाबेस रीसेट करा"
+              icon={({ size }) => (
+                <MaterialCommunityIcons // Using MaterialCommunityIcons for 'database-remove'
+                  name="database-remove"
+                  size={size}
+                  color={isRouteActive('ResetDatabaseScreen') ? ACTIVE_COLOR : INACTIVE_COLOR} // Corrected to 'ResetDatabaseScreen'
+                />
+              )}
+              onPress={() => router.navigate('/(drawer)/(tabs)/ResetDatabaseScreen')} // Navigate to the new screen
+              labelStyle={[
+                styles.label,
+                { color: isRouteActive('ResetDatabaseScreen') ? ACTIVE_COLOR : INACTIVE_COLOR }
+              ]}
+              style={[
+                styles.menuItem,
+                isRouteActive('ResetDatabaseScreen') && styles.activeItem
+              ]}
+            />
           )}
 
         </View>
@@ -254,15 +340,22 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: '#AD7F58',
   },
-  username: {
+  appNameHeader: {
     fontSize: 20,
     fontWeight: 'bold',
     color: '#2c3e50',
     marginBottom: 5,
     textAlign: 'center',
-    fontFamily: 'Mukta-Regular', // Consider adding Marathi font
+    fontFamily: 'Mukta-Regular',
   },
-  userEmail: {
+  loggedInUserName: {
+    fontSize: 18,
+    color: '#7f8c8d',
+    textAlign: 'center',
+    fontFamily: 'Mukta-Regular',
+    marginTop: 5,
+  },
+  loggedInUserRole: {
     fontSize: 14,
     color: '#7f8c8d',
     textAlign: 'center',

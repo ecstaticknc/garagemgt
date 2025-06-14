@@ -21,9 +21,7 @@ const LoginScreen = ({ navigation }) => {
     const success = await login(username, password);
     if (success) {
       console.log('Login successful, navigating to Home');
-      router.push('/(drawer)/(tabs)/Home');
-     // router.push('/(drawer)/(tabs)/Home');
-     // console.log(success, 'Login successful. scId:', success);
+      router.push('/(drawer)/(tabs)/Home');    
       // Login successful, AuthContext will handle navigation to HomeScreen
       // No explicit navigation.navigate('Home') needed here because App.js renders based on userScId
     } else {
