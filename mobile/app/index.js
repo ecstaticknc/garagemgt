@@ -1,4 +1,3 @@
-
 // screens/LoginScreen.js
 import React, { useState } from 'react';
 import { View, StyleSheet, Alert, ImageBackground } from 'react-native';
@@ -13,25 +12,34 @@ const LoginScreen = ({ navigation }) => {
   const router = useRouter();
 
   const handleLogin = async () => {
-    if (!username || !password) {
-      Alert.alert('Login Error', 'Please enter both username and password.');
-      return;
-    }
+    // --- TEMPORARY LOGIN BYPASS START ---
+    console.log('Bypassing login for development purposes. REMOVE THIS IN PRODUCTION!');
+    router.push('/(drawer)/(tabs)/Home');
+    return; // Exit the function after navigating
+    // --- TEMPORARY LOGIN BYPASS END ---
 
-    const success = await login(username, password);
-    if (success) {
-      console.log('Login successful, navigating to Home');
-      router.push('/(drawer)/(tabs)/Home');    
-      // Login successful, AuthContext will handle navigation to HomeScreen
-      // No explicit navigation.navigate('Home') needed here because App.js renders based on userScId
-    } else {
-      // Error handled by AuthContext and displayed here
-      // Alert.alert('Login Failed', error || 'Invalid credentials'); // Error is already shown below
-    }
+    // Original login logic (uncomment to re-enable authentication)
+    // if (!username || !password) {
+    //   Alert.alert('Login Error', 'Please enter both username and password.');
+    //   return;
+    // }
+
+    // const success = await login(username, password);
+    // if (success) {
+    //   console.log('Login successful, navigating to Home');
+    //   router.push('/(drawer)/(tabs)/Home');
+    //   // Login successful, AuthContext will handle navigation to HomeScreen
+    //   // No explicit navigation.navigate('Home') needed here because App.js renders based on userScId
+    // } else {
+    //   // Error handled by AuthContext and displayed here
+    //   // Alert.alert('Login Failed', error || 'Invalid credentials'); // Error is already shown below
+    // }
   };
 
   return (
-<View style={styles.background}>
+    <View style={styles.background}>
+      {/* If you want a background image, uncomment the ImageBackground and provide your image source */}
+      {/* <ImageBackground source={require('../assets/your-background-image.jpg')} style={styles.background}> */}
       <View style={styles.overlay} />
       <View style={styles.container}>
         <Text style={styles.title}>Welcome Back!</Text>
@@ -54,18 +62,19 @@ const LoginScreen = ({ navigation }) => {
           left={<TextInput.Icon icon="lock" />}
         />
         {error && <Text style={styles.errorText}>{error}</Text>}
-       <Button
-  mode="contained"
-  onPress={handleLogin}
-  loading={isLoading}
-  disabled={isLoading}
-  style={styles.button}
-  contentStyle={styles.buttonContent}
-  labelStyle={styles.buttonLabel}
-  label={isLoading ? 'Logging In...' : 'Login'}
-/>
+        <Button
+          mode="contained"
+          onPress={handleLogin}
+          loading={isLoading}
+          disabled={isLoading}
+          style={styles.button}
+          contentStyle={styles.buttonContent}
+          labelStyle={styles.buttonLabel}
+          label={isLoading ? 'Logging In...' : 'Login'}
+        />
       </View>
-   </View>
+      {/* </ImageBackground> */}
+    </View>
   );
 };
 
@@ -101,7 +110,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   button: {
-    color: '#fff',  
+    color: '#fff',
     width: '100%',
     marginTop: 20,
     borderRadius: 8,
@@ -125,4 +134,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default LoginScreen; 
+export default LoginScreen;
