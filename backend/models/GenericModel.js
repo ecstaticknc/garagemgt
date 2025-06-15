@@ -16,11 +16,14 @@ class GenericModel {
     return rows[0];
   }
 
-  // --- NEW METHOD FOR FILTERING ---
-  async findByColumn(columnName, value) {
-    const [rows] = await db.execute(`SELECT * FROM ${this.tableName} WHERE ${columnName} = ?`, [value]);
-    return rows;
-  }
+ async findByColumn(columnName, value) {
+  console.log(`Finding ${this.tableName} by ${columnName} with value:`, value);
+  const [rows] = await db.execute(
+    `SELECT * FROM ${this.tableName} WHERE ${columnName} = ?`, 
+    [value]
+  );
+  return rows;
+}
 
   async create(data) {
     const fields = Object.keys(data).join(', ');

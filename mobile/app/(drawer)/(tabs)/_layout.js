@@ -49,7 +49,7 @@ export default function TabLayout() {
           tabBarIcon: ({ color, size }) => (
             <FontAwesome name="users" size={size} color={color} /> // Changed to a more suitable icon for "Customers"
           ),
-          headerShown: false, // The nested stack will handle its own headers
+          headerShown: true, // The nested stack will handle its own headers
         }}
       />
       <Tabs.Screen
@@ -59,7 +59,7 @@ export default function TabLayout() {
           tabBarIcon: ({ color, size }) => (
             <MaterialCommunityIcons name="garage" size={size} color={color} />
           ),
-          headerShown: false, // The nested stack will handle its own headers
+          headerShown: true, // The nested stack will handle its own headers
         }}
       />
       <Tabs.Screen
@@ -69,7 +69,7 @@ export default function TabLayout() {
           tabBarIcon: ({ color, size }) => (
             <FontAwesome5 name="history" size={size} color={color} />
           ),
-          headerShown: false, // The nested stack will handle its own headers
+          headerShown: true, // The nested stack will handle its own headers
         }}
       />
      

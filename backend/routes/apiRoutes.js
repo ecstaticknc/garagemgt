@@ -27,10 +27,12 @@ const serviceHistoryController = createGenericController(serviceHistoryModel, ['
 router.use('/customers', (() => {
   const customerRouter = express.Router();
   customerRouter.get('/', customerController.getAll);
+  customerRouter.get('/by-sc', customerController.getByScId);
   customerRouter.get('/:id', customerController.getById);
   customerRouter.post('/', customerController.create);
   customerRouter.put('/:id', customerController.update);
   customerRouter.delete('/:id', customerController.delete);
+  
   return customerRouter;
 })());
 

@@ -79,8 +79,7 @@ const ServiceHistoryListScreen = () => {
       description={`Date: ${item.serviceDate ? item.serviceDate.split('T')[0] : 'N/A'} | Services: ${item.selectedServices}`}
       left={props => <List.Icon {...props} icon="calendar-check" />}
       right={props => (
-        <View style={styles.actions}>
-          {/* <Button icon="pencil" onPress={() => navigation.navigate('ServiceHistoryForm', { serviceHistory: item })} /> */}
+        <View style={styles.actions}>        
              <Button icon="pencil" onPress={() => router.push({
                 pathname: 'servicehistory/SHForm',
                 params: { serviceHistory: JSON.stringify(item), customerId: customerId } // Pass the service
