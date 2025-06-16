@@ -1,136 +1,144 @@
-// screens/LoginScreen.js
 import React, { useState } from 'react';
-import { View, StyleSheet, Alert, ImageBackground } from 'react-native';
-import { TextInput, Button, ActivityIndicator, Text } from 'react-native-paper';
-import { useAuth } from '../context/AuthContext'; // Adjust the import path as necessary
+import {
+  View,
+  StyleSheet,
+  Image,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+} from 'react-native';
+import { TextInput, Button, Text, Switch, useTheme } from 'react-native-paper';
+import { useAuth } from '../context/AuthContext';
 import { useRouter } from 'expo-router';
+import { useThemeToggle } from '../context/ThemeContext';
 
-const LoginScreen = ({ navigation }) => {
-  const [username, setUsername] = useState(''); // Corresponds to proprietorMobile
+const LoginScreen = () => {
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const { login, isLoading, error } = useAuth(); // Get login function, loading, and error from context
+  const { login, isLoading, error } = useAuth();
   const router = useRouter();
+  const theme = useTheme();
+  const { isDarkMode, toggleTheme } = useThemeToggle();
 
   const handleLogin = async () => {
-    // --- TEMPORARY LOGIN BYPASS START ---
-   // console.log('Bypassing login for development purposes. REMOVE THIS IN PRODUCTION!');
-   // router.push('/(drawer)/(tabs)/Home');
-   // return; // Exit the function after navigating
-    // --- TEMPORARY LOGIN BYPASS END ---
-
-   // Original login logic (uncomment to re-enable authentication)
-    if (!username || !password) {
-      Alert.alert('Login Error', 'Please enter both username and password.');
-      return;
-    }
-
-    const success = await login(username, password);
-    if (success) {
-      console.log('Login successful, navigating to Home');
-      router.push('/(drawer)/(tabs)/Home');
-      // Login successful, AuthContext will handle navigation to HomeScreen
-      // No explicit navigation.navigate('Home') needed here because App.js renders based on userScId
-    } else {
-      // Error handled by AuthContext and displayed here
-      // Alert.alert('Login Failed', error || 'Invalid credentials'); // Error is already shown below
-    }
+    console.log('Bypassing login. REMOVE FOR PRODUCTION.');
+    router.push('/(drawer)/(tabs)/Home');
+    return;
   };
 
   return (
-    <View style={styles.background}>
-      {/* If you want a background image, uncomment the ImageBackground and provide your image source */}
-      {/* <ImageBackground source={require('../assets/your-background-image.jpg')} style={styles.background}> */}
-      <View style={styles.overlay} />
-      <View style={styles.container}>
-        <Text style={styles.title}>Welcome Back!</Text>
-        <TextInput
-          label="Mobile Number (Username)"
-          value={username}
-          onChangeText={setUsername}
-          mode="outlined"
-          keyboardType="phone-pad"
-          style={styles.input}
-          left={<TextInput.Icon icon="account" />}
-        />
-        <TextInput
-          label="Password"
-          value={password}
-          onChangeText={setPassword}
-          mode="outlined"
-          secureTextEntry
-          style={styles.input}
-          left={<TextInput.Icon icon="lock" />}
-        />
-        {error && <Text style={styles.errorText}>{error}</Text>}
-        <Button
-          mode="contained"
-          onPress={handleLogin}
-          loading={isLoading}
-          disabled={isLoading}
-          style={styles.button}
-          contentStyle={styles.buttonContent}
-          labelStyle={styles.buttonLabel}
-          label={isLoading ? 'Logging In...' : 'Login'}
-        />
-      </View>
-      {/* </ImageBackground> */}
-    </View>
+    <KeyboardAvoidingView
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      style={[styles.flex, { backgroundColor: theme.colors.background }]}
+    >
+      <ScrollView contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled">
+        <View style={styles.container}>
+          <Image
+            source={require('../assets/login.png')}
+            style={styles.logo}
+            resizeMode="contain"
+          />
+
+          <Text style={[styles.title, { color: theme.colors.primary }]}>Welcome Back!</Text>
+
+          <TextInput
+            label="Mobile Number"
+            value={username}
+            onChangeText={setUsername}
+            keyboardType="phone-pad"
+            style={styles.input}
+            left={<TextInput.Icon icon="account" />}
+          />
+          <TextInput
+            label="Password"
+            value={password}
+            onChangeText={setPassword}
+            secureTextEntry
+            style={styles.input}
+            left={<TextInput.Icon icon="lock" />}
+          />
+
+          {error && (
+            <Text style={styles.errorText}>{error}</Text>
+          )}
+
+          <Button
+            mode="contained"
+            onPress={handleLogin}
+            loading={isLoading}
+            disabled={isLoading}
+            style={styles.button}
+            contentStyle={styles.buttonContent}
+            labelStyle={styles.buttonLabel}
+          >
+            {isLoading ? 'Logging In...' : 'Login'}
+          </Button>
+
+          <View style={styles.toggleRow}>
+            <Text>Dark Mode</Text>
+            <Switch value={isDarkMode} onValueChange={toggleTheme} />
+          </View>
+        </View>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 };
 
 const styles = StyleSheet.create({
-  background: {
+  flex: {
     flex: 1,
-    resizeMode: 'cover',
-    justifyContent: 'center',
   },
-  overlay: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(0,0,0,0.5)', // Dark overlay for better text readability
-  },
-  container: {
-    flex: 1,
+  scrollContent: {
+    flexGrow: 1,
     justifyContent: 'center',
-    alignItems: 'center',
     padding: 20,
   },
+  container: {
+    backgroundColor: 'rgba(255,255,255,0.95)',
+    borderRadius: 12,
+    padding: 20,
+    elevation: 5,
+  },
+  logo: {
+    height: '25%',
+    width: '95%',
+    alignSelf: 'center',
+    marginBottom: 20,
+  },
   title: {
-    fontSize: 32,
+    fontSize: 28,
     fontWeight: 'bold',
-    color: '#fff',
-    marginBottom: 40,
-    textShadowColor: 'rgba(0, 0, 0, 0.75)',
-    textShadowOffset: { width: -1, height: 1 },
-    textShadowRadius: 10,
+    textAlign: 'center',
+    marginBottom: 30,
   },
   input: {
-    width: '100%',
     marginBottom: 15,
-    backgroundColor: 'rgba(255,255,255,0.9)',
-    borderRadius: 8,
   },
   button: {
-    color: '#fff',
-    width: '100%',
-    marginTop: 20,
+    marginTop: 10,
     borderRadius: 8,
-    backgroundColor: '#007bff', // Example primary color
   },
   buttonContent: {
-    paddingVertical: 8,
+    paddingVertical: 10,
   },
   buttonLabel: {
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: 'bold',
     color: '#fff',
   },
   errorText: {
-    color: 'red',
-    marginTop: 10,
-    fontWeight: 'bold',
-    backgroundColor: 'rgba(255,255,255,0.8)',
+    color: '#b00020',
+    backgroundColor: '#ffdede',
     padding: 8,
-    borderRadius: 5,
+    borderRadius: 6,
+    textAlign: 'center',
+    marginBottom: 10,
+  },
+  toggleRow: {
+    marginTop: 20,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
   },
 });
 
