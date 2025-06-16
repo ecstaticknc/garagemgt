@@ -16,31 +16,31 @@ export default function CustomDrawer(props) {
   const { userScId, loggedInUser, logout } = useAuth();
 
   const [serviceCenterInfo, setServiceCenterInfo] = useState(null);
-    const [loadingInfo, setLoadingInfo] = useState(true);
-    const [errorInfo, setErrorInfo] = useState(null);
+  const [loadingInfo, setLoadingInfo] = useState(true);
+  const [errorInfo, setErrorInfo] = useState(null);
 
-   useEffect(() => {
-      const fetchServiceCenterData = async () => {
-        if (userScId) {
-          try {
-            setLoadingInfo(true);
-            setErrorInfo(null);
-            const response = await API._get(`/servicecenters/${userScId}`);
-            setServiceCenterInfo(response.data.data);
-          } catch (error) {
-            console.error("Failed to fetch service center data for dashboard:", error);
-            setErrorInfo("Failed to load service center details.");
-          } finally {
-            setLoadingInfo(false);
-          }
-        } else {
-          setServiceCenterInfo(null);
+  useEffect(() => {
+    const fetchServiceCenterData = async () => {
+      if (userScId) {
+        try {
+          setLoadingInfo(true);
+          setErrorInfo(null);
+          const response = await API._get(`/servicecenters/${userScId}`);
+          setServiceCenterInfo(response.data.data);
+        } catch (error) {
+          console.error("Failed to fetch service center data for dashboard:", error);
+          setErrorInfo("Failed to load service center details.");
+        } finally {
           setLoadingInfo(false);
         }
-      };
-  
-      fetchServiceCenterData();
-    }, [userScId]);
+      } else {
+        setServiceCenterInfo(null);
+        setLoadingInfo(false);
+      }
+    };
+
+    fetchServiceCenterData();
+  }, [userScId]);
 
   const handleExitApp = () => {
     Alert.alert(
@@ -51,10 +51,8 @@ export default function CustomDrawer(props) {
         {
           text: "होय",
           onPress: () => {
-            logout(); // Clears AuthContext
-            router.replace('/'); // Navigates to login screen
-            // Optional: If you need to forcefully exit the app, though generally not recommended in React Native
-            // BackHandler.exitApp();
+            logout();
+            router.replace('/');
           }
         }
       ],
@@ -62,44 +60,46 @@ export default function CustomDrawer(props) {
     );
   };
 
-  // Helper function to check if the current route is active
-  // This now checks against the full path or a significant part of it
   const isRouteActive = (routePath) => {
-    // pathname example: / (for index), /Home, /CustomerDetailScreen, /CustomerListScreen etc.
-    // Ensure `routePath` matches the expected segment of your Expo Router file system routing.
-    // For example, if your file is `app/(drawer)/(tabs)/CustomerListScreen.js`, the pathname segment is 'CustomerListScreen'.
     return pathname.includes(routePath);
   };
 
-  // Consistent colors
-  const ACTIVE_COLOR = "#FF8C00"; // Saffron color
-  const INACTIVE_COLOR = "#4a4a4a";
+  // Updated color scheme
+  const ACTIVE_COLOR = "#FF6B35"; // Vibrant orange
+  const INACTIVE_COLOR = "#4A4E69"; // Dark blue-gray
+  const BACKGROUND_COLOR = "#F7F7FF"; // Light off-white
+  const TEXT_COLOR = "#252627"; // Dark gray
+  const ACCENT_COLOR = "#1985A1"; // Teal blue
 
   const showAdminFeatures = loggedInUser && loggedInUser.role === 'admin';
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: BACKGROUND_COLOR }]}>
       <BlurView intensity={90} tint="light" style={StyleSheet.absoluteFill} />
       <DrawerContentScrollView
         {...props}
         contentContainerStyle={styles.scrollContainer}
         drawerHideStatusBarOnOpen={true}
       >
-        {/* User Profile Section */}
+        {/* User Profile Section - Updated Design */}
         <View style={styles.header}>
-          <Image
-            source={require('../../assets/logo1.png')}
-            style={styles.avatar}
-          />
+          <View style={styles.avatarContainer}>
+            <Image
+              source={require('../../assets/logo1.png')}
+              style={styles.avatar}
+            />
+          </View>
           <Text style={styles.appNameHeader}>बाईक क्लिनिक</Text>
           {loggedInUser ? (
             <>
               <Text style={styles.loggedInUserName}>
                 नमस्कार, {loggedInUser.username}!
               </Text>
-              <Text style={styles.loggedInUserRole}>
-                पद: {loggedInUser.role}
-              </Text>
+              <View style={styles.roleBadge}>
+                <Text style={styles.loggedInUserRole}>
+                  {loggedInUser.role}
+                </Text>
+              </View>
             </>
           ) : (
             <Text style={styles.loggedInUserName}>
@@ -108,7 +108,7 @@ export default function CustomDrawer(props) {
           )}
         </View>
 
-        {/* Main Navigation Items */}
+        {/* Main Navigation Items - Updated Styling */}
         <View style={styles.menuSection}>
           <DrawerItem
             label="डॅशबोर्ड"
@@ -116,13 +116,16 @@ export default function CustomDrawer(props) {
               <Feather
                 name="home"
                 size={size}
-                color={isRouteActive('Home') ? ACTIVE_COLOR : INACTIVE_COLOR} // Corrected to 'Home' (capital H)
+                color={isRouteActive('Home') ? ACTIVE_COLOR : INACTIVE_COLOR}
               />
             )}
-            onPress={() => router.navigate('/(drawer)/(tabs)/Home')} // Corrected to 'Home' (capital H)
+            onPress={() => router.navigate('/(drawer)/(tabs)/Home')}
             labelStyle={[
               styles.label,
-              { color: isRouteActive('Home') ? ACTIVE_COLOR : INACTIVE_COLOR }
+              { 
+                color: isRouteActive('Home') ? ACTIVE_COLOR : INACTIVE_COLOR,
+                fontFamily: 'Mukta-SemiBold'
+              }
             ]}
             style={[
               styles.menuItem,
@@ -130,14 +133,11 @@ export default function CustomDrawer(props) {
             ]}
           />
 
-          
-
-          {/* Service Center Management - Re-added as per Home.js options */}
           <DrawerItem
             label="सर्व्हिस सेंटर व्यवस्थापन"
             icon={({ size }) => (
               <MaterialCommunityIcons
-                name="car-wrench" // Icon for service center
+                name="car-wrench"
                 size={size}
                 color={isRouteActive('SCList') ? ACTIVE_COLOR : INACTIVE_COLOR}
               />
@@ -145,7 +145,10 @@ export default function CustomDrawer(props) {
             onPress={() => router.navigate('servicecenters/SCList')}
             labelStyle={[
               styles.label,
-              { color: isRouteActive('ServiceCenterListScreen') ? ACTIVE_COLOR : INACTIVE_COLOR }
+              { 
+                color: isRouteActive('ServiceCenterListScreen') ? ACTIVE_COLOR : INACTIVE_COLOR,
+                fontFamily: 'Mukta-SemiBold'
+              }
             ]}
             style={[
               styles.menuItem,
@@ -153,12 +156,11 @@ export default function CustomDrawer(props) {
             ]}
           />
 
-          {/* Service History List - Re-added as per Home.js options */}
           <DrawerItem
             label="सेवा इतिहास"
             icon={({ size }) => (
               <MaterialIcons
-                name="history" // Icon for service history
+                name="history"
                 size={size}
                 color={isRouteActive('ServiceHistoryListScreen') ? ACTIVE_COLOR : INACTIVE_COLOR}
               />
@@ -166,7 +168,10 @@ export default function CustomDrawer(props) {
             onPress={() => router.navigate('servicehistory/SHList')}
             labelStyle={[
               styles.label,
-              { color: isRouteActive('ServiceHistoryListScreen') ? ACTIVE_COLOR : INACTIVE_COLOR }
+              { 
+                color: isRouteActive('ServiceHistoryListScreen') ? ACTIVE_COLOR : INACTIVE_COLOR,
+                fontFamily: 'Mukta-SemiBold'
+              }
             ]}
             style={[
               styles.menuItem,
@@ -174,21 +179,23 @@ export default function CustomDrawer(props) {
             ]}
           />
 
-          {/* New "Reset Database" Drawer Item */}
           {showAdminFeatures && (
             <DrawerItem
               label="डेटाबेस रीसेट करा"
               icon={({ size }) => (
-                <MaterialCommunityIcons // Using MaterialCommunityIcons for 'database-remove'
+                <MaterialCommunityIcons
                   name="database-remove"
                   size={size}
-                  color={isRouteActive('ResetDatabaseScreen') ? ACTIVE_COLOR : INACTIVE_COLOR} // Corrected to 'ResetDatabaseScreen'
+                  color={isRouteActive('ResetDatabaseScreen') ? ACTIVE_COLOR : INACTIVE_COLOR}
                 />
               )}
-              onPress={() => router.navigate('/(drawer)/(tabs)/ResetDatabaseScreen')} // Navigate to the new screen
+              onPress={() => router.navigate('/(drawer)/(tabs)/ResetDatabaseScreen')}
               labelStyle={[
                 styles.label,
-                { color: isRouteActive('ResetDatabaseScreen') ? ACTIVE_COLOR : INACTIVE_COLOR }
+                { 
+                  color: isRouteActive('ResetDatabaseScreen') ? ACTIVE_COLOR : INACTIVE_COLOR,
+                  fontFamily: 'Mukta-SemiBold'
+                }
               ]}
               style={[
                 styles.menuItem,
@@ -196,21 +203,20 @@ export default function CustomDrawer(props) {
               ]}
             />
           )}
-
         </View>
       </DrawerContentScrollView>
 
-      {/* Footer Section */}
+      {/* Footer Section - Updated Design */}
       <View style={styles.footer}>
         <BlurView intensity={80} tint="light" style={styles.footerBlur}>
           <DrawerItem
             label="अ‍ॅपमधून बाहेर पडा"
             icon={({ size }) => (
-              <Entypo name="log-out" size={size} color="#e74c3c" />
+              <Entypo name="log-out" size={size} color="#E71D36" />
             )}
             onPress={handleExitApp}
             labelStyle={[styles.label, styles.exitLabel]}
-            style={styles.menuItem}
+            style={[styles.menuItem, styles.exitButton]}
           />
         </BlurView>
       </View>
@@ -221,81 +227,103 @@ export default function CustomDrawer(props) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: 'rgba(255, 255, 255, 0.94)',
   },
   scrollContainer: {
     flexGrow: 1,
-    paddingTop: 20,
+    paddingTop: 10,
   },
   header: {
     padding: 20,
     alignItems: 'center',
     borderBottomWidth: 1,
-    borderBottomColor: 'rgba(173, 127, 88, 0.3)',
+    borderBottomColor: 'rgba(74, 78, 105, 0.1)',
     marginBottom: 10,
+  },
+  avatarContainer: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    backgroundColor: 'rgba(255, 255, 255, 0.7)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 15,
+    borderWidth: 3,
+    borderColor: '#FF6B35',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 5,
   },
   avatar: {
     width: 80,
     height: 80,
     borderRadius: 40,
-    marginBottom: 15,
-    borderWidth: 2,
-    borderColor: '#AD7F58',
   },
   appNameHeader: {
-    fontSize: 20,
+    fontSize: 22,
     fontWeight: 'bold',
-    color: '#2c3e50',
-    marginBottom: 5,
+    color: '#252627',
+    marginBottom: 8,
     textAlign: 'center',
-    fontFamily: 'Mukta-Regular',
+    fontFamily: 'Mukta-Bold',
   },
   loggedInUserName: {
-    fontSize: 18,
-    color: '#7f8c8d',
+    fontSize: 16,
+    color: '#4A4E69',
     textAlign: 'center',
-    fontFamily: 'Mukta-Regular',
+    fontFamily: 'Mukta-Medium',
     marginTop: 5,
+  },
+  roleBadge: {
+    backgroundColor: '#1985A1',
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    borderRadius: 15,
+    marginTop: 8,
   },
   loggedInUserRole: {
     fontSize: 14,
-    color: '#7f8c8d',
+    color: '#FFFFFF',
     textAlign: 'center',
-    fontFamily: 'Mukta-Regular',
+    fontFamily: 'Mukta-SemiBold',
   },
   menuSection: {
-    marginTop: 10,
-    paddingHorizontal: 10,
+    marginTop: 15,
+    paddingHorizontal: 15,
   },
   menuItem: {
-    borderRadius: 15,
-    marginVertical: 4,
+    borderRadius: 12,
+    marginVertical: 5,
     justifyContent: 'center',
+    height: 50,
+    overflow: 'hidden',
   },
   label: {
-    fontSize: 18,
-    fontWeight: '500',
-    textAlign: 'center',
-    marginLeft: 10,
-    width: '100%',
-    fontFamily: 'Mukta-Regular',
+    fontSize: 16,
+    textAlign: 'left',
+    marginLeft: -10,
+    fontFamily: 'Mukta-Medium',
   },
   activeItem: {
-    backgroundColor: 'rgba(255, 140, 0, 0.16)',
-    borderLeftWidth: 8,
-    borderRightWidth: 8,
-    borderColor: '#FF8C00',
+    backgroundColor: 'rgba(255, 107, 53, 0.15)',
+    borderLeftWidth: 5,
+    borderLeftColor: '#FF6B35',
   },
   exitLabel: {
-    color: '#e74c3c',
+    color: '#E71D36',
+    fontFamily: 'Mukta-SemiBold',
+  },
+  exitButton: {
+    backgroundColor: 'rgba(231, 29, 54, 0.1)',
   },
   footer: {
     padding: 0,
     borderTopWidth: 1,
-    borderTopColor: 'rgba(173, 127, 88, 0.3)',
+    borderTopColor: 'rgba(74, 78, 105, 0.1)',
   },
   footerBlur: {
-    paddingVertical: 15,
-    paddingHorizontal: 10,
+    paddingVertical: 10,
+    paddingHorizontal: 15,
   },
 });

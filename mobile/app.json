@@ -3,12 +3,8 @@
     "name": "Bike Clinic",
     "slug": "Bike Clinic",
     "version": "1.0.0",
-    "scheme": "Bike Clinic",
-    "web": {
-      "bundler": "metro",
-      "output": "static",
-      "favicon": "./assets/icon1.png"
-    },
+    "scheme": "Bike Clinick",
+    
     "plugins": [
       "expo-router",
       [
@@ -53,7 +49,7 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/icon.png",
+        "foregroundImage": "./assets/icon1.png",
         "backgroundColor": "#ffffff"
       },
       "package": "com.ecstaticknc.BikeClinic"
