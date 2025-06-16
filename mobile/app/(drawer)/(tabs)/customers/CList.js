@@ -1,29 +1,42 @@
 // screens/Customer/CustomerListScreen.js
+
 import React, { useState, useEffect, useCallback } from 'react';
 import { View, FlatList, StyleSheet, Alert, RefreshControl } from 'react-native';
 import { Appbar, List, FAB, ActivityIndicator, Text, Button } from 'react-native-paper';
 import { useFocusEffect } from '@react-navigation/native';
 import API from '../../../config/axiosInstance';
 import { useRouter, useNavigation } from 'expo-router';
+import { useAuth } from '../../../../context/AuthContext';
 
 const CustomerListScreen = () => {
   const router = useRouter();
   const navigation = useNavigation();
+  const { userScId } = useAuth();
+
+  console.log("User Service Center ID:", userScId);
+
   const [customers, setCustomers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState(null);
 
   const fetchCustomers = async () => {
+    if (!userScId) {
+      setLoading(false);
+      setError('User service center ID not available. Please log in again.');
+      return;
+    }
+
     setLoading(true);
     setError(null);
     try {
-      const response = await API._get(`/customers`);
+      const response = await API._get(`/customers/by-sc?scId=${userScId}`);
+      console.log("Fetched Customers:", response.data.data.length);
       setCustomers(response.data.data);
     } catch (err) {
       console.error('Error fetching customers:', err);
       setError('Failed to load customers. Please try again.');
-      Alert.alert('Error', 'Failed to load customers. Check your backend connection.');
+      Alert.alert('Error', 'Failed to load customers. Check your backend connection and login status.');
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -33,10 +46,8 @@ const CustomerListScreen = () => {
   useFocusEffect(
     useCallback(() => {
       fetchCustomers();
-      return () => {
-        // Cleanup if necessary
-      };
-    }, [])
+      return () => {};
+    }, [userScId])
   );
 
   const handleDeleteCustomer = async (id) => {
@@ -49,9 +60,9 @@ const CustomerListScreen = () => {
           text: 'Delete',
           onPress: async () => {
             try {
-              await _delete(`/customers/${id}`);
+              await API._delete(`/customers/${id}`);
               Alert.alert('Success', 'Customer deleted successfully!');
-              fetchCustomers(); // Refresh the list
+              fetchCustomers();
             } catch (err) {
               console.error('Error deleting customer:', err);
               Alert.alert('Error', 'Failed to delete customer.');
@@ -68,11 +79,11 @@ const CustomerListScreen = () => {
       title={item.customerName}
       description={`Mobile: ${item.mobile} | Vehicle: ${item.vehicles || 'N/A'}`}
       left={props => <List.Icon {...props} icon="account" />}
-      right={props => (
+      right={() => (
         <View style={styles.actions}>
-          <Button icon="pencil" onPress={() =>  router.push({
-                pathname: '/customers/CForm', // Path to CustomerFormScreen within the stack
-                params: { customer: JSON.stringify(item) }, // Pass the customer object as a string
+          <Button icon="pencil" onPress={() => router.push({
+                pathname: '/customers/CForm',
+                params: { customer: JSON.stringify(item) },
               })} />
           <Button icon="delete" onPress={() => handleDeleteCustomer(item.id)} />
         </View>
@@ -114,7 +125,11 @@ const CustomerListScreen = () => {
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={fetchCustomers} />
         }
-        ListEmptyComponent={<Text style={styles.emptyList}>No customers found.</Text>}
+        ListEmptyComponent={
+          <View style={styles.center}>
+            <Text style={styles.emptyList}>No customers found for this service center.</Text>
+          </View>
+        }
       />
       <FAB
         style={styles.fab}

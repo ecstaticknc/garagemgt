@@ -31,6 +31,27 @@ const createGenericController = (modelInstance, requiredFields = []) => {
       }
     },
 
+    getByScId: async (req, res) => {
+      try {
+        const { scId } = req.query;
+        if (!scId) {
+          return res.status(400).json({ msg: 'Service Center ID (scId) is required' });
+        }
+        
+        const data = await modelInstance.findByColumn('scId', scId);
+        res.json({ 
+          msg: `${modelInstance.tableName} list for Service Center ${scId}`,
+          data 
+        });
+      } catch (error) {
+        console.error(`Error fetching ${modelInstance.tableName} by scId:`, error);
+        res.status(500).json({ 
+          msg: `Server Error fetching ${modelInstance.tableName} by scId`, 
+          error: error.message 
+        });
+      }
+    },
+
     create: async (req, res) => {
       try {
         const newData = req.body;

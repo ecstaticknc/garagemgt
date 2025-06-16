@@ -1,6 +1,6 @@
 import { Stack } from 'expo-router';
 
-export default function ServiceHistoryStackLayout() {
+export default function CustomerStackLayout() {
   return (
     <Stack screenOptions={{ headerShown: false }}>
       <Stack.Screen name="CList" options={{ title: "CustomerList" }} />
