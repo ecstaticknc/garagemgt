@@ -6,22 +6,31 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
+  Dimensions,
 } from 'react-native';
-import { TextInput, Button, Text, Switch, useTheme } from 'react-native-paper';
+import {
+  TextInput,
+  Button,
+  Text,
+  useTheme,
+  IconButton,
+} from 'react-native-paper';
 import { useAuth } from '../context/AuthContext';
-import { useRouter } from 'expo-router';
 import { useThemeToggle } from '../context/ThemeContext';
+import { useRouter } from 'expo-router';
+
+const { height } = Dimensions.get('window');
 
 const LoginScreen = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const { login, isLoading, error } = useAuth();
-  const router = useRouter();
-  const theme = useTheme();
   const { isDarkMode, toggleTheme } = useThemeToggle();
+  const theme = useTheme();
+  const router = useRouter();
 
   const handleLogin = async () => {
-    console.log('Bypassing login. REMOVE FOR PRODUCTION.');
+    console.log('Bypassing login. REMOVE THIS FOR PRODUCTION.');
     router.push('/(drawer)/(tabs)/Home');
     return;
   };
@@ -29,9 +38,23 @@ const LoginScreen = () => {
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      style={[styles.flex, { backgroundColor: theme.colors.background }]}
+      style={[styles.root, { backgroundColor: theme.colors.background }]}
     >
-      <ScrollView contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled">
+      <ScrollView
+        contentContainerStyle={styles.scrollContainer}
+        keyboardShouldPersistTaps="handled"
+      >
+        {/* Top-right dark mode toggle */}
+        <View style={styles.topBar}>
+          <IconButton
+            icon={isDarkMode ? 'white-balance-sunny' : 'weather-night'}
+            size={24}
+            onPress={toggleTheme}
+            iconColor={theme.colors.primary}
+          />
+        </View>
+
+        {/* Main content block */}
         <View style={styles.container}>
           <Image
             source={require('../assets/login.png')}
@@ -39,7 +62,9 @@ const LoginScreen = () => {
             resizeMode="contain"
           />
 
-          <Text style={[styles.title, { color: theme.colors.primary }]}>Welcome Back!</Text>
+          <Text style={[styles.title, { color: theme.colors.primary }]}>
+            Welcome Back!
+          </Text>
 
           <TextInput
             label="Mobile Number"
@@ -58,9 +83,7 @@ const LoginScreen = () => {
             left={<TextInput.Icon icon="lock" />}
           />
 
-          {error && (
-            <Text style={styles.errorText}>{error}</Text>
-          )}
+          {error && <Text style={styles.errorText}>{error}</Text>}
 
           <Button
             mode="contained"
@@ -73,11 +96,6 @@ const LoginScreen = () => {
           >
             {isLoading ? 'Logging In...' : 'Login'}
           </Button>
-
-          <View style={styles.toggleRow}>
-            <Text>Dark Mode</Text>
-            <Switch value={isDarkMode} onValueChange={toggleTheme} />
-          </View>
         </View>
       </ScrollView>
     </KeyboardAvoidingView>
@@ -85,22 +103,30 @@ const LoginScreen = () => {
 };
 
 const styles = StyleSheet.create({
-  flex: {
+  root: {
     flex: 1,
   },
-  scrollContent: {
+  scrollContainer: {
     flexGrow: 1,
     justifyContent: 'center',
-    padding: 20,
+    paddingHorizontal: 20,
+    paddingBottom: 40,
+  },
+  topBar: {
+    position: 'absolute',
+    top: Platform.OS === 'ios' ? 50 : 20,
+    right: 10,
+    zIndex: 999,
   },
   container: {
-    backgroundColor: 'rgba(255,255,255,0.95)',
-    borderRadius: 12,
+    flex: 1,
+    justifyContent: 'center',
+    marginTop: 100,
     padding: 20,
-    elevation: 5,
+    borderRadius: 12,
   },
   logo: {
-    height: '25%',
+    height: height * 0.25,
     width: '95%',
     alignSelf: 'center',
     marginBottom: 20,
@@ -113,6 +139,7 @@ const styles = StyleSheet.create({
   },
   input: {
     marginBottom: 15,
+    backgroundColor: 'white',
   },
   button: {
     marginTop: 10,
@@ -133,12 +160,6 @@ const styles = StyleSheet.create({
     borderRadius: 6,
     textAlign: 'center',
     marginBottom: 10,
-  },
-  toggleRow: {
-    marginTop: 20,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
   },
 });
 

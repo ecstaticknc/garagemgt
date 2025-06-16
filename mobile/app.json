@@ -7,7 +7,7 @@
     "web": {
       "bundler": "metro",
       "output": "static",
-      "favicon": "./assets/logo.png"
+      "favicon": "./assets/icon1.png"
     },
     "plugins": [
       "expo-router",
@@ -42,6 +42,7 @@
     "userInterfaceStyle": "light",
     "splash": {
       "resizeMode": "contain",
+      "image": "./assets/icon.png",
       "backgroundColor": "#ffffff"
     },
     "assetBundlePatterns": [
@@ -52,6 +53,7 @@
     },
     "android": {
       "adaptiveIcon": {
+        "foregroundImage": "./assets/icon.png",
         "backgroundColor": "#ffffff"
       },
       "package": "com.ecstaticknc.BikeClinic"
@@ -59,7 +61,7 @@
     "extra": {
       "router": {},
       "eas": {
-        "projectId": "1990d831-2c7c-41e9-ad8a-104bc51663fe"
+        "projectId": ""
       }
     }
   }
