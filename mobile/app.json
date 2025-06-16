@@ -1,9 +1,9 @@
 {
   "expo": {
-    "name": "samarthcatres",
-    "slug": "samarthcatres",
+    "name": "Bike Clinic",
+    "slug": "Bike Clinic",
     "version": "1.0.0",
-    "scheme": "samarthcatres",
+    "scheme": "Bike Clinic",
     "web": {
       "bundler": "metro",
       "output": "static",
@@ -54,7 +54,7 @@
       "adaptiveIcon": {
         "backgroundColor": "#ffffff"
       },
-      "package": "com.ecstaticknc.samarthcatres"
+      "package": "com.ecstaticknc.BikeClinic"
     },
     "extra": {
       "router": {},

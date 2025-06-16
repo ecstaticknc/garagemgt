@@ -1,7 +1,7 @@
 // screens/HomeScreen.js
 import React, { useEffect, useState } from 'react';
 import { View, StyleSheet, ActivityIndicator } from 'react-native';
-import { Appbar, List, Divider, Text, Card } from 'react-native-paper';
+import {  List, Divider, Text, Card } from 'react-native-paper';
 import { useAuth } from '../../../context/AuthContext'; // To get userScId
 import API from '../../config/axiosInstance'; // To make API calls
 import { useNavigation, useRouter } from 'expo-router';
@@ -22,7 +22,9 @@ export default function Home() {
           setLoadingInfo(true);
           setErrorInfo(null);
           const response = await API._get(`/servicecenters/${userScId}`);
+          console.log("Service Center Data:", response.data.data); 
           setServiceCenterInfo(response.data.data);
+
         } catch (error) {
           console.error("Failed to fetch service center data for dashboard:", error);
           setErrorInfo("Failed to load service center details.");
@@ -40,13 +42,7 @@ export default function Home() {
 
   return (
     <View style={styles.container}>
-      <Appbar.Header>
-        {/* Use navigation.openDrawer() as it's a method from the drawer navigator */}
-        <Appbar.Action icon="menu" onPress={() => navigation.openDrawer()} />
-        <Appbar.Content title="Dashboard" />
-        {/* Optional logout button */}
-        {/* <Appbar.Action icon="logout" onPress={logout} /> */}
-      </Appbar.Header>
+      
 
       <View style={styles.content}>
         {loadingInfo ? (

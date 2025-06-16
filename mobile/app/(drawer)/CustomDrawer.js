@@ -130,105 +130,7 @@ export default function CustomDrawer(props) {
             ]}
           />
 
-          <DrawerItem
-            label="ग्राहक नोंदणी"
-            icon={({ size }) => (
-              <Feather
-                name="user-plus"
-                size={size}
-                color={isRouteActive('CustomerDetailScreen') ? ACTIVE_COLOR : INACTIVE_COLOR} // Aligned with _layout.js tab name
-              />
-            )}
-            onPress={() => router.navigate('/(drawer)/(tabs)/CustomerDetailScreen')} // Aligned with _layout.js tab name
-            labelStyle={[
-              styles.label,
-              { color: isRouteActive('CustomerDetailScreen') ? ACTIVE_COLOR : INACTIVE_COLOR }
-            ]}
-            style={[
-              styles.menuItem,
-              isRouteActive('CustomerDetailScreen') && styles.activeItem
-            ]}
-          />
-
-          <DrawerItem
-            label="ग्राहक यादी"
-            icon={({ size }) => (
-              <MaterialIcons
-                name="groups" // Corrected icon for customer list
-                size={size}
-                color={isRouteActive('CustomerListScreen') ? ACTIVE_COLOR : INACTIVE_COLOR} // Corrected to 'CustomerListScreen'
-              />
-            )}
-            onPress={() => router.navigate('/(drawer)/(tabs)/CustomerListScreen')} // Corrected to 'CustomerListScreen'
-            labelStyle={[
-              styles.label,
-              { color: isRouteActive('CustomerListScreen') ? ACTIVE_COLOR : INACTIVE_COLOR }
-            ]}
-            style={[
-              styles.menuItem,
-              isRouteActive('CustomerListScreen') && styles.activeItem
-            ]}
-          />
-
-          <DrawerItem
-            label="पूर्ण कार्यक्रम"
-            icon={({ size }) => (
-              <MaterialIcons
-                name="event-available" // Corrected icon for completed events
-                size={size}
-                color={isRouteActive('CompletedEvents') ? ACTIVE_COLOR : INACTIVE_COLOR}
-              />
-            )}
-            onPress={() => router.navigate('/(drawer)/(tabs)/CompletedEvents')}
-            labelStyle={[
-              styles.label,
-              { color: isRouteActive('CompletedEvents') ? ACTIVE_COLOR : INACTIVE_COLOR }
-            ]}
-            style={[
-              styles.menuItem,
-              isRouteActive('CompletedEvents') && styles.activeItem
-            ]}
-          />
-
-          <DrawerItem
-            label="बुकिंग व्यवस्थापन"
-            icon={({ size }) => (
-              <FontAwesome5
-                name="calendar-alt"
-                size={size}
-                color={isRouteActive('BookingView') ? ACTIVE_COLOR : INACTIVE_COLOR}
-              />
-            )}
-            onPress={() => router.navigate('/(drawer)/(tabs)/BookingView')}
-            labelStyle={[
-              styles.label,
-              { color: isRouteActive('BookingView') ? ACTIVE_COLOR : INACTIVE_COLOR }
-            ]}
-            style={[
-              styles.menuItem,
-              isRouteActive('BookingView') && styles.activeItem
-            ]}
-          />
-
-          <DrawerItem
-            label="सामग्री व्यवस्थापन"
-            icon={({ size }) => (
-              <Entypo
-                name="add-to-list"
-                size={size}
-                color={isRouteActive('ItemManagement') ? ACTIVE_COLOR : INACTIVE_COLOR}
-              />
-            )}
-            onPress={() => router.navigate('/(drawer)/(tabs)/ItemManagement')}
-            labelStyle={[
-              styles.label,
-              { color: isRouteActive('ItemManagement') ? ACTIVE_COLOR : INACTIVE_COLOR }
-            ]}
-            style={[
-              styles.menuItem,
-              isRouteActive('ItemManagement') && styles.activeItem
-            ]}
-          />
+          
 
           {/* Service Center Management - Re-added as per Home.js options */}
           <DrawerItem
@@ -237,10 +139,10 @@ export default function CustomDrawer(props) {
               <MaterialCommunityIcons
                 name="car-wrench" // Icon for service center
                 size={size}
-                color={isRouteActive('ServiceCenterListScreen') ? ACTIVE_COLOR : INACTIVE_COLOR}
+                color={isRouteActive('SCList') ? ACTIVE_COLOR : INACTIVE_COLOR}
               />
             )}
-            onPress={() => router.navigate('/(drawer)/(tabs)/ServiceCenterListScreen')}
+            onPress={() => router.navigate('servicecenters/SCList')}
             labelStyle={[
               styles.label,
               { color: isRouteActive('ServiceCenterListScreen') ? ACTIVE_COLOR : INACTIVE_COLOR }
@@ -261,7 +163,7 @@ export default function CustomDrawer(props) {
                 color={isRouteActive('ServiceHistoryListScreen') ? ACTIVE_COLOR : INACTIVE_COLOR}
               />
             )}
-            onPress={() => router.navigate('/(drawer)/(tabs)/ServiceHistoryListScreen')}
+            onPress={() => router.navigate('servicehistory/SHList')}
             labelStyle={[
               styles.label,
               { color: isRouteActive('ServiceHistoryListScreen') ? ACTIVE_COLOR : INACTIVE_COLOR }
