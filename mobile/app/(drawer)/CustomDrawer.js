@@ -1,23 +1,36 @@
 // CustomDrawer.js
 import React, { useEffect, useState } from 'react';
-import { DrawerContentScrollView, DrawerItem } from '@react-navigation/drawer';
+import { DrawerContentScrollView } from '@react-navigation/drawer';
 import { useRouter } from 'expo-router';
-import { StyleSheet, View, Text, Image, Alert, BackHandler } from 'react-native';
-import { Feather, Entypo, MaterialIcons, FontAwesome5, MaterialCommunityIcons } from '@expo/vector-icons';
+import { StyleSheet, View, Text, Image, Alert, TouchableOpacity, Animated } from 'react-native';
+import { Feather, Entypo, MaterialIcons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { usePathname } from 'expo-router';
 import { BlurView } from 'expo-blur';
-import { useAuth } from './../../context/AuthContext'; 
-import API from '../config/axiosInstance'; 
+import { LinearGradient } from 'expo-linear-gradient';
+import { useAuth } from './../../context/AuthContext';
+import API from '../config/axiosInstance';
+
+const COLORS = {
+  primary: '#6B42F6',
+  secondary: '#8A5DFE',
+  accent: '#FFD700',
+  background: '#F0F2F5',
+  text: '#344054',
+  lightText: '#667085',
+  card: '#FFFFFF',
+  border: '#EAECF0',
+  danger: '#F04438',
+  success: '#12B76A',
+};
 
 export default function CustomDrawer(props) {
   const router = useRouter();
   const pathname = usePathname();
-
   const { userScId, loggedInUser, logout } = useAuth();
-
   const [serviceCenterInfo, setServiceCenterInfo] = useState(null);
   const [loadingInfo, setLoadingInfo] = useState(true);
   const [errorInfo, setErrorInfo] = useState(null);
+  const pulseAnim = new Animated.Value(1);
 
   useEffect(() => {
     const fetchServiceCenterData = async () => {
@@ -28,7 +41,7 @@ export default function CustomDrawer(props) {
           const response = await API._get(`/servicecenters/${userScId}`);
           setServiceCenterInfo(response.data.data);
         } catch (error) {
-          console.error("Failed to fetch service center data for dashboard:", error);
+          console.error("Failed to fetch service center data:", error);
           setErrorInfo("Failed to load service center details.");
         } finally {
           setLoadingInfo(false);
@@ -42,14 +55,31 @@ export default function CustomDrawer(props) {
     fetchServiceCenterData();
   }, [userScId]);
 
+  useEffect(() => {
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(pulseAnim, {
+          toValue: 1.02,
+          duration: 700,
+          useNativeDriver: true,
+        }),
+        Animated.timing(pulseAnim, {
+          toValue: 1,
+          duration: 700,
+          useNativeDriver: true,
+        }),
+      ])
+    ).start();
+  }, [pulseAnim]);
+
   const handleExitApp = () => {
     Alert.alert(
-      "अ‍ॅप बंद करा",
-      "तुम्हाला अ‍ॅप बंद करायचे आहे का?",
+      "Exit App",
+      "Are you sure you want to exit the app?",
       [
-        { text: "रद्द करा", style: "cancel" },
+        { text: "Cancel", style: "cancel" },
         {
-          text: "होय",
+          text: "Yes",
           onPress: () => {
             logout();
             router.replace('/');
@@ -64,161 +94,138 @@ export default function CustomDrawer(props) {
     return pathname.includes(routePath);
   };
 
-  // Updated color scheme
-  const ACTIVE_COLOR = "#FF6B35"; // Vibrant orange
-  const INACTIVE_COLOR = "#4A4E69"; // Dark blue-gray
-  const BACKGROUND_COLOR = "#F7F7FF"; // Light off-white
-  const TEXT_COLOR = "#252627"; // Dark gray
-  const ACCENT_COLOR = "#1985A1"; // Teal blue
-
   const showAdminFeatures = loggedInUser && loggedInUser.role === 'admin';
 
+  const MenuItem = ({ label, iconName, routePath, iconLib = 'Feather' }) => {
+    const isActive = isRouteActive(routePath);
+    const IconComponent = {
+      Feather,
+      MaterialIcons,
+      MaterialCommunityIcons,
+      Entypo,
+    }[iconLib];
+
+    return (
+      <TouchableOpacity
+        onPress={() => router.navigate(routePath)}
+        style={[
+          styles.menuItem,
+          isActive && styles.activeItem,
+          isActive && { transform: [{ scale: pulseAnim }] }
+        ]}
+      >
+        <View style={styles.menuItemContent}>
+          <IconComponent
+            name={iconName}
+            size={22}
+            color={isActive ? COLORS.primary : COLORS.lightText}
+            style={styles.menuIcon}
+          />
+          <Text style={[
+            styles.menuLabel,
+            { color: isActive ? COLORS.primary : COLORS.text }
+          ]}>
+            {label}
+          </Text>
+        </View>
+        {isActive && (
+          <View style={[styles.activeIndicator, { backgroundColor: COLORS.primary }]} />
+        )}
+      </TouchableOpacity>
+    );
+  };
+
   return (
-    <View style={[styles.container, { backgroundColor: BACKGROUND_COLOR }]}>
-      <BlurView intensity={90} tint="light" style={StyleSheet.absoluteFill} />
+    <View style={[styles.container, { backgroundColor: COLORS.background }]}>
+      <LinearGradient
+        colors={['rgba(107, 66, 246, 0.03)', 'rgba(107, 66, 246, 0.01)']}
+        style={StyleSheet.absoluteFill}
+      />
+      <BlurView intensity={15} tint="light" style={StyleSheet.absoluteFill} />
+
       <DrawerContentScrollView
         {...props}
         contentContainerStyle={styles.scrollContainer}
-        drawerHideStatusBarOnOpen={true}
+        showsVerticalScrollIndicator={false}
       >
-        {/* User Profile Section - Updated Design */}
-        <View style={styles.header}>
+        <LinearGradient
+          colors={[COLORS.primary, COLORS.secondary]}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={styles.profileCard}
+        >
           <View style={styles.avatarContainer}>
             <Image
               source={require('../../assets/logo1.png')}
               style={styles.avatar}
             />
+            <View style={styles.onlineIndicator} />
           </View>
-          <Text style={styles.appNameHeader}>बाईक क्लिनिक</Text>
+
+          <Text style={styles.appName}>Bike Clinic</Text>
+          
           {loggedInUser ? (
             <>
-              <Text style={styles.loggedInUserName}>
-                नमस्कार, {loggedInUser.username}!
-              </Text>
-              <View style={styles.roleBadge}>
-                <Text style={styles.loggedInUserRole}>
-                  {loggedInUser.role}
-                </Text>
+              <Text style={styles.userName}>Hello, {loggedInUser.username}!</Text>
+              <View style={[
+                styles.roleBadge,
+                { backgroundColor: loggedInUser.role === 'admin' ? COLORS.accent : 'rgba(255,255,255,0.3)' }
+              ]}>
+                <Text style={styles.roleText}>{loggedInUser.role}</Text>
               </View>
             </>
           ) : (
-            <Text style={styles.loggedInUserName}>
-              {serviceCenterInfo?.proprietorName}
-            </Text>
+            <Text style={styles.userName}>{serviceCenterInfo?.proprietorName}</Text>
           )}
-        </View>
+        </LinearGradient>
 
-        {/* Main Navigation Items - Updated Styling */}
-        <View style={styles.menuSection}>
-          <DrawerItem
-            label="डॅशबोर्ड"
-            icon={({ size }) => (
-              <Feather
-                name="home"
-                size={size}
-                color={isRouteActive('Home') ? ACTIVE_COLOR : INACTIVE_COLOR}
-              />
-            )}
-            onPress={() => router.navigate('/(drawer)/(tabs)/Home')}
-            labelStyle={[
-              styles.label,
-              { 
-                color: isRouteActive('Home') ? ACTIVE_COLOR : INACTIVE_COLOR,
-                fontFamily: 'Mukta-SemiBold'
-              }
-            ]}
-            style={[
-              styles.menuItem,
-              isRouteActive('Home') && styles.activeItem
-            ]}
+        <View style={styles.menuContainer}>
+          <MenuItem 
+            label="Dashboard" 
+            iconName="home" 
+            routePath="/(drawer)/(tabs)/Home" 
           />
-
-          <DrawerItem
-            label="सर्व्हिस सेंटर व्यवस्थापन"
-            icon={({ size }) => (
-              <MaterialCommunityIcons
-                name="car-wrench"
-                size={size}
-                color={isRouteActive('SCList') ? ACTIVE_COLOR : INACTIVE_COLOR}
-              />
-            )}
-            onPress={() => router.navigate('servicecenters/SCList')}
-            labelStyle={[
-              styles.label,
-              { 
-                color: isRouteActive('ServiceCenterListScreen') ? ACTIVE_COLOR : INACTIVE_COLOR,
-                fontFamily: 'Mukta-SemiBold'
-              }
-            ]}
-            style={[
-              styles.menuItem,
-              isRouteActive('ServiceCenterListScreen') && styles.activeItem
-            ]}
+          
+          <MenuItem 
+            label="Service Center Management" 
+            iconName="car-wrench" 
+            routePath="servicecenters/SCList" 
+            iconLib="MaterialCommunityIcons"
           />
-
-          <DrawerItem
-            label="सेवा इतिहास"
-            icon={({ size }) => (
-              <MaterialIcons
-                name="history"
-                size={size}
-                color={isRouteActive('ServiceHistoryListScreen') ? ACTIVE_COLOR : INACTIVE_COLOR}
-              />
-            )}
-            onPress={() => router.navigate('servicehistory/SHList')}
-            labelStyle={[
-              styles.label,
-              { 
-                color: isRouteActive('ServiceHistoryListScreen') ? ACTIVE_COLOR : INACTIVE_COLOR,
-                fontFamily: 'Mukta-SemiBold'
-              }
-            ]}
-            style={[
-              styles.menuItem,
-              isRouteActive('ServiceHistoryListScreen') && styles.activeItem
-            ]}
+          
+          <MenuItem 
+            label="Service History" 
+            iconName="history" 
+            routePath="servicehistory/SHList" 
+            iconLib="MaterialIcons"
           />
-
+          
           {showAdminFeatures && (
-            <DrawerItem
-              label="डेटाबेस रीसेट करा"
-              icon={({ size }) => (
-                <MaterialCommunityIcons
-                  name="database-remove"
-                  size={size}
-                  color={isRouteActive('ResetDatabaseScreen') ? ACTIVE_COLOR : INACTIVE_COLOR}
-                />
-              )}
-              onPress={() => router.navigate('/(drawer)/(tabs)/ResetDatabaseScreen')}
-              labelStyle={[
-                styles.label,
-                { 
-                  color: isRouteActive('ResetDatabaseScreen') ? ACTIVE_COLOR : INACTIVE_COLOR,
-                  fontFamily: 'Mukta-SemiBold'
-                }
-              ]}
-              style={[
-                styles.menuItem,
-                isRouteActive('ResetDatabaseScreen') && styles.activeItem
-              ]}
+            <MenuItem 
+              label="Reset Database" 
+              iconName="database-remove" 
+              routePath="/(drawer)/(tabs)/ResetDatabaseScreen" 
+              iconLib="MaterialCommunityIcons"
             />
           )}
         </View>
       </DrawerContentScrollView>
 
-      {/* Footer Section - Updated Design */}
       <View style={styles.footer}>
-        <BlurView intensity={80} tint="light" style={styles.footerBlur}>
-          <DrawerItem
-            label="अ‍ॅपमधून बाहेर पडा"
-            icon={({ size }) => (
-              <Entypo name="log-out" size={size} color="#E71D36" />
-            )}
-            onPress={handleExitApp}
-            labelStyle={[styles.label, styles.exitLabel]}
-            style={[styles.menuItem, styles.exitButton]}
-          />
-        </BlurView>
+        <TouchableOpacity 
+          onPress={handleExitApp}
+          style={styles.logoutButton}
+        >
+          <LinearGradient
+            colors={['rgba(240, 68, 56, 0.1)', 'rgba(247, 104, 94, 0.42)']}
+            style={styles.logoutGradient}
+          >
+            <Entypo name="log-out" size={20} color={COLORS.danger} />
+            <Text style={[styles.logoutText, { color: COLORS.danger }]}>Exit App</Text>
+          </LinearGradient>
+        </TouchableOpacity>
+        
+        <Text style={styles.versionText}>Version 1.0.0</Text>
       </View>
     </View>
   );
@@ -227,103 +234,154 @@ export default function CustomDrawer(props) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    borderTopRightRadius: 30,
+    borderBottomRightRadius: 30,
+    overflow: 'hidden',
   },
   scrollContainer: {
     flexGrow: 1,
+    paddingBottom: 20,
     paddingTop: 10,
   },
-  header: {
-    padding: 20,
+  profileCard: {
+    padding: 28,
     alignItems: 'center',
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(74, 78, 105, 0.1)',
-    marginBottom: 10,
+    marginHorizontal: 20,
+    marginTop: 30,
+    borderRadius: 25,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.15,
+    shadowRadius: 15,
+    elevation: 8,
   },
   avatarContainer: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    backgroundColor: 'rgba(255, 255, 255, 0.7)',
+    width: 95,
+    height: 95,
+    borderRadius: 47.5,
+    backgroundColor: 'rgba(255, 255, 255, 0.25)',
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 15,
-    borderWidth: 3,
-    borderColor: '#FF6B35',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
-    elevation: 5,
+    marginBottom: 18,
+    borderWidth: 4,
+    borderColor: 'rgba(255, 255, 255, 0.4)',
+    position: 'relative',
   },
   avatar: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
+    width: 75,
+    height: 75,
+    borderRadius: 37.5,
   },
-  appNameHeader: {
-    fontSize: 22,
+  onlineIndicator: {
+    position: 'absolute',
+    right: 7,
+    bottom: 7,
+    width: 16,
+    height: 16,
+    borderRadius: 8,
+    backgroundColor: '#12B76A',
+    borderWidth: 3,
+    borderColor: '#FFFFFF',
+  },
+  appName: {
+    fontSize: 26,
     fontWeight: 'bold',
-    color: '#252627',
+    color: '#FFFFFF',
     marginBottom: 8,
-    textAlign: 'center',
-    fontFamily: 'Mukta-Bold',
+    textShadowColor: 'rgba(0, 0, 0, 0.15)',
+    textShadowOffset: { width: 0, height: 2 },
+    textShadowRadius: 3,
   },
-  loggedInUserName: {
-    fontSize: 16,
-    color: '#4A4E69',
-    textAlign: 'center',
-    fontFamily: 'Mukta-Medium',
-    marginTop: 5,
+  userName: {
+    fontSize: 19,
+    color: 'rgba(255, 255, 255, 0.95)',
+    marginBottom: 6,
   },
   roleBadge: {
-    backgroundColor: '#1985A1',
-    paddingHorizontal: 12,
-    paddingVertical: 4,
-    borderRadius: 15,
-    marginTop: 8,
+    paddingHorizontal: 14,
+    paddingVertical: 6,
+    borderRadius: 25,
+    marginTop: 10,
   },
-  loggedInUserRole: {
-    fontSize: 14,
+  roleText: {
+    fontSize: 13,
     color: '#FFFFFF',
-    textAlign: 'center',
-    fontFamily: 'Mukta-SemiBold',
+    textTransform: 'uppercase',
+    letterSpacing: 0.7,
   },
-  menuSection: {
-    marginTop: 15,
-    paddingHorizontal: 15,
+  menuContainer: {
+    marginTop: 25,
+    paddingHorizontal: 20,
   },
   menuItem: {
-    borderRadius: 12,
-    marginVertical: 5,
-    justifyContent: 'center',
-    height: 50,
-    overflow: 'hidden',
+    borderRadius: 15,
+    marginVertical: 8,
+    paddingVertical: 16,
+    paddingHorizontal: 20,
+    backgroundColor: '#FFFFFF',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 5,
+    elevation: 3,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#EAECF0',
   },
-  label: {
-    fontSize: 16,
-    textAlign: 'left',
-    marginLeft: -10,
-    fontFamily: 'Mukta-Medium',
+  menuItemContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
   },
   activeItem: {
-    backgroundColor: 'rgba(255, 107, 53, 0.15)',
-    borderLeftWidth: 5,
-    borderLeftColor: '#FF6B35',
+    backgroundColor: '#FFFFFF',
+    shadowColor: '#6B42F6',
+    shadowOffset: { width: 0, height: 5 },
+    shadowOpacity: 0.25,
+    shadowRadius: 12,
+    elevation: 8,
+    borderColor: '#6B42F6',
+    borderWidth: 1,
   },
-  exitLabel: {
-    color: '#E71D36',
-    fontFamily: 'Mukta-SemiBold',
+  menuIcon: {
+    marginRight: 18,
+    width: 22,
+    textAlign: 'center',
   },
-  exitButton: {
-    backgroundColor: 'rgba(231, 29, 54, 0.1)',
+  menuLabel: {
+    fontSize: 17,
+    flex: 1,
+  },
+  activeIndicator: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
   },
   footer: {
-    padding: 0,
+    padding: 20,
     borderTopWidth: 1,
-    borderTopColor: 'rgba(74, 78, 105, 0.1)',
+    borderTopColor: '#EAECF0',
   },
-  footerBlur: {
-    paddingVertical: 10,
-    paddingHorizontal: 15,
+  logoutButton: {
+    borderRadius: 15,
+    overflow: 'hidden',
+    marginBottom: 15,
+  },
+  logoutGradient: {
+    padding: 18,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  logoutText: {
+    marginLeft: 12,
+    fontSize: 17,
+  },
+  versionText: {
+    textAlign: 'center',
+    color: '#667085',
+    fontSize: 14,
   },
 });
