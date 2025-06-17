@@ -1,6 +1,5 @@
-// screens/HomeScreen.js
-import React, { useEffect, useState } from 'react';
-import { View, StyleSheet, ActivityIndicator, ScrollView } from 'react-native';
+import React, { useEffect, useState ,useRef, } from 'react';
+import { View, StyleSheet, ActivityIndicator, ScrollView,Animated,Easing} from 'react-native';
 import { List, Divider, Text, Card, useTheme } from 'react-native-paper';
 import { useAuth } from '../../../context/AuthContext';
 import API from '../../config/axiosInstance';
@@ -18,6 +17,8 @@ export default function Home() {
   const [serviceCenterInfo, setServiceCenterInfo] = useState(null);
   const [loadingInfo, setLoadingInfo] = useState(true);
   const [errorInfo, setErrorInfo] = useState(null);
+  const spinAnim = useRef(new Animated.Value(0)).current;
+
 
   useEffect(() => {
     const fetchServiceCenterData = async () => {
@@ -42,15 +43,39 @@ export default function Home() {
     fetchServiceCenterData();
   }, [userScId]);
 
+
+  useEffect(() => {
+  Animated.loop(
+    Animated.timing(spinAnim, {
+      toValue: 1,
+      duration: 3000,
+      easing: Easing.linear,
+      useNativeDriver: true,
+    })
+  ).start();
+}, []);
+  const spin = spinAnim.interpolate({
+    inputRange: [0, 3],
+    outputRange: ['0deg', '360deg'],
+  });
+
   return (
     <ScrollView style={[styles.container, { backgroundColor: colors.background }]}>
       {/* Header Gradient */}
       <LinearGradient
-        colors={[colors.primary, '#6a11cb']}
+        colors={[colors.primary, '#611cb']}
+        start={{ x: 2, y: 1 }}
+        end={{ x: 3, y: 5 }}
         style={styles.header}
       >
-        <Text style={styles.headerTitle}>Service Center Dashboard</Text>
-        <Icon name="car-wrench" size={40} color="#fff" style={styles.headerIcon} />
+        
+        <View style={styles.headerTextContainer}>
+  <Text style={styles.welcomeText}>Welcome</Text>
+  <Text style={styles.headerTitle}>Service Center Dashboard</Text>
+</View>
+<Animated.View style={{ transform: [{ rotate: spin }] }}>
+  <Icon name="tools" size={40} color="#fff" style={styles.headerIcon} />
+</Animated.View>
       </LinearGradient>
 
       <View style={styles.content}>
@@ -67,89 +92,47 @@ export default function Home() {
             </Card.Content>
           </Card>
         ) : serviceCenterInfo ? (
-          <>
-            <Card style={[styles.infoCard, { backgroundColor: colors.surface }]}>
-              <LinearGradient
-                colors={['transparent', 'rgba(0,0,0,0.05)']}
-                style={styles.cardGradient}
-              />
-              <Card.Title
-                title={`Welcome, ${serviceCenterInfo.proprietorName}!`}
-                titleStyle={[styles.cardTitle, { color: colors.primary }]}
-                subtitle={`${serviceCenterInfo.serviceCenterName}`}
-                subtitleStyle={styles.cardSubtitle}
-                left={(props) => <List.Icon {...props} icon="account-tie" color={colors.primary} />}
-              />
-              <Card.Content style={styles.cardContent}>
-                <View style={styles.infoRow}>
-                  <Icon name="phone" size={20} color={colors.primary} style={styles.infoIcon} />
-                  <Text style={[styles.infoText, { color: colors.text }]}>
-                    {serviceCenterInfo.proprietorMobile}
-                  </Text>
-                </View>
-                <View style={styles.infoRow}>
-                  <Icon name="email" size={20} color={colors.primary} style={styles.infoIcon} />
-                  <Text style={[styles.infoText, { color: colors.text }]}>
-                    {serviceCenterInfo.proprietorEmail}
-                  </Text>
-                </View>
-                <View style={styles.infoRow}>
-                  <Icon name="map-marker" size={20} color={colors.primary} style={styles.infoIcon} />
-                  <Text style={[styles.infoText, { color: colors.text }]}>
-                    {serviceCenterInfo.serviceCenterAddress}
-                  </Text>
-                </View>
-              </Card.Content>
-            </Card>
-
-            {/* Stats Cards */}
-            <View style={styles.statsContainer}>
-              <Card style={[styles.statCard, { backgroundColor: colors.surface }]}>
-                <Card.Content style={styles.statContent}>
-                  <Icon name="calendar-clock" size={30} color="#4CAF50" />
-                  <Text style={[styles.statValue, { color: colors.text }]}>24</Text>
-                  <Text style={[styles.statLabel, { color: colors.text }]}>Today's Appointments</Text>
-                </Card.Content>
-              </Card>
-
-              <Card style={[styles.statCard, { backgroundColor: colors.surface }]}>
-                <Card.Content style={styles.statContent}>
-                  <Icon name="car-wrench" size={30} color="#FF9800" />
-                  <Text style={[styles.statValue, { color: colors.text }]}>8</Text>
-                  <Text style={[styles.statLabel, { color: colors.text }]}>In Progress</Text>
-                </Card.Content>
-              </Card>
-            </View>
-          </>
-        ) : (
           <Card style={[styles.infoCard, { backgroundColor: colors.surface }]}>
-            <Card.Content style={styles.noInfoContent}>
-              <Icon name="information-outline" size={30} color={colors.text} />
-              <Text style={[styles.noInfoText, { color: colors.text }]}>
-                No service center information available.
-              </Text>
+            <LinearGradient
+              colors={['transparent', 'rgba(0, 0, 0, 0.06)']}
+              style={styles.cardGradient}
+            />
+            <Card.Title
+  title={serviceCenterInfo.proprietorName}
+  titleStyle={[styles.cardTitle, { color: colors.primary }]}
+  subtitle={serviceCenterInfo.serviceCenterName}
+  subtitleStyle={styles.cardSubtitle}
+  left={(props) => <List.Icon {...props} icon="account-tie" color={colors.primary} />}
+/>
+            <Card.Content style={styles.cardContent}>
+              <View style={styles.infoRow}>
+                <Icon name="phone" size={20} color={colors.primary} style={styles.infoIcon} />
+                <Text style={[styles.infoText, { color: colors.text }]}>
+                  {serviceCenterInfo.proprietorMobile}
+                </Text>
+              </View>
+              <View style={styles.infoRow}>
+                <Icon name="email" size={20} color={colors.primary} style={styles.infoIcon} />
+                <Text style={[styles.infoText, { color: colors.text }]}>
+                  {serviceCenterInfo.proprietorEmail}
+                </Text>
+              </View>
+              <View style={styles.infoRow}>
+                <Icon name="map-marker" size={20} color={colors.primary} style={styles.infoIcon} />
+                <Text style={[styles.infoText, { color: colors.text }]}>
+                  {serviceCenterInfo.serviceCenterAddress}
+                </Text>
+              </View>
             </Card.Content>
           </Card>
+        ) : (
+          <View style={styles.noInfoContent}>
+            <Icon name="information" size={30} color={colors.primary} />
+            <Text style={[styles.noInfoText, { color: colors.text }]}>
+              No service center data available.
+            </Text>
+          </View>
         )}
-
-        {/* Quick Actions
-        <Text style={[styles.sectionTitle, { color: colors.text }]}>Quick Actions</Text>
-        <Card style={[styles.actionsCard, { backgroundColor: colors.surface }]}>
-          <Card.Content style={styles.actionsContent}>
-            <View style={styles.actionItem}>
-              <Icon name="plus-circle" size={28} color={colors.primary} />
-              <Text style={[styles.actionText, { color: colors.text }]}>New Job</Text>
-            </View>
-            <View style={styles.actionItem}>
-              <Icon name="calendar-plus" size={28} color={colors.primary} />
-              <Text style={[styles.actionText, { color: colors.text }]}>Schedule</Text>
-            </View>
-            <View style={styles.actionItem}>
-              <Icon name="chart-bar" size={28} color={colors.primary} />
-              <Text style={[styles.actionText, { color: colors.text }]}>Reports</Text>
-            </View>
-          </Card.Content>
-        </Card> */}
       </View>
     </ScrollView>
   );
@@ -229,29 +212,6 @@ const styles = StyleSheet.create({
     flex: 1,
     flexWrap: 'wrap',
   },
-  statsContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 20,
-  },
-  statCard: {
-    width: '48%',
-    borderRadius: 12,
-    elevation: 2,
-  },
-  statContent: {
-    alignItems: 'center',
-    padding: 15,
-  },
-  statValue: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    marginVertical: 5,
-  },
-  statLabel: {
-    fontSize: 13,
-    textAlign: 'center',
-  },
   errorCard: {
     borderRadius: 12,
     marginBottom: 20,
@@ -274,28 +234,22 @@ const styles = StyleSheet.create({
     fontSize: 16,
     textAlign: 'center',
   },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginBottom: 15,
-    marginTop: 10,
-  },
-  actionsCard: {
-    borderRadius: 15,
-    marginBottom: 20,
-  },
-  actionsContent: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    padding: 15,
-  },
-  actionItem: {
-    alignItems: 'center',
-    minWidth: 80,
-  },
-  actionText: {
-    marginTop: 5,
-    fontSize: 13,
-  },
-});
+  headerTextContainer: {
+  flex: 1,
+},
 
+welcomeText: {
+  fontSize: 24,
+  color: '#fff',
+  fontWeight: 'bold',
+ 
+  marginBottom: 4,
+  textAlign: 'center',
+},
+
+headerTitle: {
+  fontSize: 20,
+  fontWeight: 'bold',
+  color: '#fff',
+},
+});
