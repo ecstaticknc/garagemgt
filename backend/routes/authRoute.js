@@ -4,7 +4,13 @@ const router = express.Router();
 const db = require('../config/db');
 
 router.post('/login', async (req, res) => {
+  //console.log("req", req);
+  //console.log("res", res);
+
   const { username, password } = req.body;
+
+  console.log("username", username);
+  console.log("password", password);
 
   // --- ADD THESE CONSOLE LOGS ---
 //   console.log('----------------------------------------------------');

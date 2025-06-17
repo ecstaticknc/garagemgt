@@ -1,9 +1,9 @@
 import { View, Text, ActivityIndicator } from 'react-native'
 import axios from 'axios';
 
-
+const BASE_URL = 'http://192.168.43.95:3000/api/';
 // const BASE_URL = 'https://jsonplaceholder.typicode.com';
- const BASE_URL = 'http://192.168.1.24:3000/api';
+ //const BASE_URL = 'http://192.168.1.24:3000/api';
 //const BASE_URL = 'https://lsbackend.laxmipanditservices.com/api';
 //const BASE_URL = 'http://ecogas.luknos.com/api';
 
