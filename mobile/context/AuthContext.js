@@ -1,7 +1,7 @@
 // context/AuthContext.js
 import React, { createContext, useState, useEffect, useContext } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import API from '../app/config/axiosInstance'; // Adjust the import path as necessary
+import API from '../app/config/axiosInstance'; 
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
@@ -32,6 +32,7 @@ export const AuthProvider = ({ children }) => {
     try {
       const response = await API._post('/login', { username, password });
       const userData = response?.data?.data;
+      console.log("response in login", response)
 
       if (userData && userData.scId) {
         await AsyncStorage.setItem('userScId', String(userData.scId)); 

@@ -48,6 +48,8 @@ const ServiceCenterFormScreen = () => {
         // Add other fields from your backend response if they are mutable
       };
 
+      console.log("serivce center data payload", serviceCenterData)
+
       if (existingServiceCenter) {
         await API._put(`/servicecenters/${existingServiceCenter.id}`, serviceCenterData);
         Alert.alert('Success', 'Service Center updated successfully!');
