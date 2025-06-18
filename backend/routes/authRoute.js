@@ -20,7 +20,7 @@ router.post('/login', async (req, res) => {
 //   console.log('----------------------------------------------------');
 
   try {
-    const [rows] = await db.execute('SELECT id, username, password, scId FROM users WHERE username = ?', [username]);
+    const [rows] = await db.execute('SELECT id, username, password, scId, role FROM users WHERE username = ?', [username]);
 
     if (rows.length === 0) {
       //console.log(`Backend Debug: User '${username}' NOT found in database.`);
@@ -44,6 +44,7 @@ router.post('/login', async (req, res) => {
         id: user.id,
         username: user.username,
         scId: user.scId,
+        role: user.role
       }
     });
 

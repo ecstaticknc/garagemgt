@@ -3,26 +3,30 @@ import { useNavigation } from 'expo-router';
 import { Ionicons, MaterialIcons, FontAwesome, MaterialCommunityIcons, FontAwesome5 } from '@expo/vector-icons';
 import { TouchableOpacity, StyleSheet, Animated, View } from 'react-native';
 import { useRef, useEffect } from 'react';
+import { useAuth } from '../../../context/AuthContext'; // Import useAuth to get user role
 
 export default function TabLayout() {
   const navigation = useNavigation();
   const scaleAnim = useRef(new Animated.Value(1)).current;
+  const { loggedInUser } = useAuth(); // Get the loggedInUser from AuthContext
+
+  // --- ADD THIS CONSOLE LOG ---
+  useEffect(() => {
+    console.log('TabLayout - loggedInUser:', loggedInUser);
+    console.log('TabLayout - loggedInUser.role:', loggedInUser?.role);
+    console.log('TabLayout - showServiceCentersTab:', loggedInUser && loggedInUser.role === 'admin');
+  }, [loggedInUser]);
+  // --- END CONSOLE LOG ---
+
+  // Determine if the 'Service Centers' tab should be shown
+  const showServiceCentersTab = loggedInUser && loggedInUser.role === 'admin';
 
   const drawerButton = () => (
     <TouchableOpacity
       onPress={() => {
-        // Add animation when drawer button is pressed
         Animated.sequence([
-          Animated.timing(scaleAnim, {
-            toValue: 0.8,
-            duration: 100,
-            useNativeDriver: true,
-          }),
-          Animated.timing(scaleAnim, {
-            toValue: 1,
-            duration: 100,
-            useNativeDriver: true,
-          }),
+          Animated.timing(scaleAnim, { toValue: 0.8, duration: 100, useNativeDriver: true }),
+          Animated.timing(scaleAnim, { toValue: 1, duration: 100, useNativeDriver: true }),
         ]).start(() => navigation.openDrawer());
       }}
       style={{ marginLeft: 15 }}
@@ -55,29 +59,34 @@ export default function TabLayout() {
           ),
         }}
       />
-
+{!showServiceCentersTab && (
       <Tabs.Screen
         name="customers"
         options={{
-          title: 'Customers', // Changed from ग्राहक to English
+          title: 'Customers',
           tabBarIcon: ({ color, size }) => (
             <FontAwesome name="users" size={size} color={color} />
           ),
           headerShown: true,
         }}
       />
+)}
 
-      <Tabs.Screen
-        name="servicecenters"
-        options={{
-          title: 'Service Centers', // Changed from सेवा केन्द्र to English
-          tabBarIcon: ({ color, size }) => (
-            <MaterialCommunityIcons name="garage" size={size} color={color} />
-          ),
-          headerShown: true,
-        }}
-      />
+      {/* Conditionally render 'servicecenters' tab based on user role */}
+      {showServiceCentersTab && (
+        <Tabs.Screen
+          name="servicecenters"
+          options={{
+            title: 'Service Centers',
+            tabBarIcon: ({ color, size }) => (
+              <MaterialCommunityIcons name="garage" size={size} color={color} />
+            ),
+            headerShown: true,
+          }}
+        />
+      )}
 
+{!showServiceCentersTab && (
       <Tabs.Screen
         name="servicehistory"
         options={{
@@ -88,6 +97,7 @@ export default function TabLayout() {
           headerShown: true,
         }}
       />
+)}
     </Tabs>
   );
 }
