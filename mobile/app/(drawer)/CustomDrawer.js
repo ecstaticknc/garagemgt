@@ -82,8 +82,7 @@ export default function CustomDrawer(props) {
           text: "Yes",
           onPress: () => {
             logout();
-           // router.replace('/index');
-           setTimeout(() => router.replace('/'), 200);
+            router.replace('/');
           }
         }
       ],

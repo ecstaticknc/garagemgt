@@ -7,7 +7,6 @@ import {
   Platform,
   ScrollView,
   Dimensions,
-  Alert, // Make sure Alert is imported
 } from 'react-native';
 import {
   TextInput,
@@ -32,6 +31,13 @@ const LoginScreen = () => {
 
   const handleLogin = async () => {
     console.log("Hi");
+    // --- TEMPORARY LOGIN BYPASS START ---
+   // console.log('Bypassing login for development purposes. REMOVE THIS IN PRODUCTION!');
+   // router.push('/(drawer)/(tabs)/Home');
+   // return; // Exit the function after navigating
+    // --- TEMPORARY LOGIN BYPASS END ---
+
+   // Original login logic (uncomment to re-enable authentication)
     if (!username || !password) {
       Alert.alert('Login Error', 'Please enter both username and password.');
       return;
@@ -39,12 +45,13 @@ const LoginScreen = () => {
 
     const success = await login(username, password);
     if (success) {
-      console.log('Login successful, navigating to root');
-      // Use replace to clear navigation history and go to the root.
-      // _layout.js will then handle routing to the authenticated stack.
-     router.replace('/(drawer)/(tabs)/Home');
+      console.log('Login successful, navigating to Home');
+      router.push('/(drawer)/(tabs)/Home');
+      // Login successful, AuthContext will handle navigation to HomeScreen
+      // No explicit navigation.navigate('Home') needed here because App.js renders based on userScId
     } else {
-      Alert.alert('Login Failed', error || 'Invalid credentials');
+      //Error handled by AuthContext and displayed here
+      Alert.alert('Login Failed', error || 'Invalid credentials'); // Error is already shown below
     }
   };
 
@@ -57,6 +64,7 @@ const LoginScreen = () => {
         contentContainerStyle={styles.scrollContainer}
         keyboardShouldPersistTaps="handled"
       >
+        {/* Top-right dark mode toggle */}
         <View style={styles.topBar}>
           <IconButton
             icon={isDarkMode ? 'white-balance-sunny' : 'weather-night'}
@@ -66,6 +74,7 @@ const LoginScreen = () => {
           />
         </View>
 
+        {/* Main content block */}
         <View style={styles.container}>
           <Image
             source={require('../assets/login.png')}

@@ -70,7 +70,8 @@ const serviceCenterController = {
       try {
         console.log("In user creation step.");
         // 2. Create a default user for this service center with the plain password
-        const insertUserQuery = `INSERT INTO users (username, password, scId, firstLoginDone) VALUES (?, ?, ?, 0);`;
+        const insertUserQuery = `INSERT INTO users (username, password, scId, firstLoginDone) VALUES (?, ?, ?, 0);
+        `;
         const [userResult] = await connection.execute(insertUserQuery, [proprietorMobile, DEFAULT_USER_PASSWORD, newServiceCenterId]); // Use plain password
         console.log("User created result:", userResult);
 
