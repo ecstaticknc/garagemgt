@@ -22,7 +22,7 @@ export default function Home() {
           setLoadingInfo(true);
           setErrorInfo(null);
           const response = await API._get(`/servicecenters/${userScId}`);
-          console.log("Service Center Data:", response.data.data); 
+          //console.log("Service Center Data:", response.data.data); 
           setServiceCenterInfo(response.data.data);
 
         } catch (error) {

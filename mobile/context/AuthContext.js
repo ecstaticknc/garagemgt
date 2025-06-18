@@ -32,7 +32,7 @@ export const AuthProvider = ({ children }) => {
     try {
       const response = await API._post('/login', { username, password });
       const userData = response?.data?.data;
-      console.log("response in login", response)
+     // console.log("response in login", response)
 
       if (userData && userData.scId) {
         await AsyncStorage.setItem('userScId', String(userData.scId)); 
@@ -53,6 +53,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   const logout = async () => {
+    console.log("logiut")
     try {
       await AsyncStorage.removeItem('userScId'); 
       setUserScId(null);

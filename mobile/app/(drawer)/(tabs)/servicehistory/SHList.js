@@ -26,7 +26,7 @@ const ServiceHistoryListScreen = () => {
       // You might want to filter by customerId if provided
       const url = customerId ? `/servicehistory?customerId=${customerId}` : '/servicehistory';
       const response = await API._get(url);
-      console.log("fiservicehistoryrst response", response.data.data);
+      //console.log("fiservicehistoryrst response", response.data.data);
       setServiceHistory(response.data.data);
     } catch (err) {
       console.error('Error fetching service history:', err);
