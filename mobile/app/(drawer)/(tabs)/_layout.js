@@ -98,6 +98,19 @@ export default function TabLayout() {
         }}
       />
 )}
+
+{!showServiceCentersTab && (
+      <Tabs.Screen
+        name="Reminder"
+        options={{
+          title: 'Service Reminder',
+          tabBarIcon: ({ color, size }) => (
+            <FontAwesome5 name="reminder" size={size} color={color} />
+          ),
+          headerShown: true,
+        }}
+      />
+)}
     </Tabs>
   );
 }
