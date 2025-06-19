@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, StyleSheet, Alert, ScrollView } from 'react-native';
 import { Appbar, TextInput, Button, ActivityIndicator, Text } from 'react-native-paper';
+import { useAuth } from '../../../../context/AuthContext';
 import API from '../../../config/axiosInstance';
 import { useLocalSearchParams, useNavigation } from 'expo-router'; 
 
@@ -10,12 +11,13 @@ const CustomerFormScreen = () => { // It must be a function component
   const localSearchParams = useLocalSearchParams(); // Get local search parameters
   const existingCustomer = localSearchParams?.customer ? JSON.parse(localSearchParams.customer) : null;
   //const existingCustomer = route.params?.customer;
+   const { userScId } = useAuth();
 
   const [customerName, setCustomerName] = useState(existingCustomer?.customerName || '');
   const [mobile, setMobile] = useState(existingCustomer?.mobile || '');
   const [vehicles, setVehicles] = useState(existingCustomer?.vehicles || '');
   const [regDate, setRegDate] = useState(existingCustomer?.regDate ? existingCustomer.regDate.split('T')[0] : '');
-  const [scId, setScId] = useState(existingCustomer?.scId ? String(existingCustomer.scId) : '');
+  const [scId, setScId] = useState(existingCustomer?.scId ? String(existingCustomer.scId) : userScId);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
