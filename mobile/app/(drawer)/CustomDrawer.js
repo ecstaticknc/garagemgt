@@ -166,10 +166,10 @@ export default function CustomDrawer(props) {
           
           {loggedInUser ? (
             <>
-              <Text style={styles.userName}>Hello, {loggedInUser.username}!</Text>
+              <Text style={styles.userName}>Hello, {serviceCenterInfo.proprietorName}!</Text>
               <View style={[
                 styles.roleBadge,
-                { backgroundColor: loggedInUser.role === 'admin' ? COLORS.accent : 'rgba(255,255,255,0.3)' }
+                { backgroundColor: loggedInUser.role === 'admin' ? COLORS.accent : 'rgba(26, 149, 250, 0.3)' }
               ]}>
                 <Text style={styles.roleText}>{loggedInUser.role}</Text>
               </View>
