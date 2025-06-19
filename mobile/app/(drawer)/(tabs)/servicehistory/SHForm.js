@@ -192,7 +192,7 @@ const ServiceHistoryFormScreen = () => {
         <TouchableOpacity onPress={() => setShowCustomerPicker(true)} style={styles.input}>
           <TextInput
             label="Select Customer"
-            value={selectedCustomer ? `${selectedCustomer.customerName} (${selectedCustomer.mobile})` : ''}
+            value={selectedCustomer ? `${selectedCustomer.customerName} ` : ''}
             mode="outlined"
             editable={false} // Make it read-only, opens picker on press
             right={<TextInput.Icon icon="chevron-down" />}
