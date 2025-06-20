@@ -1,32 +1,41 @@
 import { Tabs } from 'expo-router/tabs';
 import { useNavigation } from 'expo-router';
-import { Ionicons, MaterialIcons, FontAwesome, MaterialCommunityIcons, FontAwesome5 } from '@expo/vector-icons';
-import { TouchableOpacity, StyleSheet, Animated, View } from 'react-native';
+import {
+  Ionicons,
+  MaterialIcons,
+  FontAwesome,
+  MaterialCommunityIcons,
+  FontAwesome5,
+} from '@expo/vector-icons';
+import {
+  TouchableOpacity,
+  StyleSheet,
+  Animated,
+} from 'react-native';
 import { useRef, useEffect } from 'react';
-import { useAuth } from '../../../context/AuthContext'; // Import useAuth to get user role
+import { useAuth } from '../../../context/AuthContext';
 
 export default function TabLayout() {
   const navigation = useNavigation();
   const scaleAnim = useRef(new Animated.Value(1)).current;
-  const { loggedInUser } = useAuth(); // Get the loggedInUser from AuthContext
+  const { loggedInUser } = useAuth();
 
-  // --- ADD THIS CONSOLE LOG ---
-  useEffect(() => {
-    console.log('TabLayout - loggedInUser:', loggedInUser);
-    console.log('TabLayout - loggedInUser.role:', loggedInUser?.role);
-    console.log('TabLayout - showServiceCentersTab:', loggedInUser && loggedInUser.role === 'admin');
-  }, [loggedInUser]);
-  // --- END CONSOLE LOG ---
-
-  // Determine if the 'Service Centers' tab should be shown
   const showServiceCentersTab = loggedInUser && loggedInUser.role === 'admin';
 
   const drawerButton = () => (
     <TouchableOpacity
       onPress={() => {
         Animated.sequence([
-          Animated.timing(scaleAnim, { toValue: 0.8, duration: 100, useNativeDriver: true }),
-          Animated.timing(scaleAnim, { toValue: 1, duration: 100, useNativeDriver: true }),
+          Animated.timing(scaleAnim, {
+            toValue: 0.8,
+            duration: 100,
+            useNativeDriver: true,
+          }),
+          Animated.timing(scaleAnim, {
+            toValue: 1,
+            duration: 100,
+            useNativeDriver: true,
+          }),
         ]).start(() => navigation.openDrawer());
       }}
       style={{ marginLeft: 15 }}
@@ -59,45 +68,55 @@ export default function TabLayout() {
           ),
         }}
       />
-{!showServiceCentersTab && (
-      <Tabs.Screen
-        name="customers"
-        options={{
-          title: 'Customers',
-          tabBarIcon: ({ color, size }) => (
-            <FontAwesome name="users" size={size} color={color} />
-          ),
-          headerShown: true,
-        }}
-      />
-)}
 
-      {/* Conditionally render 'servicecenters' tab based on user role */}
-      {showServiceCentersTab && (
+      {!showServiceCentersTab && (
         <Tabs.Screen
-          name="servicecenters"
+          name="customers"
           options={{
-            title: 'Service Centers',
+            title: 'Customers',
             tabBarIcon: ({ color, size }) => (
-              <MaterialCommunityIcons name="garage" size={size} color={color} />
+              <FontAwesome name="users" size={size} color={color} />
             ),
-            headerShown: true,
           }}
         />
       )}
 
-{!showServiceCentersTab && (
+      {!showServiceCentersTab && (
+        <Tabs.Screen
+          name="servicehistory"
+          options={{
+            title: 'Service History',
+            tabBarIcon: ({ color, size }) => (
+              <FontAwesome5 name="history" size={size} color={color} />
+            ),
+          }}
+        />
+      )}
+
+      {!showServiceCentersTab && (
+        <Tabs.Screen
+          name="Reminder"
+          options={{
+            title: 'Reminder',
+            tabBarIcon: ({ color, size }) => (
+              <FontAwesome5 name="bell" size={size} color={color} />
+            ),
+          }}
+        />
+      )}
+
+      {/* Service Centers tab - conditionally shown in tab bar */}
       <Tabs.Screen
-        name="servicehistory"
+        name="servicecenters"
         options={{
-          title: 'Service History',
+          title: 'Service Centers',
           tabBarIcon: ({ color, size }) => (
-            <FontAwesome5 name="history" size={size} color={color} />
+            <MaterialCommunityIcons name="garage" size={size} color={color} />
           ),
-          headerShown: true,
+          // Hide from tab bar if user is not admin
+          tabBarButton: () => showServiceCentersTab ? undefined : null,
         }}
       />
-)}
     </Tabs>
   );
 }
@@ -130,11 +149,5 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: '600',
     color: '#333',
-  },
-  drawerButton: {
-    marginLeft: 15,
-    padding: 8,
-    borderRadius: 20,
-    backgroundColor: 'rgba(255,107,53,0.1)',
   },
 });
