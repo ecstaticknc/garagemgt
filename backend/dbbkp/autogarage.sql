@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jun 19, 2025 at 03:25 PM
+-- Generation Time: Jun 20, 2025 at 01:00 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.0.30
 
@@ -47,7 +47,7 @@ INSERT INTO `customers` (`id`, `customerName`, `mobile`, `vehicles`, `regDate`, 
 (10, 'dasds', '8989898989', 'MH-13-SD-4', '2024-10-20', 3),
 (11, 'jitesh', '8989898989', 'MH-13-SD-4', '2024-10-20', 2),
 (12, 'NEW', '8989898989', 'MH-13-SD-4', '2024-10-20', 3),
-(13, 'aj11', '9898989898', 'MH-34-SD-3', '2024-10-22', 1),
+(13, 'aj11', '919766474227', 'MH-34-SD-3', '2024-10-22', 1),
 (14, 'ashish wangi', '9876543210', 'MH-12-DF-5423', '2024-10-21', 2),
 (15, 'jitesh123', '8989898989', 'MH-13-SD-4578', '2024-10-23', 1),
 (16, 'savan', '5665787787', 'MH-12-SD-4585', '2024-02-21', 1),
@@ -62,7 +62,8 @@ INSERT INTO `customers` (`id`, `customerName`, `mobile`, `vehicles`, `regDate`, 
 (43, 'Saheb', '123456789', 'Mh-13-ab-7867, Mh-08-gf-7890', '2022-01-08', 2),
 (62, 'Saheb23', '21546312', 'HR-10-ab-7282, Mh-12-sg-6542', '2025-09-06', 2),
 (63, 'Kriti sanon', '65431287964', 'Mh56ag7890', '2021-05-20', 2),
-(64, 'Raghini sawant', '9851456321', 'Mh-12-ad-1234, Mh-12-fg-1234', '2025-06-17', 1);
+(64, 'Raghini sawant', '9851456321', 'Mh-12-ad-1234, Mh-12-fg-1234', '2025-06-17', 1),
+(66, 'Somesh computer', '098765432', 'Mh13aa0011', '2025-01-06', 2);
 
 -- --------------------------------------------------------
 
@@ -118,7 +119,8 @@ INSERT INTO `servicehistory` (`id`, `selectedBike`, `selectedServices`, `service
 (13, 'MH13AB4547', 'oilChange, fullService, mediumService', '2024-11-18', 'BUPER CHANGE', 4),
 (14, 'MH13AB4547', 'miscellaneous', '2024-11-19', 'BIKE STAND', 4),
 (15, 'MH13AB4547', 'fullService', '2025-06-17', 'Overalling\nParts changed', 4),
-(16, 'MH-13-SD-4', 'miscellaneous', '2025-06-18', 'Change parts', 11);
+(16, 'MH-13-SD-4', 'miscellaneous', '2025-06-18', 'Change parts', 11),
+(17, 'Mh13aa0011', 'mediumService', '2025-06-19', 'Test bike service', 66);
 
 -- --------------------------------------------------------
 
@@ -186,7 +188,7 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT for table `customers`
 --
 ALTER TABLE `customers`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=65;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=67;
 
 --
 -- AUTO_INCREMENT for table `servicecenters`
@@ -198,7 +200,7 @@ ALTER TABLE `servicecenters`
 -- AUTO_INCREMENT for table `servicehistory`
 --
 ALTER TABLE `servicehistory`
-  MODIFY `id` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
+  MODIFY `id` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
 
 --
 -- AUTO_INCREMENT for table `users`

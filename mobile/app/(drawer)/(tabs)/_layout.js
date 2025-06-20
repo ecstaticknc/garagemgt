@@ -81,32 +81,31 @@ export default function TabLayout() {
         />
       )}
 
-      {!showServiceCentersTab && (
-        <Tabs.Screen
-          name="servicehistory"
-          options={{
-            title: 'Service History',
-            tabBarIcon: ({ color, size }) => (
-              <FontAwesome5 name="history" size={size} color={color} />
-            ),
-          }}
-        />
-      )}
-
-      
-
-      {/* Service Centers tab - conditionally shown in tab bar */}
+{!showServiceCentersTab && (
       <Tabs.Screen
-        name="servicecenters"
+        name="servicehistory"
         options={{
-          title: 'Service Centers',
+          title: 'Service History',
           tabBarIcon: ({ color, size }) => (
-            <MaterialCommunityIcons name="garage" size={size} color={color} />
+            <FontAwesome5 name="history" size={size} color={color} />
           ),
-          // Hide from tab bar if user is not admin
-          tabBarButton: () => showServiceCentersTab ? undefined : null,
+          headerShown: true,
         }}
       />
+)}
+
+{!showServiceCentersTab && (
+      <Tabs.Screen
+        name="Reminder"
+        options={{
+          title: 'Service Reminder',
+          tabBarIcon: ({ color, size }) => (
+            <FontAwesome5 name="reminder" size={size} color={color} />
+          ),
+          headerShown: true,
+        }}
+      />
+)}
     </Tabs>
   );
 }
