@@ -182,15 +182,15 @@ const styles = StyleSheet.create({
   },
   welcomeText: {
     fontSize: 18,
-    color: 'rgba(255,255,255,0.9)',
+    color: 'rgba(255, 255, 255, 0.42)',
     fontWeight: '500',
-    marginBottom: 4,
+    marginBottom: 8,
   },
   serviceCenterName: {
-    fontSize: 22,
+    fontSize: 24,
     fontWeight: 'bold',
-    color: '#fff',
-    lineHeight: 28,
+    color: '#FF7F50',
+    lineHeight: 30,
   },
   iconContainer: {
     marginLeft: 16,
