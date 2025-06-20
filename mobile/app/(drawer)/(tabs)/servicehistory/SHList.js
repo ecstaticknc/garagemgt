@@ -4,48 +4,51 @@ import { View, FlatList, StyleSheet, Alert, RefreshControl } from 'react-native'
 import { Appbar, List, FAB, ActivityIndicator, Text, Button } from 'react-native-paper';
 import { useFocusEffect } from '@react-navigation/native';
 import API from '../../../config/axiosInstance';
-import { router, useLocalSearchParams, useNavigation } from 'expo-router'; 
-
-
+import { router, useLocalSearchParams, useNavigation } from 'expo-router';
+import { useAuth } from '../../../../context/AuthContext';
 
 const ServiceHistoryListScreen = () => {
+  const { user } = useAuth();
+    const scId = user?.scId; // Get scId from auth context
+    
   const navigation = useNavigation(); // Get navigation object from hook
-    const localSearchParams = useLocalSearchParams(); // Get local search parameters
-    const customerId = localSearchParams?.customerId ? JSON.parse(localSearchParams.customerId) : null;
+  const localSearchParams = useLocalSearchParams(); // Get local search parameters
 
- // const { customerId } = route.params || {}; // Get customerId if navigated from CustomerDetailScreen
-  const [serviceHistory, setServiceHistory] = useState([]);
-  const [loading, setLoading] = useState(true);
+  // Parse customerId from local search params
+  const customerId = localSearchParams?.customerId ? JSON.parse(localSearchParams.customerId) : null;
+
+  // You need a way to get the scId (Service Center ID) of the logged-in user.
+  // For demonstration, I'm hardcoding it. In a real app, this would come from
+  // authentication context, a global state, or local storage after login.
+  // For testing, make sure this matches an scId in your 'servicecenters' table
+  // and associated with the customer you're testing.
+  //const scId = 1; // ** IMPORTANT: Replace with actual scId from your application's state/context **
+
+  const [customersWithHistory, setCustomersWithHistory] = useState([]);
+    const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState(null);
 
-  const fetchServiceHistory = async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      // You might want to filter by customerId if provided
-      const url = customerId ? `/servicehistory?customerId=${customerId}` : '/servicehistory';
-      const response = await API._get(url);
-      console.log("fiservicehistoryrst response", response.data.data);
-      setServiceHistory(response.data.data);
-    } catch (err) {
-      console.error('Error fetching service history:', err);
-      setError('Failed to load service history. Please try again.');
-      Alert.alert('Error', 'Failed to load service history. Check your backend connection.');
-    } finally {
-      setLoading(false);
-      setRefreshing(false);
-    }
-  };
+ 
 
-  useFocusEffect(
-    useCallback(() => {
-      fetchServiceHistory();
-      return () => {
-        // Cleanup if necessary
-      };
-    }, [customerId]) // Re-run effect if customerId changes
-  );
+  const fetchData = async () => {
+        try {
+            const response = await API._get(`/servicehistory/byServiceCenter?scId=${scId}`);
+            setCustomersWithHistory(response.data.data);
+        } catch (error) {
+            console.error('Error:', error);
+            Alert.alert('Error', 'Failed to fetch service history');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useFocusEffect(
+        useCallback(() => {
+            if (scId) fetchData();
+        }, [scId])
+    );
+
 
   const handleDeleteServiceEntry = async (id) => {
     Alert.alert(
@@ -57,6 +60,8 @@ const ServiceHistoryListScreen = () => {
           text: 'Delete',
           onPress: async () => {
             try {
+              // This delete still uses the generic delete endpoint,
+              // assuming your backend for /servicehistory/:id still exists and works.
               await API._delete(`/servicehistory/${id}`);
               Alert.alert('Success', 'Service entry deleted successfully!');
               fetchServiceHistory(); // Refresh the list
@@ -72,66 +77,36 @@ const ServiceHistoryListScreen = () => {
   };
 
   const renderItem = ({ item }) => (
-    <List.Item
-      // Changed to use selectedBike from your backend data
-      title={`Vehicle: ${item.selectedBike}`}
-      // Changed to use selectedServices from your backend data
-      description={`Date: ${item.serviceDate ? item.serviceDate.split('T')[0] : 'N/A'} | Services: ${item.selectedServices}`}
-      left={props => <List.Icon {...props} icon="calendar-check" />}
-      right={props => (
-        <View style={styles.actions}>        
-             <Button icon="pencil" onPress={() => router.push({
-                pathname: 'servicehistory/SHForm',
-                params: { serviceHistory: JSON.stringify(item), customerId: customerId } // Pass the service
-             })} />
-          <Button icon="delete" onPress={() => handleDeleteServiceEntry(item.id)} />
-        </View>
-      )}
-      style={styles.listItem}
-    />
-  );
-
-  if (loading) {
-    return (
-      <View style={styles.center}>
-        <ActivityIndicator animating={true} size="large" />
-        <Text>Loading Service History...</Text>
-      </View>
-    );
-  }
-
-  if (error) {
-    return (
-      <View style={styles.center}>
-        <Text style={styles.errorText}>{error}</Text>
-        <Button mode="contained" onPress={fetchServiceHistory}>Retry</Button>
-      </View>
-    );
-  }
-
-  return (
     <View style={styles.container}>
-      <Appbar.Header>
-        {customerId && <Appbar.BackAction onPress={() => navigation.goBack()} />}
-        <Appbar.Content title={customerId ? "Customer Service History" : "Service History"} />
-        <Appbar.Action icon="magnify" onPress={() => { /* Search functionality */ }} />
-      </Appbar.Header>
-      <FlatList
-        data={serviceHistory}
-        keyExtractor={(item) => item.id.toString()}
-        renderItem={renderItem}
-        contentContainerStyle={styles.listContent}
-        refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={fetchServiceHistory} />
-        }
-        ListEmptyComponent={<Text style={styles.emptyList}>No service history found.</Text>}
-      />
-      <FAB
-        style={styles.fab}
-        icon="plus"
-        onPress={() => navigation.navigate('SHForm', { customerId: customerId })} // Pass customerId if applicable
-      />
-    </View>
+            {loading ? (
+                <ActivityIndicator size="large" />
+            ) : (
+                <FlatList
+                    data={customersWithHistory}
+                    keyExtractor={(item) => item.customerId.toString()}
+                    renderItem={({ item }) => (
+                        <View style={styles.customerCard}>
+                            <Text style={styles.customerName}>{item.customerName}</Text>
+                            <Text>Mobile: {item.mobile}</Text>
+                            <Text>Vehicles: {item.vehicles}</Text>
+                            
+                            <FlatList
+                                data={item.serviceHistory}
+                                keyExtractor={(sh) => sh.id.toString()}
+                                renderItem={({ item: sh }) => (
+                                    <View style={styles.serviceCard}>
+                                        <Text>Bike: {sh.selectedBike}</Text>
+                                        <Text>Services: {sh.selectedServices}</Text>
+                                        <Text>Date: {sh.serviceDate}</Text>
+                                        <Text>Remarks: {sh.serviceRemark}</Text>
+                                    </View>
+                                )}
+                            />
+                        </View>
+                    )}
+                />
+            )}
+        </View>
   );
 };
 

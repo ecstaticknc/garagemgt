@@ -4,6 +4,7 @@ const router = express.Router();
 
 const GenericModel = require('../models/GenericModel'); //
 const createGenericController = require('../controllers/genericController'); //
+const serviceHistoryController = require('../controllers/serviceHistoryController');
 
 // --- IMPORTANT CHANGE HERE ---
 // REMOVE THIS LINE:
@@ -17,8 +18,8 @@ const serviceCenterController = require('../controllers/serviceCenterController'
 const customerModel = new GenericModel('customers'); //
 const customerController = createGenericController(customerModel, ['customerName', 'mobile']);
 
-const serviceHistoryModel = new GenericModel('servicehistory'); //
-const serviceHistoryController = createGenericController(serviceHistoryModel, ['selectedBike', 'selectedServices', 'serviceDate', 'customerId']);
+//const serviceHistoryModel = new GenericModel('servicehistory'); //
+//const serviceHistoryController = createGenericController(serviceHistoryModel, ['selectedBike', 'selectedServices', 'serviceDate', 'customerId']);
 
 
 // --- Route Definitions ---
@@ -54,6 +55,9 @@ router.use('/servicehistory', (() => {
   const serviceHistoryRouter = express.Router();
   serviceHistoryRouter.get('/', serviceHistoryController.getAll);
   serviceHistoryRouter.get('/:id', serviceHistoryController.getById);
+  console.log("Registering GET /servicehistory/byServiceCenter");
+  serviceHistoryRouter.get('/byServiceCenter', serviceHistoryController.getServiceHistoryByScId);
+  //serviceHistoryRouter.get('/byCustomerAndSC', serviceHistoryController.getServiceHistoryByCustomerAndSC);
   serviceHistoryRouter.post('/', serviceHistoryController.create);
   serviceHistoryRouter.put('/:id', serviceHistoryController.update);
   serviceHistoryRouter.delete('/:id', serviceHistoryRouter.delete);
