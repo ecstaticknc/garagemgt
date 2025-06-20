@@ -93,17 +93,7 @@ export default function TabLayout() {
         />
       )}
 
-      {!showServiceCentersTab && (
-        <Tabs.Screen
-          name="Reminder"
-          options={{
-            title: 'Reminder',
-            tabBarIcon: ({ color, size }) => (
-              <FontAwesome5 name="bell" size={size} color={color} />
-            ),
-          }}
-        />
-      )}
+      
 
       {/* Service Centers tab - conditionally shown in tab bar */}
       <Tabs.Screen
