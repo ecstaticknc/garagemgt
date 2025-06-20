@@ -138,7 +138,7 @@ export default function CustomDrawer(props) {
   return (
     <View style={[styles.container, { backgroundColor: COLORS.background }]}>
       <LinearGradient
-        colors={['rgba(107, 66, 246, 0.03)', 'rgba(107, 66, 246, 0.01)']}
+        colors={['rgba(66, 114, 246, 0.03)', 'rgba(107, 66, 246, 0.01)']}
         style={StyleSheet.absoluteFill}
       />
       <BlurView intensity={15} tint="light" style={StyleSheet.absoluteFill} />
@@ -167,9 +167,10 @@ export default function CustomDrawer(props) {
           {loggedInUser ? (
             <>
               <Text style={styles.userName}>Hello, {loggedInUser.username}!</Text>
+              <Text style={styles.proprietorName}>{loggedInUser.proprietorName}</Text>
               <View style={[
                 styles.roleBadge,
-                { backgroundColor: loggedInUser.role === 'admin' ? COLORS.accent : 'rgba(255,255,255,0.3)' }
+                { backgroundColor: loggedInUser.role === 'admin' ? COLORS.accent : 'rgba(37, 152, 247, 0.3)' }
               ]}>
                 <Text style={styles.roleText}>{loggedInUser.role}</Text>
               </View>
@@ -296,6 +297,11 @@ const styles = StyleSheet.create({
     fontSize: 19,
     color: 'rgba(255, 255, 255, 0.95)',
     marginBottom: 6,
+  },
+  proprietorName: {
+    fontSize: 15,
+    color: 'rgba(255, 255, 255, 0.85)',
+    marginBottom: 10,
   },
   roleBadge: {
     paddingHorizontal: 14,

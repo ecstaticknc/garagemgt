@@ -1,5 +1,5 @@
-import React, { useEffect, useState ,useRef, } from 'react';
-import { View, StyleSheet, ActivityIndicator, ScrollView,Animated,Easing} from 'react-native';
+import React, { useEffect, useState, useRef } from 'react';
+import { View, StyleSheet, ActivityIndicator, ScrollView, Animated, Easing } from 'react-native';
 import { List, Divider, Text, Card, useTheme } from 'react-native-paper';
 import { useAuth } from '../../../context/AuthContext';
 import API from '../../config/axiosInstance';
@@ -19,7 +19,6 @@ export default function Home() {
   const [errorInfo, setErrorInfo] = useState(null);
   const spinAnim = useRef(new Animated.Value(0)).current;
 
-
   useEffect(() => {
     const fetchServiceCenterData = async () => {
       if (userScId) {
@@ -27,11 +26,10 @@ export default function Home() {
           setLoadingInfo(true);
           setErrorInfo(null);
           const response = await API._get(`/servicecenters/${userScId}`);
-          console.log("Service Center Data:", response.data.data); 
           setServiceCenterInfo(response.data.data);
         } catch (error) {
-          console.error("Failed to fetch service center data for dashboard:", error);
-          setErrorInfo("Failed to load service center details.");
+          console.error("Failed to fetch service center data:", error);
+          setErrorInfo("Failed to load service center details. Please try again.");
         } finally {
           setLoadingInfo(false);
         }
@@ -44,46 +42,55 @@ export default function Home() {
     fetchServiceCenterData();
   }, [userScId]);
 
-
   useEffect(() => {
-  Animated.loop(
-    Animated.timing(spinAnim, {
-      toValue: 1,
-      duration: 3000,
-      easing: Easing.linear,
-      useNativeDriver: true,
-    })
-  ).start();
-}, []);
+    Animated.loop(
+      Animated.timing(spinAnim, {
+        toValue: 1,
+        duration: 3000,
+        easing: Easing.linear,
+        useNativeDriver: true,
+      })
+    ).start();
+  }, []);
+
   const spin = spinAnim.interpolate({
-    inputRange: [0, 3],
-    outputRange: ['0deg', '360deg'],
+    inputRange: [0, 1],
+    outputRange: ['0deg', '360deg']
   });
 
   return (
-    <ScrollView style={[styles.container, { backgroundColor: colors.background }]}>
+    <ScrollView 
+      style={[styles.container, { backgroundColor: colors.background }]}
+      contentContainerStyle={styles.scrollContainer}
+    >
       {/* Header Gradient */}
       <LinearGradient
-        colors={[colors.primary, '#611cb']}
-        start={{ x: 2, y: 1 }}
-        end={{ x: 3, y: 5 }}
+        colors={[colors.primary, '#4a6da7']}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
         style={styles.header}
       >
-        
-        <View style={styles.headerTextContainer}>
-  <Text style={styles.welcomeText}>Welcome</Text>
-  <Text style={styles.headerTitle}>Service Center Dashboard</Text>
-</View>
-<Animated.View style={{ transform: [{ rotate: spin }] }}>
-  <Icon name="tools" size={40} color="#fff" style={styles.headerIcon} />
-</Animated.View>
+        <View style={styles.headerContent}>
+          <View style={styles.headerTextContainer}>
+            <Text style={styles.welcomeText}>Welcome</Text>
+            <Text style={styles.serviceCenterName}>
+              {serviceCenterInfo?.serviceCenterName || 'Service Center'}
+            </Text>
+          </View>
+          
+          <Animated.View style={[styles.iconContainer, { transform: [{ rotate: spin }] }]}>
+            <Icon name="tools" size={40} color="#fff" />
+          </Animated.View>
+        </View>
       </LinearGradient>
 
       <View style={styles.content}>
         {loadingInfo ? (
           <View style={styles.loadingContainer}>
             <ActivityIndicator size="large" color={colors.primary} />
-            <Text style={{ marginTop: 10, color: colors.text }}>Loading your information...</Text>
+            <Text style={[styles.loadingText, { color: colors.text }]}>
+              Loading service center information...
+            </Text>
           </View>
         ) : errorInfo ? (
           <Card style={[styles.errorCard, { backgroundColor: colors.errorContainer }]}>
@@ -95,16 +102,26 @@ export default function Home() {
         ) : serviceCenterInfo ? (
           <Card style={[styles.infoCard, { backgroundColor: colors.surface }]}>
             <LinearGradient
-              colors={['transparent', 'rgba(0, 0, 0, 0.06)']}
+              colors={['transparent', 'rgba(0, 0, 0, 0.05)']}
               style={styles.cardGradient}
             />
+            
             <Card.Title
-  title={serviceCenterInfo.proprietorName}
-  titleStyle={[styles.cardTitle, { color: colors.primary }]}
-  subtitle={serviceCenterInfo.serviceCenterName}
-  subtitleStyle={styles.cardSubtitle}
-  left={(props) => <List.Icon {...props} icon="account-tie" color={colors.primary} />}
-/>
+              title={serviceCenterInfo.proprietorName}
+              titleStyle={[styles.cardTitle, { color: colors.primary }]}
+              subtitle="Proprietor"
+              subtitleStyle={[styles.cardSubtitle, { color: colors.onSurface }]}
+              left={(props) => (
+                <List.Icon 
+                  {...props} 
+                  icon="account-tie" 
+                  color={colors.primary} 
+                />
+              )}
+            />
+            
+            <Divider style={styles.divider} />
+            
             <Card.Content style={styles.cardContent}>
               <View style={styles.infoRow}>
                 <Icon name="phone" size={20} color={colors.primary} style={styles.infoIcon} />
@@ -112,12 +129,14 @@ export default function Home() {
                   {serviceCenterInfo.proprietorMobile}
                 </Text>
               </View>
+              
               <View style={styles.infoRow}>
                 <Icon name="email" size={20} color={colors.primary} style={styles.infoIcon} />
                 <Text style={[styles.infoText, { color: colors.text }]}>
                   {serviceCenterInfo.proprietorEmail}
                 </Text>
               </View>
+              
               <View style={styles.infoRow}>
                 <Icon name="map-marker" size={20} color={colors.primary} style={styles.infoIcon} />
                 <Text style={[styles.infoText, { color: colors.text }]}>
@@ -127,10 +146,10 @@ export default function Home() {
             </Card.Content>
           </Card>
         ) : (
-          <View style={styles.noInfoContent}>
-            <Icon name="information" size={30} color={colors.primary} />
+          <View style={styles.noInfoContainer}>
+            <Icon name="information-outline" size={40} color={colors.primary} />
             <Text style={[styles.noInfoText, { color: colors.text }]}>
-              No service center data available.
+              No service center information available
             </Text>
           </View>
         )}
@@ -143,27 +162,43 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
+  scrollContainer: {
+    flexGrow: 1,
+  },
   header: {
-    padding: 30,
+    paddingHorizontal: 24,
     paddingTop: 50,
     paddingBottom: 30,
+    borderBottomLeftRadius: 24,
+    borderBottomRightRadius: 24,
+  },
+  headerContent: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    borderBottomLeftRadius: 20,
-    borderBottomRightRadius: 20,
   },
-  headerTitle: {
-    fontSize: 24,
+  headerTextContainer: {
+    flex: 1,
+  },
+  welcomeText: {
+    fontSize: 18,
+    color: 'rgba(255,255,255,0.9)',
+    fontWeight: '500',
+    marginBottom: 4,
+  },
+  serviceCenterName: {
+    fontSize: 22,
     fontWeight: 'bold',
     color: '#fff',
+    lineHeight: 28,
   },
-  headerIcon: {
-    marginRight: 10,
+  iconContainer: {
+    marginLeft: 16,
+    padding: 8,
   },
   content: {
     padding: 20,
-    paddingTop: 10,
+    paddingTop: 24,
   },
   loadingContainer: {
     flex: 1,
@@ -171,15 +206,18 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 40,
   },
+  loadingText: {
+    marginTop: 16,
+    fontSize: 16,
+  },
   infoCard: {
-    borderRadius: 15,
-    marginBottom: 20,
+    borderRadius: 16,
     overflow: 'hidden',
-    elevation: 3,
+    elevation: 2,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
-    shadowRadius: 6,
+    shadowRadius: 8,
   },
   cardGradient: {
     position: 'absolute',
@@ -189,68 +227,56 @@ const styles = StyleSheet.create({
     height: '100%',
   },
   cardTitle: {
-    fontSize: 22,
+    fontSize: 20,
     fontWeight: 'bold',
-    marginBottom: 5,
+    marginBottom: 2,
   },
   cardSubtitle: {
-    fontSize: 16,
+    fontSize: 14,
     opacity: 0.8,
   },
+  divider: {
+    marginHorizontal: 16,
+    backgroundColor: 'rgba(0,0,0,0.1)',
+  },
   cardContent: {
-    paddingTop: 10,
+    paddingVertical: 12,
   },
   infoRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginVertical: 8,
+    marginVertical: 10,
   },
   infoIcon: {
-    marginRight: 10,
+    marginRight: 12,
   },
   infoText: {
     fontSize: 15,
     flex: 1,
     flexWrap: 'wrap',
+    lineHeight: 20,
   },
   errorCard: {
     borderRadius: 12,
-    marginBottom: 20,
+    overflow: 'hidden',
   },
   errorContent: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 15,
+    padding: 16,
   },
   errorText: {
-    marginLeft: 10,
+    marginLeft: 12,
     fontSize: 15,
   },
-  noInfoContent: {
+  noInfoContainer: {
     alignItems: 'center',
-    padding: 20,
+    padding: 32,
   },
   noInfoText: {
-    marginTop: 10,
+    marginTop: 16,
     fontSize: 16,
     textAlign: 'center',
+    maxWidth: '80%',
   },
-  headerTextContainer: {
-  flex: 1,
-},
-
-welcomeText: {
-  fontSize: 24,
-  color: '#fff',
-  fontWeight: 'bold',
- 
-  marginBottom: 4,
-  textAlign: 'center',
-},
-
-headerTitle: {
-  fontSize: 20,
-  fontWeight: 'bold',
-  color: '#fff',
-},
 });
