@@ -167,7 +167,7 @@ export default function CustomDrawer(props) {
                   {loggedInUser?.proprietorName || serviceCenterInfo?.proprietorName}
                 </Text>
               )}
-              <View
+              {/* <View
                 style={[
                   styles.roleBadge,
                   {
@@ -176,7 +176,7 @@ export default function CustomDrawer(props) {
                   },
                 ]}>
                 <Text style={styles.roleText}>{loggedInUser.role}</Text>
-              </View>
+              </View> */}
             </>
           ) : 
           (
@@ -208,15 +208,7 @@ export default function CustomDrawer(props) {
             iconLib="Feather"
           />
 
-          {showAdminFeatures && (
-            <MenuItem
-              label="Reset Database"
-              iconName="database-remove"
-              routePath="/(drawer)/(tabs)/ResetDatabaseScreen"
-              iconLib="MaterialCommunityIcons"
-            />
-          )}
-        </View>
+          </View>
       </DrawerContentScrollView>
 
       <View style={styles.footer}>
@@ -307,7 +299,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   roleBadge: {
-    paddingHorizontal: 14,
+    paddingHorizontal: 20,
     paddingVertical: 6,
     borderRadius: 25,
     marginTop: 10,
