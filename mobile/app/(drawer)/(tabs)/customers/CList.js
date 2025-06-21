@@ -134,7 +134,9 @@ const CustomerListScreen = () => {
       <FAB
         style={styles.fab}
         icon="plus"
+        label="Add Customer"
         onPress={() => navigation.navigate('CForm')}
+        color="#fff"
       />
     </View>
   );
@@ -172,6 +174,9 @@ const styles = StyleSheet.create({
     right: 0,
     bottom: 0,
     backgroundColor: '#6200ee',
+    borderRadius: 30,
+    elevation: 6,
+    
   },
   emptyList: {
     textAlign: 'center',

@@ -18,10 +18,12 @@ import { useAuth } from '../../../context/AuthContext';
 export default function TabLayout() {
   const navigation = useNavigation();
   const scaleAnim = useRef(new Animated.Value(1)).current;
+  const pulseAnim = useRef(new Animated.Value(1)).current;
   const { loggedInUser } = useAuth();
 
   const showServiceCentersTab = loggedInUser && loggedInUser.role === 'admin';
 
+  // Drawer button animation
   const drawerButton = () => (
     <TouchableOpacity
       onPress={() => {
@@ -46,6 +48,32 @@ export default function TabLayout() {
     </TouchableOpacity>
   );
 
+  // Start pulse loop animation
+  useEffect(() => {
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(pulseAnim, {
+          toValue: 1.3,
+          duration: 700,
+          useNativeDriver: true,
+        }),
+        Animated.timing(pulseAnim, {
+          toValue: 1,
+          duration: 500,
+          useNativeDriver: true,
+        }),
+      ])
+    ).start();
+  }, [pulseAnim]);
+
+  // Helper: Conditionally animate only the focused tab icon
+  const getAnimatedIcon = (iconComponent, focused) => {
+    if (focused) {
+      return <Animated.View style={{ transform: [{ scale: pulseAnim }] }}>{iconComponent}</Animated.View>;
+    }
+    return iconComponent;
+  };
+
   return (
     <Tabs
       screenOptions={{
@@ -63,9 +91,8 @@ export default function TabLayout() {
         name="Home"
         options={{
           title: 'Home',
-          tabBarIcon: ({ color, size }) => (
-            <MaterialIcons name="home" size={size} color={color} />
-          ),
+          tabBarIcon: ({ color, size, focused }) =>
+            getAnimatedIcon(<MaterialIcons name="home" size={size} color={color} />, focused),
         }}
       />
 
@@ -74,9 +101,8 @@ export default function TabLayout() {
           name="customers"
           options={{
             title: 'Customers',
-            tabBarIcon: ({ color, size }) => (
-              <FontAwesome name="users" size={size} color={color} />
-            ),
+            tabBarIcon: ({ color, size, focused }) =>
+              getAnimatedIcon(<FontAwesome name="users" size={size} color={color} />, focused),
           }}
         />
       )}
@@ -85,10 +111,9 @@ export default function TabLayout() {
         <Tabs.Screen
           name="servicehistory"
           options={{
-            title: 'Service History',
-            tabBarIcon: ({ color, size }) => (
-              <FontAwesome5 name="history" size={size} color={color} />
-            ),
+            title: 'Service\nHistory',
+            tabBarIcon: ({ color, size, focused }) =>
+              getAnimatedIcon(<FontAwesome5 name="history" size={size} color={color} />, focused),
           }}
         />
       )}
@@ -98,23 +123,19 @@ export default function TabLayout() {
           name="Reminder"
           options={{
             title: 'Reminder',
-            tabBarIcon: ({ color, size }) => (
-              <FontAwesome5 name="bell" size={size} color={color} />
-            ),
+            tabBarIcon: ({ color, size, focused }) =>
+              getAnimatedIcon(<FontAwesome5 name="bell" size={size} color={color} />, focused),
           }}
         />
       )}
 
-      {/* Service Centers tab - conditionally shown in tab bar */}
       <Tabs.Screen
         name="servicecenters"
         options={{
-          title: 'Service Centers',
-          tabBarIcon: ({ color, size }) => (
-            <MaterialCommunityIcons name="garage" size={size} color={color} />
-          ),
-          // Hide from tab bar if user is not admin
-          tabBarButton: () => showServiceCentersTab ? undefined : null,
+          title: 'Service\nCenters',
+          tabBarIcon: ({ color, size, focused }) =>
+            getAnimatedIcon(<MaterialCommunityIcons name="garage" size={size} color={color} />, focused),
+          tabBarButton: () => (showServiceCentersTab ? undefined : null),
         }}
       />
     </Tabs>
@@ -136,6 +157,10 @@ const styles = StyleSheet.create({
   tabLabel: {
     fontSize: 12,
     fontWeight: '600',
+    textAlign: 'center',
+    lineHeight: 16,
+    flexWrap: 'wrap',
+    width: 70,
     marginBottom: 5,
   },
   header: {

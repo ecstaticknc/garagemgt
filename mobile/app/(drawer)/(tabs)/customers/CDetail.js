@@ -1,6 +1,15 @@
-import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, Alert, ScrollView, RefreshControl } from 'react-native';
-import { Appbar, Card, Title, Paragraph, ActivityIndicator, Text, Button, useTheme } from 'react-native-paper';
+import React, { useState, useEffect, useRef } from 'react';
+import {
+  View,
+  StyleSheet,
+  Alert,
+  ScrollView,
+  RefreshControl,
+  Animated,
+  TouchableOpacity,
+  Easing
+} from 'react-native';
+import { Appbar, Card, Title, ActivityIndicator, Text, Button, useTheme } from 'react-native-paper';
 import API from '../../../config/axiosInstance';
 import { useNavigation, useLocalSearchParams } from 'expo-router';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -11,16 +20,19 @@ const CustomerDetailScreen = () => {
   const { colors } = theme;
   const params = useLocalSearchParams();
   
-  // Extract ID with multiple possible param names
   const customerId = params?.id || params?.customerId;
-  
   const [customer, setCustomer] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [refreshing, setRefreshing] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  
+  // Animation refs
+  const shakeAnim = useRef(new Animated.Value(0)).current;
+  const scaleAnim = useRef(new Animated.Value(1)).current;
+  const opacityAnim = useRef(new Animated.Value(1)).current;
 
   const fetchCustomerDetails = async () => {
-    // Validate customer ID
     if (!customerId || isNaN(Number(customerId))) {
       setError('Invalid customer ID provided');
       setLoading(false);
@@ -61,12 +73,69 @@ const CustomerDetailScreen = () => {
     });
   };
 
-  const handleDelete = async () => {
+  const startDeleteAnimation = () => {
+    setIsDeleting(true);
+    
+    // Shake animation
+    Animated.sequence([
+      Animated.timing(shakeAnim, {
+        toValue: 5,
+        duration: 50,
+        easing: Easing.linear,
+        useNativeDriver: true
+      }),
+      Animated.timing(shakeAnim, {
+        toValue: -5,
+        duration: 50,
+        easing: Easing.linear,
+        useNativeDriver: true
+      }),
+      Animated.timing(shakeAnim, {
+        toValue: 5,
+        duration: 50,
+        easing: Easing.linear,
+        useNativeDriver: true
+      }),
+      Animated.timing(shakeAnim, {
+        toValue: 0,
+        duration: 50,
+        easing: Easing.linear,
+        useNativeDriver: true
+      })
+    ]).start(() => {
+      // Pulse animation after shaking
+      Animated.sequence([
+        Animated.timing(scaleAnim, {
+          toValue: 0.95,
+          duration: 100,
+          useNativeDriver: true
+        }),
+        Animated.timing(scaleAnim, {
+          toValue: 1.05,
+          duration: 100,
+          useNativeDriver: true
+        }),
+        Animated.timing(scaleAnim, {
+          toValue: 1,
+          duration: 100,
+          useNativeDriver: true
+        })
+      ]).start(() => {
+        handleDeleteConfirmation();
+      });
+    });
+  };
+
+  const handleDeleteConfirmation = () => {
     Alert.alert(
       'Delete Customer',
       'Are you sure you want to delete this customer?',
       [
-        { text: 'Cancel', style: 'cancel' },
+        { 
+          text: 'Cancel', 
+          style: 'cancel',
+          onPress: () => resetDeleteAnimation()
+        },
         { 
           text: 'Delete', 
           style: 'destructive',
@@ -77,6 +146,7 @@ const CustomerDetailScreen = () => {
               navigation.goBack();
             } catch (err) {
               Alert.alert('Error', err.response?.data?.message || 'Delete failed');
+              resetDeleteAnimation();
             }
           }
         }
@@ -84,11 +154,57 @@ const CustomerDetailScreen = () => {
     );
   };
 
+  const resetDeleteAnimation = () => {
+    Animated.parallel([
+      Animated.spring(scaleAnim, {
+        toValue: 1,
+        friction: 3,
+        useNativeDriver: true
+      }),
+      Animated.spring(shakeAnim, {
+        toValue: 0,
+        friction: 3,
+        useNativeDriver: true
+      })
+    ]).start(() => {
+      setIsDeleting(false);
+    });
+  };
+
   const handleServiceHistory = () => {
     navigation.navigate('ServiceHistoryList', { 
       customerId: customer.id,
       customerName: customer.customerName 
     });
+  };
+
+  const renderDeleteButton = () => {
+    return (
+      <Animated.View
+        style={[
+          styles.deleteButtonContainer,
+          { 
+            transform: [
+              { translateX: shakeAnim },
+              { scale: scaleAnim }
+            ],
+            borderColor: colors.error
+          }
+        ]}
+      >
+        <TouchableOpacity 
+          onPress={startDeleteAnimation}
+          disabled={isDeleting}
+          style={styles.deleteButton}
+          activeOpacity={0.7}
+        >
+          <Icon name="delete" size={24} color={colors.error} />
+          <Text style={[styles.deleteButtonText, { color: colors.error }]}>
+            Delete Customer
+          </Text>
+        </TouchableOpacity>
+      </Animated.View>
+    );
   };
 
   const renderContent = () => {
@@ -211,16 +327,7 @@ const CustomerDetailScreen = () => {
             Edit Customer
           </Button>
 
-          <Button
-            mode="outlined"
-            onPress={handleDelete}
-            style={[styles.button, { borderColor: colors.error }]}
-            textColor={colors.error}
-            icon="delete"
-            contentStyle={styles.buttonContent}
-          >
-            Delete Customer
-          </Button>
+          {renderDeleteButton()}
         </View>
       </ScrollView>
     );
@@ -309,6 +416,24 @@ const styles = StyleSheet.create({
   },
   buttonContent: {
     height: 48,
+  },
+  deleteButtonContainer: {
+    borderWidth: 1,
+    borderRadius: 8,
+    marginVertical: 8,
+    overflow: 'hidden',
+  },
+  deleteButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+  },
+  deleteButtonText: {
+    marginLeft: 8,
+    fontSize: 16,
+    fontWeight: 'bold',
   },
 });
 
