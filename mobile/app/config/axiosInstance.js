@@ -1,12 +1,15 @@
-import { View, Text, ActivityIndicator } from 'react-native'
+import { View, Text, ActivityIndicator } from 'react-native';
 import axios from 'axios';
 
 //const BASE_URL = 'http://192.168.43.95:3000/api/';
 // const BASE_URL = 'https://jsonplaceholder.typicode.com';
+<<<<<<< HEAD
  const BASE_URL = 'http://192.168.1.123:3000/api';
+=======
+//const BASE_URL = 'http://192.168.1.123:3000/api';
+>>>>>>> 016e337d729df3d997e7f799c6d5da58cee28375
 //const BASE_URL = 'https://lsbackend.laxmipanditservices.com/api';
-//const BASE_URL = 'http://ecogas.luknos.com/api';
-
+const BASE_URL = 'http://192.168.1.121:3000/api';
 
 const apiClient = axios.create({
   baseURL: BASE_URL,
@@ -18,7 +21,7 @@ const apiClient = axios.create({
 const apiClient1 = axios.create({
   baseURL: BASE_URL,
   headers: {
-     'Content-Type': 'multipart/form-data',
+    'Content-Type': 'multipart/form-data',
   },
 });
 

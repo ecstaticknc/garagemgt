@@ -9,13 +9,15 @@ import { useAuth } from '../../../../context/AuthContext';
 
 const ServiceHistoryListScreen = () => {
   const { user } = useAuth();
-    const scId = user?.scId; // Get scId from auth context
-    
+  const scId = 1; // user?.scId; // Get scId from auth context
+
   const navigation = useNavigation(); // Get navigation object from hook
   const localSearchParams = useLocalSearchParams(); // Get local search parameters
 
   // Parse customerId from local search params
-  const customerId = localSearchParams?.customerId ? JSON.parse(localSearchParams.customerId) : null;
+  const customerId = localSearchParams?.customerId
+    ? JSON.parse(localSearchParams.customerId)
+    : null;
 
   // You need a way to get the scId (Service Center ID) of the logged-in user.
   // For demonstration, I'm hardcoding it. In a real app, this would come from
@@ -25,30 +27,49 @@ const ServiceHistoryListScreen = () => {
   //const scId = 1; // ** IMPORTANT: Replace with actual scId from your application's state/context **
 
   const [customersWithHistory, setCustomersWithHistory] = useState([]);
-    const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState(null);
 
- 
+  // screens/ServiceHistory/ServiceHistoryListScreen.js
 
   const fetchData = async () => {
-        try {
-            const response = await API._get(`/servicehistory/byServiceCenter?scId=${scId}`);
-            setCustomersWithHistory(response.data.data);
-        } catch (error) {
-            console.error('Error:', error);
-            Alert.alert('Error', 'Failed to fetch service history');
-        } finally {
-            setLoading(false);
-        }
-    };
+    try {
+      // Ensure you have a valid scId before making the call
+      if (!scId) {
+        Alert.alert('Error', 'Service Center ID is missing.');
+        setLoading(false);
+        return;
+      }
+      console.log('scId in fetch', scId);
 
-    useFocusEffect(
-        useCallback(() => {
-            if (scId) fetchData();
-        }, [scId])
-    );
+      // This is the CORRECTED line. It targets the right endpoint.
+      const response = await API._get(`/servicehistory/byServiceCenter?scId=${scId}`);
 
+      // This was the INCORRECT line that you should remove or keep commented out.
+      // const response = await API._get(`/`);
+
+      // It's good practice to check if the response contains the expected data structure.
+      if (response.data && response.data.data) {
+        // console.log('response.data.data', response.data.data);
+        setCustomersWithHistory(response.data.data);
+      } else {
+        setCustomersWithHistory([]); // Set to empty array if no data
+      }
+    } catch (error) {
+      console.error('Error fetching service history:', error);
+      // Provide a more descriptive error message if possible
+      const errorMessage = error.response?.data?.message || 'Failed to fetch service history';
+      Alert.alert('Error', errorMessage);
+    } finally {
+      setLoading(false);
+    }
+  };
+  useFocusEffect(
+    useCallback(() => {
+      if (scId) fetchData();
+    }, [scId])
+  );
 
   const handleDeleteServiceEntry = async (id) => {
     Alert.alert(
@@ -78,35 +99,35 @@ const ServiceHistoryListScreen = () => {
 
   const renderItem = ({ item }) => (
     <View style={styles.container}>
-            {loading ? (
-                <ActivityIndicator size="large" />
-            ) : (
-                <FlatList
-                    data={customersWithHistory}
-                    keyExtractor={(item) => item.customerId.toString()}
-                    renderItem={({ item }) => (
-                        <View style={styles.customerCard}>
-                            <Text style={styles.customerName}>{item.customerName}</Text>
-                            <Text>Mobile: {item.mobile}</Text>
-                            <Text>Vehicles: {item.vehicles}</Text>
-                            
-                            <FlatList
-                                data={item.serviceHistory}
-                                keyExtractor={(sh) => sh.id.toString()}
-                                renderItem={({ item: sh }) => (
-                                    <View style={styles.serviceCard}>
-                                        <Text>Bike: {sh.selectedBike}</Text>
-                                        <Text>Services: {sh.selectedServices}</Text>
-                                        <Text>Date: {sh.serviceDate}</Text>
-                                        <Text>Remarks: {sh.serviceRemark}</Text>
-                                    </View>
-                                )}
-                            />
-                        </View>
-                    )}
-                />
-            )}
-        </View>
+      {loading ? (
+        <ActivityIndicator size="large" />
+      ) : (
+        <FlatList
+          data={customersWithHistory}
+          keyExtractor={(item) => item.customerId.toString()}
+          renderItem={({ item }) => (
+            <View style={styles.customerCard}>
+              <Text style={styles.customerName}>{item.customerName}</Text>
+              <Text>Mobile: {item.mobile}</Text>
+              <Text>Vehicles: {item.vehicles}</Text>
+
+              <FlatList
+                data={item.serviceHistory}
+                keyExtractor={(sh) => sh.id.toString()}
+                renderItem={({ item: sh }) => (
+                  <View style={styles.serviceCard}>
+                    <Text>Bike: {sh.selectedBike}</Text>
+                    <Text>Services: {sh.selectedServices}</Text>
+                    <Text>Date: {sh.serviceDate}</Text>
+                    <Text>Remarks: {sh.serviceRemark}</Text>
+                  </View>
+                )}
+              />
+            </View>
+          )}
+        />
+      )}
+    </View>
   );
 };
 
