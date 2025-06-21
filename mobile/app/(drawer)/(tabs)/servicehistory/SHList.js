@@ -1,22 +1,72 @@
-// SHList.js (ServiceHistoryListScreen.js)
 import React, { useState, useEffect, useCallback } from 'react';
 import { View, FlatList, StyleSheet, Alert, RefreshControl } from 'react-native';
-import { Appbar, List, FAB, ActivityIndicator, Text, Button } from 'react-native-paper';
+import { Appbar, List, FAB, ActivityIndicator, Text, Button, Card, Title, Paragraph } from 'react-native-paper';
 import { useFocusEffect } from '@react-navigation/native';
 import API from '../../../config/axiosInstance';
 import { router, useLocalSearchParams, useNavigation } from 'expo-router';
 import { useAuth } from '../../../../context/AuthContext';
+import { MaterialIcons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
+
+const COLORS = {
+  primary: '#6B42F6',
+  secondary: '#8A5DFE',
+  accent: '#FFD700',
+  background: '#F8FAFC',
+  text: '#344054',
+  lightText: '#667085',
+  card: '#FFFFFF',
+  border: '#EAECF0',
+  danger: '#F04438',
+  success: '#12B76A',
+  warning: '#F79009',
+  info: '#06AED4',
+};
+
+// Date and time formatting utilities
+const formatDate = (dateString) => {
+  if (!dateString) return 'N/A';
+  
+  try {
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) return 'Invalid Date';
+    
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const year = String(date.getFullYear()).slice(-2);
+    
+    return `${day}-${month}-${year}`;
+  } catch (error) {
+    console.error('Date formatting error:', error);
+    return 'N/A';
+  }
+};
+
+const formatTime = (dateString) => {
+  if (!dateString) return 'N/A';
+  
+  try {
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) return 'Invalid Time';
+    
+    let hours = date.getHours();
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    const ampm = hours >= 12 ? 'PM' : 'AM';
+    
+    hours = hours % 12;
+    hours = hours ? hours : 12; // Convert 0 to 12
+    
+    return `${String(hours).padStart(2, '0')}-${minutes} ${ampm}`;
+  } catch (error) {
+    console.error('Time formatting error:', error);
+    return 'N/A';
+  }
+};
 
 const ServiceHistoryListScreen = () => {
   const { userScId } = useAuth();
-  const scId = userScId; // fallback to 2 for testing
-console.log("user scId", userScId)
+  const scId = userScId;
   const navigation = useNavigation();
-  //const localSearchParams = useLocalSearchParams();
-
-  // const customerId = localSearchParams?.customerId
-  //   ? JSON.parse(localSearchParams.customerId)
-  //   : null;
 
   const [customersWithHistory, setCustomersWithHistory] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -34,8 +84,7 @@ console.log("user scId", userScId)
 
       const response = await API._get(`/servicehistory/byServiceCenter?scId=${scId}`);
       const data = response.data?.data || [];
-console.log("data in shlist", data)
-      // Filter customers with service history
+
       const filtered = data.filter(customer =>
         customer.serviceHistory && customer.serviceHistory.length > 0
       );
@@ -43,7 +92,6 @@ console.log("data in shlist", data)
     } catch (err) {
       console.error('Error fetching service history:', err);
       setError(err.response?.data?.message || 'Failed to fetch service history.');
-      Alert.alert('Error', error);
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -58,18 +106,19 @@ console.log("data in shlist", data)
   );
 
   const handleDeleteServiceEntry = async (id) => {
-    Alert.alert('Confirm Delete', 'Are you sure?', [
+    Alert.alert('Confirm Delete', 'Are you sure you want to delete this service entry?', [
       { text: 'Cancel', style: 'cancel' },
       {
         text: 'Delete',
+        style: 'destructive',
         onPress: async () => {
           try {
             await API._delete(`/servicehistory/${id}`);
-            Alert.alert('Success', 'Entry deleted!');
+            Alert.alert('Success', 'Service entry deleted successfully!');
             fetchData();
           } catch (err) {
             console.error('Delete error:', err);
-            Alert.alert('Error', err.response?.data?.message || 'Delete failed.');
+            Alert.alert('Error', err.response?.data?.message || 'Failed to delete service entry.');
           }
         }
       }
@@ -78,87 +127,142 @@ console.log("data in shlist", data)
 
   const handleEditServiceEntry = (serviceEntry) => {
     router.push({
-       pathname: '/servicehistory/SHForm',
-    params: {
-      serviceHistory: JSON.stringify(serviceEntry),
-      customerId: serviceEntry.customerId?.toString(),
-      customerData: JSON.stringify(serviceEntry.customerData) // ✅ includes name, mobile, vehicles
-    }
+      pathname: '/servicehistory/SHForm',
+      params: {
+        serviceHistory: JSON.stringify(serviceEntry),
+        customerId: serviceEntry.customerId?.toString(),
+        customerData: JSON.stringify(serviceEntry.customerData)
+      }
     });
   };
 
   const renderCustomerItem = ({ item: customer }) => (
-    <View style={styles.customerCard}>
-      <Text style={styles.customerName}>{customer.customerName}</Text>
-      <Text>Mobile: {customer.mobile}</Text>
-      <Text>Vehicles: {customer.vehicles}</Text>
+    <Card style={styles.customerCard}>
+      <Card.Content>
+        <View style={styles.customerHeader}>
+          <MaterialIcons name="person" size={24} color={COLORS.primary} />
+          <Title style={styles.customerName}>{customer.customerName}</Title>
+        </View>
+        
+        <View style={styles.customerInfo}>
+          <Paragraph style={styles.infoText}>
+            <MaterialIcons name="phone" size={16} color={COLORS.lightText} /> {customer.mobile}
+          </Paragraph>
+          <Paragraph style={styles.infoText}>
+            <MaterialIcons name="directions-bike" size={16} color={COLORS.lightText} /> {customer.vehicles}
+          </Paragraph>
+        </View>
 
-      <FlatList
-        data={customer.serviceHistory.map(sh => ({
-    ...sh,
-    customerData: {
-      id: customer.customerId,
-      customerName: customer.customerName,
-      mobile: customer.mobile,
-      vehicles: customer.vehicles
-    }
-  }))}
-        keyExtractor={(sh) => sh.id.toString()}
-        renderItem={({ item: sh }) => (
-          <View style={styles.serviceCard}>
-            <Text>Bike: {sh.selectedBike}</Text>
-            <Text>Services: {sh.selectedServices}</Text>
-            <Text>Date: {sh.serviceDate}</Text>
-            <Text>Remarks: {sh.serviceRemark}</Text>
+        <FlatList
+          data={customer.serviceHistory.map(sh => ({
+            ...sh,
+            customerData: {
+              id: customer.customerId,
+              customerName: customer.customerName,
+              mobile: customer.mobile,
+              vehicles: customer.vehicles
+            }
+          }))}
+          keyExtractor={(sh) => sh.id.toString()}
+          renderItem={({ item: sh }) => (
+            <Card style={styles.serviceCard}>
+              <Card.Content>
+                <View style={styles.serviceHeader}>
+                  <MaterialIcons name="calendar-today" size={18} color={COLORS.text} />
+                  <Paragraph style={styles.serviceDate}>
+                    {formatDate(sh.serviceDate)} at {formatTime(sh.serviceDate)}
+                  </Paragraph>
+                </View>
+                
+                <View style={styles.serviceDetail}>
+                  <MaterialIcons name="two-wheeler" size={16} color={COLORS.lightText} />
+                  <Paragraph style={styles.serviceText}>{sh.selectedBike}</Paragraph>
+                </View>
+                
+                <View style={styles.serviceDetail}>
+                  <MaterialIcons name="build" size={16} color={COLORS.lightText} />
+                  <Paragraph style={styles.serviceText}>{sh.selectedServices}</Paragraph>
+                </View>
+                
+                {sh.serviceRemark && (
+                  <View style={styles.serviceDetail}>
+                    <MaterialIcons name="notes" size={16} color={COLORS.lightText} />
+                    <Paragraph style={styles.serviceText}>{sh.serviceRemark}</Paragraph>
+                  </View>
+                )}
 
-            <View style={styles.serviceActions}>
-              <Button
-                mode="outlined"
-                icon="pencil"
-                onPress={() => handleEditServiceEntry(sh)}
-                compact
-                style={styles.editButton}
-                labelStyle={styles.editButtonLabel}
-              >
-                Edit
-              </Button>
-              <Button
-                mode="outlined"
-                icon="delete"
-                onPress={() => handleDeleteServiceEntry(sh.id)}
-                compact
-                style={styles.deleteButton}
-                labelStyle={styles.deleteButtonLabel}
-              >
-                Delete
-              </Button>
-            </View>
-          </View>
-        )}
-      />
-    </View>
+                <View style={styles.serviceActions}>
+                  <Button 
+                    mode="contained-tonal" 
+                    icon="pencil" 
+                    onPress={() => handleEditServiceEntry(sh)}
+                    style={styles.editButton}
+                    labelStyle={styles.buttonLabel}
+                  >
+                    Edit
+                  </Button>
+                  <Button 
+                    mode="contained-tonal" 
+                    icon="delete" 
+                    onPress={() => handleDeleteServiceEntry(sh.id)}
+                    style={styles.deleteButton}
+                    labelStyle={styles.buttonLabel}
+                  >
+                    Delete
+                  </Button>
+                </View>
+              </Card.Content>
+            </Card>
+          )}
+        />
+      </Card.Content>
+    </Card>
   );
 
   return (
     <View style={styles.container}>
-      <Appbar.Header>
-        <Appbar.Content title="Service History" />
+      <LinearGradient
+        colors={['rgba(107, 66, 246, 0.05)', 'rgba(138, 93, 254, 0.02)']}
+        style={StyleSheet.absoluteFill}
+      />
+      
+      <Appbar.Header style={styles.header}>
+        <Appbar.Content 
+          title="Service History" 
+          titleStyle={styles.headerTitle}
+        />
       </Appbar.Header>
 
       {loading && !refreshing ? (
         <View style={styles.center}>
-          <ActivityIndicator size="large" />
-          <Text>Loading service history...</Text>
+          <ActivityIndicator size="large" animating={true} color={COLORS.primary} />
+          <Text style={styles.loadingText}>Loading service history...</Text>
         </View>
       ) : error ? (
         <View style={styles.center}>
+          <MaterialIcons name="error-outline" size={48} color={COLORS.danger} />
           <Text style={styles.errorText}>{error}</Text>
-          <Button mode="contained" onPress={fetchData}>Retry</Button>
+          <Button 
+            mode="contained" 
+            onPress={fetchData}
+            style={styles.retryButton}
+            labelStyle={styles.buttonLabel}
+          >
+            Try Again
+          </Button>
         </View>
       ) : customersWithHistory.length === 0 ? (
         <View style={styles.center}>
-          <Text style={styles.emptyList}>No service entries found.</Text>
-          <Button mode="contained" onPress={fetchData}>Refresh</Button>
+          <MaterialIcons name="history" size={48} color={COLORS.lightText} />
+          <Text style={styles.emptyList}>No service history found</Text>
+          <Button 
+            mode="contained" 
+            onPress={fetchData}
+            style={styles.refreshButton}
+            labelStyle={styles.buttonLabel}
+          >
+            Refresh
+          </Button>
         </View>
       ) : (
         <FlatList
@@ -166,7 +270,14 @@ console.log("data in shlist", data)
           keyExtractor={(item) => item.customerId.toString()}
           renderItem={renderCustomerItem}
           contentContainerStyle={styles.listContent}
-          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={fetchData} />}
+          refreshControl={
+            <RefreshControl 
+              refreshing={refreshing} 
+              onRefresh={fetchData}
+              colors={[COLORS.primary]}
+              tintColor={COLORS.primary}
+            />
+          }
         />
       )}
 
@@ -175,55 +286,161 @@ console.log("data in shlist", data)
         icon="plus"
         label="Add Service"
         onPress={() => navigation.navigate('SHForm')}
+        color={COLORS.card}
+        mode="flat"
       />
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#f5f5f5' },
-  center: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: 20 },
-  errorText: { color: 'red', marginBottom: 10, fontSize: 16, textAlign: 'center' },
-  listContent: { paddingBottom: 80, paddingHorizontal: 10, paddingTop: 10 },
-  customerCard: {
-    backgroundColor: '#ffffff',
-    borderRadius: 8,
-    padding: 15,
-    marginBottom: 10,
-    elevation: 2,
-    borderWidth: 1,
-    borderColor: '#e0e0e0'
+  container: {
+    flex: 1,
+    backgroundColor: COLORS.background,
   },
-  customerName: { fontSize: 18, fontWeight: 'bold', marginBottom: 5, color: '#333' },
+  header: {
+    backgroundColor: COLORS.card,
+    elevation: 2,
+    shadowColor: COLORS.primary,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+  },
+  headerTitle: {
+    fontSize: 20,
+    fontWeight: '600',
+    color: COLORS.text,
+    marginLeft: 10,
+  },
+  center: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  loadingText: {
+    marginTop: 16,
+    color: COLORS.text,
+    fontSize: 16,
+  },
+  errorText: {
+    color: COLORS.danger,
+    marginVertical: 16,
+    fontSize: 16,
+    textAlign: 'center',
+    maxWidth: '80%',
+  },
+  emptyList: {
+    color: COLORS.lightText,
+    marginVertical: 16,
+    fontSize: 16,
+    textAlign: 'center',
+  },
+  listContent: {
+    paddingBottom: 90,
+    paddingHorizontal: 16,
+    paddingTop: 16,
+  },
+  customerCard: {
+    backgroundColor: COLORS.card,
+    borderRadius: 12,
+    marginBottom: 16,
+    elevation: 1,
+    shadowColor: COLORS.primary,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    overflow: 'hidden',
+  },
+  customerHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  customerName: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: COLORS.text,
+    marginLeft: 8,
+  },
+  customerInfo: {
+    marginBottom: 12,
+    paddingLeft: 8,
+  },
+  infoText: {
+    color: COLORS.text,
+    fontSize: 14,
+    marginVertical: 2,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
   serviceCard: {
-    backgroundColor: '#f9f9f9',
-    borderRadius: 6,
-    padding: 10,
-    marginTop: 10,
-    marginBottom: 5,
-    borderLeftWidth: 3,
-    borderLeftColor: '#6200ee',
-    elevation: 1
+    backgroundColor: COLORS.card,
+    borderRadius: 8,
+    marginTop: 12,
+    borderLeftWidth: 4,
+    borderLeftColor: COLORS.primary,
+    elevation: 0,
+  },
+  serviceHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  serviceDate: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: COLORS.text,
+    marginLeft: 8,
+  },
+  serviceDetail: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    marginBottom: 6,
+  },
+  serviceText: {
+    color: COLORS.text,
+    fontSize: 14,
+    marginLeft: 8,
+    flex: 1,
   },
   serviceActions: {
     flexDirection: 'row',
     justifyContent: 'flex-end',
-    marginTop: 10,
-    gap: 8
+    marginTop: 12,
+    gap: 8,
   },
-  editButton: { borderColor: '#007bff', marginRight: 8 },
-  editButtonLabel: { color: '#007bff' },
-  deleteButton: { borderColor: '#dc3545' },
-  deleteButtonLabel: { color: '#dc3545' },
+  editButton: {
+    backgroundColor: 'rgba(0, 123, 255, 0.1)',
+    borderRadius: 6,
+  },
+  deleteButton: {
+    backgroundColor: 'rgba(220, 53, 69, 0.1)',
+    borderRadius: 6,
+  },
+  retryButton: {
+    backgroundColor: COLORS.primary,
+    borderRadius: 6,
+    marginTop: 8,
+  },
+  refreshButton: {
+    backgroundColor: COLORS.primary,
+    borderRadius: 6,
+    marginTop: 8,
+  },
+  buttonLabel: {
+    fontSize: 14,
+    fontWeight: '500',
+  },
   fab: {
     position: 'absolute',
-    margin: 16,
+    margin: 24,
     right: 0,
     bottom: 0,
-    backgroundColor: '#6200ee',
-    zIndex: 1
+    backgroundColor: COLORS.primary,
+    borderRadius: 50,
+    elevation: 4,
   },
-  emptyList: { textAlign: 'center', marginTop: 20, fontSize: 16, color: '#888' }
 });
 
 export default ServiceHistoryListScreen;
