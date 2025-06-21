@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { View, StyleSheet, Alert, ScrollView, TouchableOpacity, Modal, FlatList, Platform, KeyboardAvoidingView } from 'react-native';
-import { Appbar, TextInput, Button, ActivityIndicator, Text, List, Searchbar } from 'react-native-paper';
-import API from '../../../config/axiosInstance';
+import { View, StyleSheet, Alert, ScrollView, TouchableOpacity, Modal, FlatList, Platform,KeyboardAvoidingView } from 'react-native';
+import { Appbar, TextInput, Button, ActivityIndicator, Text, List, Searchbar, RadioButton } from 'react-native-paper';
+import API from '../../../config/axiosInstance'; // Adjusted path
 import { useLocalSearchParams, useNavigation } from 'expo-router';
 import { useAuth } from '../../../../context/AuthContext';
 import DateTimePicker from '@react-native-community/datetimepicker';
@@ -13,6 +13,7 @@ const ServiceHistoryFormScreen = () => {
 
   const existingServiceHistory = localSearchParams?.serviceHistory ? JSON.parse(localSearchParams.serviceHistory) : null;
   const initialCustomerId = localSearchParams?.customerId || '';
+  const customerDataFromParams = localSearchParams?.customerData ? JSON.parse(localSearchParams.customerData) : null;
 
   const [selectedBike, setSelectedBike] = useState(existingServiceHistory?.selectedBike || '');
   const [selectedServices, setSelectedServices] = useState(
@@ -30,6 +31,7 @@ const ServiceHistoryFormScreen = () => {
   );
   const [serviceRemark, setServiceRemark] = useState(existingServiceHistory?.serviceRemark || '');
   
+  // State for customer selection
   const [customerId, setCustomerId] = useState(existingServiceHistory?.customerId ? String(existingServiceHistory.customerId) : initialCustomerId);
   const [selectedCustomer, setSelectedCustomer] = useState(null);
   const [showCustomerPicker, setShowCustomerPicker] = useState(false);
@@ -45,14 +47,14 @@ const ServiceHistoryFormScreen = () => {
 
   useEffect(() => {
     navigation.setOptions({
-      headerTitle: existingServiceHistory ? 'Edit Service Entry' : 'Add New Service Entry',
+      headerTitle: existingServiceHistory ? 'Edit Service Entry' : 'Add Service Entry',
       headerShown: false,
     });
   }, [navigation, existingServiceHistory]);
 
   const fetchCustomers = useCallback(async () => {
     if (!userScId) {
-      setError('Service Center ID not available. Cannot fetch customers.');
+      setError('Service Center ID not available.');
       setLoadingCustomers(false);
       return;
     }
@@ -63,8 +65,7 @@ const ServiceHistoryFormScreen = () => {
       setFilteredCustomers(response.data.data);
     } catch (err) {
       console.error('Error fetching customers:', err);
-      setError('Failed to load customers for selection.');
-      Alert.alert('Error', 'Failed to load customers for selection. Check backend.');
+      Alert.alert('Error', 'Failed to load customers.');
     } finally {
       setLoadingCustomers(false);
     }
@@ -74,6 +75,7 @@ const ServiceHistoryFormScreen = () => {
     fetchCustomers();
   }, [fetchCustomers]);
 
+  // If editing, try to pre-select the customer and their vehicle
   useEffect(() => {
     if (existingServiceHistory && customers.length > 0) {
       const preSelected = customers.find(cust => String(cust.id) === String(existingServiceHistory.customerId));
@@ -84,27 +86,27 @@ const ServiceHistoryFormScreen = () => {
         }
       }
     } else if (initialCustomerId && customers.length > 0) {
-      const preSelected = customers.find(cust => String(cust.id) === String(initialCustomerId));
-      if (preSelected) {
-        setSelectedCustomer(preSelected);
-        setCustomerId(String(preSelected.id));
-        if (preSelected.vehicles) {
-          setCustomerVehicles(preSelected.vehicles.split(',').map(v => v.trim()));
+        // If coming from CustomerDetailScreen via FAB
+        const preSelected = customers.find(cust => String(cust.id) === String(initialCustomerId));
+        if (preSelected) {
+            setSelectedCustomer(preSelected);
+            setCustomerId(String(preSelected.id));
+            if (preSelected.vehicles) {
+              setCustomerVehicles(preSelected.vehicles.split(',').map(v => v.trim()));
+            }
         }
-      }
     }
-  }, [existingServiceHistory, customers, initialCustomerId]);
+  }, [existingServiceHistory, customers, initialCustomerId, selectedCustomer]);
 
+  // Filter customers based on search query
   useEffect(() => {
     if (customerSearchQuery) {
-      const lowerCaseQuery = customerSearchQuery.toLowerCase();
-      const filtered = customers.filter(
-        (customer) =>
-          customer.customerName.toLowerCase().includes(lowerCaseQuery) ||
-          customer.mobile.includes(lowerCaseQuery) ||
-          (customer.vehicles && customer.vehicles.toLowerCase().includes(lowerCaseQuery))
-      );
-      setFilteredCustomers(filtered);
+      const q = customerSearchQuery.toLowerCase();
+      setFilteredCustomers(customers.filter(c =>
+        c.customerName.toLowerCase().includes(q) ||
+        c.mobile.includes(q) ||
+        (c.vehicles && c.vehicles.toLowerCase().includes(q))
+      ));
     } else {
       setFilteredCustomers(customers);
     }
@@ -114,10 +116,10 @@ const ServiceHistoryFormScreen = () => {
     setSelectedCustomer(customer);
     setCustomerId(String(customer.id));
     setShowCustomerPicker(false);
-    setCustomerSearchQuery('');
+    setCustomerSearchQuery(''); // Clear search query after selection
     if (customer.vehicles) {
       setCustomerVehicles(customer.vehicles.split(',').map(v => v.trim()));
-      setSelectedBike('');
+      setSelectedBike(''); // Reset selected bike when customer changes
     } else {
       setCustomerVehicles([]);
       setSelectedBike('');
@@ -126,7 +128,7 @@ const ServiceHistoryFormScreen = () => {
 
   const onDateChange = (event, selectedDate) => {
     const currentDate = selectedDate || new Date();
-    setShowDatePicker(Platform.OS === 'ios');
+    setShowDatePicker(Platform.OS === 'ios'); // For iOS, keeps picker open until confirmed
     setServiceDate(currentDate.toISOString().split('T')[0]);
   };
 
@@ -146,45 +148,41 @@ const ServiceHistoryFormScreen = () => {
 
   const handleSave = async () => {
     let finalServiceRemark = serviceRemark;
-    
-    // Check if miscellaneous is selected but no text provided
-    if (selectedServices.includes('miscellaneous') && !miscellaneousServiceText.trim()) {
-      Alert.alert('Validation Error', 'Miscellaneous service details are required when selected.');
-      return;
+    if (selectedServices === 'miscellaneous') {
+      if (!miscellaneousServiceText.trim()) {
+        Alert.alert('Validation Error', 'Miscellaneous service details are required.');
+        return;
+      }
+      finalServiceRemark = miscellaneousServiceText; // Use the specific miscellaneous text for serviceRemark
     }
 
-    if (selectedServices.includes('miscellaneous')) {
-      finalServiceRemark = miscellaneousServiceText;
-    }
-
-    if (!selectedBike.trim() || selectedServices.length === 0 || !serviceDate.trim() || !selectedCustomer) {
-      Alert.alert('Validation Error', 'Vehicle, at least one Service Type, Service Date, and Customer are required.');
+    if (!selectedBike.trim() || !selectedServices.trim() || !serviceDate.trim() || !selectedCustomer) {
+      Alert.alert('Validation Error', 'Vehicle, Service Type, Service Date, and Customer are required.');
       return;
     }
 
     setLoading(true);
-    setError(null);
     try {
-      const serviceHistoryData = {
+      const payload = {
         selectedBike,
         selectedServices,
         serviceDate,
-        serviceRemark: finalServiceRemark,
-        customerId: parseInt(selectedCustomer.id),
+        serviceRemark: finalServiceRemark, // Use the potentially updated serviceRemark
+        customerId: parseInt(selectedCustomer.id), // Use the ID from the selected customer object
       };
 
       if (existingServiceHistory) {
-        await API._put(`/servicehistory/${existingServiceHistory.id}`, serviceHistoryData);
-        Alert.alert('Success', 'Service entry updated successfully!');
+        await API._put(`/servicehistory/${existingServiceHistory.id}`, payload);
+        Alert.alert('Success', 'Service entry updated!');
       } else {
-        await API._post('/servicehistory', serviceHistoryData);
-        Alert.alert('Success', 'Service entry added successfully!');
+        await API._post('/servicehistory', payload);
+        Alert.alert('Success', 'Service entry added!');
       }
+
       navigation.goBack();
     } catch (err) {
-      console.error('Error saving service history:', err);
-      setError('Failed to save service history. Please check your inputs and try again.');
-      Alert.alert('Error', 'Failed to save service history. Check console for details.');
+      console.error('Save error:', err);
+      Alert.alert('Error', 'Failed to save entry.');
     } finally {
       setLoading(false);
     }
@@ -196,133 +194,127 @@ const ServiceHistoryFormScreen = () => {
         <Appbar.BackAction onPress={() => navigation.goBack()} />
         <Appbar.Content title={existingServiceHistory ? 'Edit Service Entry' : 'Add Service Entry'} />
       </Appbar.Header>
-      
-      <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'} // Adjust behavior based on OS
         style={styles.keyboardAvoidingView}
       >
         <ScrollView contentContainerStyle={styles.scrollContent}>
-          {/* Customer Selection */}
-          <TouchableOpacity onPress={() => setShowCustomerPicker(true)} style={styles.input}>
-            <TextInput
-              label="Select Customer"
-              value={selectedCustomer ? `${selectedCustomer.customerName} ` : ''}
-              mode="outlined"
-              editable={false}
-              right={<TextInput.Icon icon="chevron-down" />}
-              style={styles.input}
-            />
-          </TouchableOpacity>
-
-          {/* Vehicle Selection */}
-          {selectedCustomer && customerVehicles.length > 0 && (
-            <View style={styles.radioGroup}>
-              <Text style={styles.radioGroupLabel}>Select Vehicle:</Text>
-              {customerVehicles.map((vehicle, index) => (
-                <TouchableOpacity
-                  key={index}
-                  style={styles.radioItem}
-                  onPress={() => setSelectedBike(vehicle)}
-                >
-                  <View style={[
-                    styles.radioButton,
-                    selectedBike === vehicle && styles.radioButtonSelected
-                  ]}>
-                    {selectedBike === vehicle && <View style={styles.radioButtonInner} />}
-                  </View>
-                  <Text style={styles.radioLabel}>{vehicle}</Text>
-                </TouchableOpacity>
-              ))}
-            </View>
-          )}
-          {selectedCustomer && customerVehicles.length === 0 && (
-            <Text style={styles.infoText}>No vehicles found for this customer.</Text>
-          )}
-
-          {/* Service Date Picker */}
-          <TouchableOpacity onPress={() => setShowDatePicker(true)} style={styles.input}>
-            <TextInput
-              label="Service Date"
-              value={serviceDate}
-              mode="outlined"
-              editable={false}
-              right={<TextInput.Icon icon="calendar" />}
-              style={styles.input}
-            />
-          </TouchableOpacity>
-          {showDatePicker && (
-            <DateTimePicker
-              testID="datePicker"
-              value={serviceDate ? new Date(serviceDate) : new Date()}
-              mode="date"
-              display="default"
-              onChange={onDateChange}
-            />
-          )}
-
-          {/* Service Types (Checkboxes) */}
-          <View style={styles.checkboxGroup}>
-            <Text style={styles.checkboxGroupLabel}>Select Service Types:</Text>
-            
-            {['fullService', 'mediumService', 'oilChange', 'miscellaneous'].map((serviceType) => (
-              <TouchableOpacity 
-                key={serviceType}
-                style={styles.checkboxItem}
-                onPress={() => toggleServiceSelection(serviceType)}
-              >
-                <View style={[
-                  styles.checkbox,
-                  selectedServices.includes(serviceType) && styles.checkboxSelected
-                ]}>
-                  {selectedServices.includes(serviceType) && <Text style={styles.checkboxIcon}>✓</Text>}
-                </View>
-                <Text style={styles.checkboxLabel}>
-                  {serviceType === 'fullService' && 'Full Service'}
-                  {serviceType === 'mediumService' && 'Medium Service'}
-                  {serviceType === 'oilChange' && 'Oil Change'}
-                  {serviceType === 'miscellaneous' && 'Miscellaneous'}
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </View>
-
-          {selectedServices.includes('miscellaneous') && (
-            <TextInput
-              label="Miscellaneous Service Details"
-              value={miscellaneousServiceText}
-              onChangeText={setMiscellaneousServiceText}
-              mode="outlined"
-              multiline
-              numberOfLines={3}
-              style={styles.input}
-              placeholder="e.g., Tire repair, headlight replacement"
-            />
-          )}
-
+        {/* Customer Selection */}
+        <TouchableOpacity onPress={() => setShowCustomerPicker(true)} style={styles.input}>
           <TextInput
-            label="Service Remark (Optional)"
-            value={serviceRemark}
-            onChangeText={setServiceRemark}
+            label="Select Customer"
+            value={selectedCustomer ? `${selectedCustomer.customerName} ` : ''}
+            mode="outlined"
+            editable={false} // Make it read-only, opens picker on press
+            right={<TextInput.Icon icon="chevron-down" />}
+            style={styles.input}
+          />
+        </TouchableOpacity>
+
+        {/* Vehicle Selection (Radio Buttons) */}
+        {selectedCustomer && customerVehicles.length > 0 && (
+          <View style={styles.radioGroup}>
+            <Text style={styles.radioGroupLabel}>Select Vehicle:</Text>
+            <RadioButton.Group onValueChange={newValue => setSelectedBike(newValue)} value={selectedBike}>
+              {customerVehicles.map((vehicle, index) => (
+                <View key={index} style={styles.radioItem}>
+                  <RadioButton value={vehicle} />
+                  <Text>{vehicle}</Text>
+                </View>
+              ))}
+            </RadioButton.Group>
+          </View>
+        )}
+        {selectedCustomer && customerVehicles.length === 0 && (
+          <Text style={styles.infoText}>No vehicles found for this customer.</Text>
+        )}
+
+        {/* Service Date Picker */}
+        <TouchableOpacity onPress={() => setShowDatePicker(true)} style={styles.input}>
+          <TextInput
+            label="Service Date"
+            value={serviceDate}
+            mode="outlined"
+            editable={false}
+            right={<TextInput.Icon icon="calendar" />}
+            style={styles.input}
+          />
+        </TouchableOpacity>
+        {showDatePicker && (
+          <DateTimePicker
+            testID="datePicker"
+            value={serviceDate ? new Date(serviceDate) : new Date()}
+            mode="date"
+            display="default"
+            onChange={onDateChange}
+          />
+        )}
+
+        {/* Service Types (Radio Buttons) */}
+        <View style={styles.radioGroup}>
+          <Text style={styles.radioGroupLabel}>Select Service Type:</Text>
+          <RadioButton.Group onValueChange={newValue => {
+            setSelectedServices(newValue);
+            if (newValue !== 'miscellaneous') {
+              setMiscellaneousServiceText(''); // Clear miscellaneous text if other option is selected
+            }
+          }} value={selectedServices}>
+            <View style={styles.radioItem}>
+              <RadioButton value="fullService" />
+              <Text>Full Service</Text>
+            </View>
+            <View style={styles.radioItem}>
+              <RadioButton value="mediumService" />
+              <Text>Medium Service</Text>
+            </View>
+            <View style={styles.radioItem}>
+              <RadioButton value="oilChange" />
+              <Text>Oil Change</Text>
+            </View>
+            <View style={styles.radioItem}>
+              <RadioButton value="miscellaneous" />
+              <Text>Miscellaneous</Text>
+            </View>
+          </RadioButton.Group>
+        </View>
+
+        {selectedServices === 'miscellaneous' && (
+          <TextInput
+            label="Miscellaneous Service Details"
+            value={miscellaneousServiceText}
+            onChangeText={setMiscellaneousServiceText}
             mode="outlined"
             multiline
             numberOfLines={3}
             style={styles.input}
+            placeholder="e.g., Tire repair, headlight replacement"
           />
-          
-          {error && <Text style={styles.errorText}>{error}</Text>}
-          <Button
-            mode="contained"
-            onPress={handleSave}
-            loading={loading}
-            disabled={loading}
-            style={styles.button}
-          >
-            {existingServiceHistory ? 'Update Service Entry' : 'Add Service Entry'}
-          </Button>
-        </ScrollView>
+        )}
+
+        <TextInput
+          label="Service Remark (Optional)"
+          value={serviceRemark}
+          onChangeText={setServiceRemark}
+          mode="outlined"
+          multiline
+          numberOfLines={3}
+          style={styles.input}
+        />
+        
+        {error && <Text style={styles.errorText}>{error}</Text>}
+        <Button
+          mode="contained"
+          onPress={handleSave}
+          loading={loading}
+          disabled={loading}
+          style={styles.button}
+        >
+          {existingServiceHistory ? 'Update Service Entry' : 'Add Service Entry'}
+        </Button>
+      </ScrollView>
       </KeyboardAvoidingView>
 
-      {/* Customer Selection Modal */}
+      {/* Customer Picker Modal */}
       <Modal visible={showCustomerPicker} animationType="slide" onRequestClose={() => setShowCustomerPicker(false)}>
         <Appbar.Header>
           <Appbar.BackAction onPress={() => setShowCustomerPicker(false)} />
@@ -330,15 +322,13 @@ const ServiceHistoryFormScreen = () => {
         </Appbar.Header>
         <View style={styles.modalContent}>
           <Searchbar
-            placeholder="Search Customer by Name, Mobile or Vehicle"
-            onChangeText={setCustomerSearchQuery}
+            placeholder="Search by name, mobile or vehicle"
             value={customerSearchQuery}
+            onChangeText={setCustomerSearchQuery}
             style={styles.searchBar}
           />
           {loadingCustomers ? (
-            <ActivityIndicator animating={true} size="large" style={styles.center} />
-          ) : error ? (
-            <Text style={[styles.errorText, styles.center]}>{error}</Text>
+            <ActivityIndicator animating size="large" />
           ) : (
             <FlatList
               data={filteredCustomers}
@@ -346,10 +336,9 @@ const ServiceHistoryFormScreen = () => {
               renderItem={({ item }) => (
                 <List.Item
                   title={item.customerName}
-                  description={`Mobile: ${item.mobile || 'N/A'} | Vehicle: ${item.vehicles || 'N/A'}`}
-                  left={props => <List.Icon {...props} icon="account" />}
+                  description={`Mobile: ${item.mobile} | Vehicles: ${item.vehicles || 'N/A'}`}
                   onPress={() => handleSelectCustomer(item)}
-                  style={styles.listItem}
+                  left={(props) => <List.Icon {...props} icon="account" />}
                 />
               )}
               ListEmptyComponent={<Text style={styles.emptyList}>No customers found.</Text>}
@@ -364,25 +353,25 @@ const ServiceHistoryFormScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: '#f5f5f5', // Light background for the whole screen
   },
-  keyboardAvoidingView: {
-    flex: 1,
+ keyboardAvoidingView: {
+    flex: 1, // Ensures the KeyboardAvoidingView takes up the full available space
   },
   scrollContent: {
     padding: 16,
-    paddingBottom: 150,
-    flexGrow: 1,
+    paddingBottom: 150, // Increased padding to ensure content scrolls above the keyboard
+    flexGrow: 1, // Allows the content container to grow and fill available space
   },
   input: {
     marginBottom: 12,
-    backgroundColor: '#ffffff',
+    backgroundColor: '#ffffff', // White background for inputs
   },
   button: {
     marginTop: 20,
-    marginBottom: 20,
-    backgroundColor: '#6200ee',
-    borderRadius: 8,
+    marginBottom: 20, // Added margin to lift the button slightly
+    backgroundColor: '#6200ee', // Material design primary color
+    borderRadius: 8, // Slightly rounded buttons
     paddingVertical: 8,
   },
   errorText: {
@@ -404,8 +393,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#ffffff',
     marginBottom: 8,
     borderRadius: 8,
-    elevation: 2,
-    shadowColor: '#000',
+    elevation: 2, // Shadow for Android
+    shadowColor: '#000', // Shadow for iOS
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.2,
     shadowRadius: 1.41,
@@ -423,100 +412,22 @@ const styles = StyleSheet.create({
   },
   radioGroup: {
     marginBottom: 12,
-    backgroundColor: '#ffffff',
-    padding: 12,
-    borderRadius: 8,
-    elevation: 1,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 0.5 },
-    shadowOpacity: 0.1,
-    shadowRadius: 1,
   },
-  radioGroupLabel: {
-    fontSize: 16,
-    color: '#333',
-    marginBottom: 8,
+  readOnlyLabel: {
+    fontSize: 13,
     fontWeight: 'bold',
   },
   radioItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 8,
-  },
-  radioButton: {
-    width: 22,
-    height: 22,
-    borderRadius: 11,
-    borderWidth: 2,
-    borderColor: '#6200ee',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 12,
-  },
-  radioButtonSelected: {
-    borderColor: '#6200ee',
-  },
-  radioButtonInner: {
-    width: 12,
-    height: 12,
-    borderRadius: 6,
-    backgroundColor: '#6200ee',
-  },
-  radioLabel: {
-    fontSize: 15,
-    color: '#333',
+    marginBottom: 4,
   },
   infoText: {
     textAlign: 'center',
     marginTop: 10,
     color: '#666',
     fontSize: 14,
-  },
-  checkboxGroup: {
-    marginBottom: 16,
-    backgroundColor: '#ffffff',
-    padding: 16,
-    borderRadius: 8,
-    elevation: 1,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 0.5 },
-    shadowOpacity: 0.1,
-    shadowRadius: 1,
-  },
-  checkboxGroupLabel: {
-    fontSize: 16,
-    color: '#333',
-    marginBottom: 12,
-    fontWeight: '600',
-  },
-  checkboxItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 12,
-  },
-  checkbox: {
-    width: 22,
-    height: 22,
-    borderRadius: 4,
-    borderWidth: 1,
-    borderColor: '#6200ee',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 12,
-    backgroundColor: 'transparent',
-  },
-  checkboxSelected: {
-    backgroundColor: '#6200ee',
-  },
-  checkboxIcon: {
-    color: '#fff',
-    fontSize: 14,
-    fontWeight: 'bold',
-  },
-  checkboxLabel: {
-    fontSize: 15,
-    color: '#333',
-  },
+  }
 });
 
 export default ServiceHistoryFormScreen;
