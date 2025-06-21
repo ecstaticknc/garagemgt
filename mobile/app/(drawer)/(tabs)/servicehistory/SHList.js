@@ -149,7 +149,7 @@ const ServiceHistoryListScreen = () => {
             <MaterialIcons name="phone" size={16} color={COLORS.lightText} /> {customer.mobile}
           </Paragraph>
           <Paragraph style={styles.infoText}>
-            <MaterialIcons name="directions-bike" size={16} color={COLORS.lightText} /> {customer.vehicles}
+            <MaterialIcons name="two-wheeler" size={16} color={COLORS.lightText} /> {customer.vehicles}
           </Paragraph>
         </View>
 
@@ -201,7 +201,7 @@ const ServiceHistoryListScreen = () => {
                   >
                     Edit
                   </Button>
-                  <Button 
+                  {/* <Button 
                     mode="contained-tonal" 
                     icon="delete" 
                     onPress={() => handleDeleteServiceEntry(sh.id)}
@@ -209,7 +209,7 @@ const ServiceHistoryListScreen = () => {
                     labelStyle={styles.buttonLabel}
                   >
                     Delete
-                  </Button>
+                  </Button> */}
                 </View>
               </Card.Content>
             </Card>
@@ -343,13 +343,13 @@ const styles = StyleSheet.create({
   },
   customerCard: {
     backgroundColor: COLORS.card,
-    borderRadius: 12,
+    borderRadius: 14,
     marginBottom: 16,
     elevation: 1,
     shadowColor: COLORS.primary,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.05,
-    shadowRadius: 4,
+    shadowRadius: 8,
     overflow: 'hidden',
   },
   customerHeader: {
@@ -379,8 +379,11 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     marginTop: 12,
     borderLeftWidth: 4,
-    borderLeftColor: COLORS.primary,
-    elevation: 0,
+    borderLeftColor: 'red',
+    borderRightColor: 'red',
+    borderRightWidth: 4,
+    
+    
   },
   serviceHeader: {
     flexDirection: 'row',
