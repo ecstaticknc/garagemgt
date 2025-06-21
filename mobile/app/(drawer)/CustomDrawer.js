@@ -146,66 +146,73 @@ export default function CustomDrawer(props) {
       <DrawerContentScrollView
         {...props}
         contentContainerStyle={styles.scrollContainer}
-        showsVerticalScrollIndicator={false}
-      >
+        showsVerticalScrollIndicator={false}>
         <LinearGradient
           colors={[COLORS.primary, COLORS.secondary]}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
-          style={styles.profileCard}
-        >
+          style={styles.profileCard}>
           <View style={styles.avatarContainer}>
-            <Image
-              source={require('../../assets/logo1.png')}
-              style={styles.avatar}
-            />
+            <Image source={require('../../assets/logo1.png')} style={styles.avatar} />
             <View style={styles.onlineIndicator} />
           </View>
 
           <Text style={styles.appName}>Bike Clinic</Text>
-          
+
           {loggedInUser ? (
             <>
-              <Text style={styles.userName}>Hello, {loggedInUser.username}!</Text>
-              <Text style={styles.proprietorName}>{loggedInUser.proprietorName}</Text>
-              <View style={[
-                styles.roleBadge,
-                { backgroundColor: loggedInUser.role === 'admin' ? COLORS.accent : 'rgba(37, 152, 247, 0.3)' }
-              ]}>
+              {/* <Text style={styles.userName}>Hello, {loggedInUser.username}!</Text> */}
+              {(loggedInUser?.proprietorName || serviceCenterInfo?.proprietorName) && (
+                <Text style={styles.proprietorName}>
+                  {loggedInUser?.proprietorName || serviceCenterInfo?.proprietorName}
+                </Text>
+              )}
+              <View
+                style={[
+                  styles.roleBadge,
+                  {
+                    backgroundColor:
+                      loggedInUser.role === 'admin' ? COLORS.accent : 'rgba(37, 152, 247, 0.3)',
+                  },
+                ]}>
                 <Text style={styles.roleText}>{loggedInUser.role}</Text>
               </View>
             </>
-          ) : (
+          ) : 
+          (
             <Text style={styles.userName}>{serviceCenterInfo?.proprietorName}</Text>
           )}
+        
         </LinearGradient>
 
         <View style={styles.menuContainer}>
-          <MenuItem 
-            label="Dashboard" 
-            iconName="home" 
-            routePath="/(drawer)/(tabs)/Home" 
-          />
-          
-          <MenuItem 
-            label="Service Center Management" 
-            iconName="car-wrench" 
-            routePath="servicecenters/SCList" 
+          <MenuItem label="Dashboard" iconName="home" routePath="/(drawer)/(tabs)/Home" />
+
+          <MenuItem
+            label="Service Center Management"
+            iconName="car-wrench"
+            routePath="servicecenters/SCList"
             iconLib="MaterialCommunityIcons"
           />
-          
-          <MenuItem 
-            label="Service History" 
-            iconName="history" 
-            routePath="servicehistory/SHList" 
+
+          <MenuItem
+            label="Service History"
+            iconName="history"
+            routePath="servicehistory/SHList"
             iconLib="MaterialIcons"
           />
-          
+          <MenuItem
+            label="Reminder"
+            iconName="bell"
+            routePath="/(drawer)/(tabs)/Reminder"
+            iconLib="Feather"
+          />
+
           {showAdminFeatures && (
-            <MenuItem 
-              label="Reset Database" 
-              iconName="database-remove" 
-              routePath="/(drawer)/(tabs)/ResetDatabaseScreen" 
+            <MenuItem
+              label="Reset Database"
+              iconName="database-remove"
+              routePath="/(drawer)/(tabs)/ResetDatabaseScreen"
               iconLib="MaterialCommunityIcons"
             />
           )}
@@ -213,19 +220,15 @@ export default function CustomDrawer(props) {
       </DrawerContentScrollView>
 
       <View style={styles.footer}>
-        <TouchableOpacity 
-          onPress={handleExitApp}
-          style={styles.logoutButton}
-        >
+        <TouchableOpacity onPress={handleExitApp} style={styles.logoutButton}>
           <LinearGradient
             colors={['rgba(240, 68, 56, 0.1)', 'rgba(247, 104, 94, 0.42)']}
-            style={styles.logoutGradient}
-          >
+            style={styles.logoutGradient}>
             <Entypo name="log-out" size={20} color={COLORS.danger} />
             <Text style={[styles.logoutText, { color: COLORS.danger }]}>Exit App</Text>
           </LinearGradient>
         </TouchableOpacity>
-        
+
         <Text style={styles.versionText}>Version 1.0.0</Text>
       </View>
     </View>
