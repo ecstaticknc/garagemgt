@@ -55,7 +55,7 @@ const ReminderScreen = () => {
       const now = moment();
       const threeMonthsAgo = moment().subtract(3, 'months');
       const startOf2024 = moment('2024-01-01');
-      const endOf2024 = moment('2024-12-31');
+      const endOf2024 = moment('2030-12-31');
 
       const filtered = response.data.data.filter(item => {
         if (!item.serviceDate) return false;
@@ -116,7 +116,7 @@ const ReminderScreen = () => {
       `Your last service was on ${formattedDate}, which was more than 3 months ago. ` +
       `It's time to schedule your next service!\n\nThank you,\nYour Service Center`;
 
-      
+
 
     const phoneWithCountryCode = `91${mobile.replace(/\D/g, '')}`;
     const url = `whatsapp://send?phone=${phoneWithCountryCode}&text=${encodeURIComponent(whatsappMsg)}`;
