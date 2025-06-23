@@ -1,4 +1,4 @@
-// CustomDrawer.js
+
 import React, { useEffect, useState } from 'react';
 import { DrawerContentScrollView } from '@react-navigation/drawer';
 import { useRouter } from 'expo-router';
@@ -205,7 +205,7 @@ export default function CustomDrawer(props) {
             label="Reminder"
             iconName="bell"
             routePath="/(drawer)/(tabs)/Reminder"
-            iconLib="Feather"
+            iconLib="MaterialCommunityIcons"
           />
 
           </View>
@@ -221,7 +221,7 @@ export default function CustomDrawer(props) {
           </LinearGradient>
         </TouchableOpacity>
 
-        <Text style={styles.versionText}>Version 1.0.0</Text>
+        
       </View>
     </View>
   );

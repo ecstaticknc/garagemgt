@@ -23,46 +23,6 @@ const COLORS = {
   info: '#06AED4',
 };
 
-// Date and time formatting utilities
-const formatDate = (dateString) => {
-  if (!dateString) return 'N/A';
-  
-  try {
-    const date = new Date(dateString);
-    if (isNaN(date.getTime())) return 'Invalid Date';
-    
-    const day = String(date.getDate()).padStart(2, '0');
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const year = String(date.getFullYear()).slice(-2);
-    
-    return `${day}-${month}-${year}`;
-  } catch (error) {
-    console.error('Date formatting error:', error);
-    return 'N/A';
-  }
-};
-
-const formatTime = (dateString) => {
-  if (!dateString) return 'N/A';
-  
-  try {
-    const date = new Date(dateString);
-    if (isNaN(date.getTime())) return 'Invalid Time';
-    
-    let hours = date.getHours();
-    const minutes = String(date.getMinutes()).padStart(2, '0');
-    const ampm = hours >= 12 ? 'PM' : 'AM';
-    
-    hours = hours % 12;
-    hours = hours ? hours : 12; // Convert 0 to 12
-    
-    return `${String(hours).padStart(2, '0')}-${minutes} ${ampm}`;
-  } catch (error) {
-    console.error('Time formatting error:', error);
-    return 'N/A';
-  }
-};
-
 const ServiceHistoryListScreen = () => {
   const { userScId } = useAuth();
   const scId = userScId;
@@ -149,7 +109,7 @@ const ServiceHistoryListScreen = () => {
             <MaterialIcons name="phone" size={16} color={COLORS.lightText} /> {customer.mobile}
           </Paragraph>
           <Paragraph style={styles.infoText}>
-            <MaterialIcons name="two-wheeler" size={16} color={COLORS.lightText} /> {customer.vehicles}
+            <MaterialIcons name="directions-bike" size={16} color={COLORS.lightText} /> {customer.vehicles}
           </Paragraph>
         </View>
 
@@ -169,9 +129,7 @@ const ServiceHistoryListScreen = () => {
               <Card.Content>
                 <View style={styles.serviceHeader}>
                   <MaterialIcons name="calendar-today" size={18} color={COLORS.text} />
-                  <Paragraph style={styles.serviceDate}>
-                    {formatDate(sh.serviceDate)} at {formatTime(sh.serviceDate)}
-                  </Paragraph>
+                  <Paragraph style={styles.serviceDate}>{sh.serviceDate}</Paragraph>
                 </View>
                 
                 <View style={styles.serviceDetail}>
@@ -201,7 +159,7 @@ const ServiceHistoryListScreen = () => {
                   >
                     Edit
                   </Button>
-                  {/* <Button 
+                  <Button 
                     mode="contained-tonal" 
                     icon="delete" 
                     onPress={() => handleDeleteServiceEntry(sh.id)}
@@ -209,7 +167,7 @@ const ServiceHistoryListScreen = () => {
                     labelStyle={styles.buttonLabel}
                   >
                     Delete
-                  </Button> */}
+                  </Button>
                 </View>
               </Card.Content>
             </Card>
@@ -343,13 +301,13 @@ const styles = StyleSheet.create({
   },
   customerCard: {
     backgroundColor: COLORS.card,
-    borderRadius: 14,
+    borderRadius: 12,
     marginBottom: 16,
     elevation: 1,
     shadowColor: COLORS.primary,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.05,
-    shadowRadius: 8,
+    shadowRadius: 4,
     overflow: 'hidden',
   },
   customerHeader: {
@@ -379,11 +337,8 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     marginTop: 12,
     borderLeftWidth: 4,
-    borderLeftColor: 'red',
-    borderRightColor: 'red',
-    borderRightWidth: 4,
-    
-    
+    borderLeftColor: COLORS.primary,
+    elevation: 0,
   },
   serviceHeader: {
     flexDirection: 'row',
