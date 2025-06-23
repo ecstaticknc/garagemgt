@@ -27,25 +27,6 @@ const ReminderScreen = () => {
   const [customers, setCustomers] = useState([]);
   const { userScId } = useAuth();
 
-  // const fetchCustomers = async () => {
-  //   if (!userScId) {
-  //     setLoading(false);
-  //     setError('User service center ID not available. Please log in again.');
-  //     return;
-  //   }
-  //   setError(null);
-
-  //   try {
-  //     const response = await API._get(`/customers/by-sc?scId=${userScId}`);
-  //     console.log("customers in reminder", response.data.data);
-  //     setCustomers(response.data.data);
-  //   } catch (err) {
-  //     console.error('Failed to fetch customers:', err);
-  //     Alert.alert('Error', 'Failed to load customer list.');
-  //     setError('Failed to load customer list.');
-  //   }
-  // };
-
   const fetchServiceHistory = useCallback(async () => {
     if (!userScId) {
       setLoading(false);
@@ -58,7 +39,7 @@ const ReminderScreen = () => {
     setError(null);
     try {
       const response = await API._get(`/servicehistory/byServiceCenter?scId=${userScId}`);
-      console.log("raw service history response", response.data.data);
+      //console.log("raw service history response", response.data.data);
 
       let allServiceHistory = [];
       response.data.data.forEach(customerData => {
@@ -75,9 +56,6 @@ const ReminderScreen = () => {
 
       const now = moment();
       const threeMonthsAgo = now.subtract(3, 'months');
-      // const threeMonthsAgo = moment().subtract(3, 'months');
-      // const startOf2024 = moment('2024-01-01');
-      // const endOf2024 = moment('2024-12-31').endOf('day');
 
       const startOfCurrentYear = moment().startOf('year');
 const endOfCurrentYear = moment().endOf('year');  
@@ -243,7 +221,6 @@ const endOfCurrentYear = moment().endOf('year');
           onPress={() => {
             setLoading(true);
             fetchServiceHistory();
-            //fetchCustomers();
           }}
         >
           <Text style={styles.retryButtonText}>Retry</Text>

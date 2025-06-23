@@ -21,12 +21,12 @@ export default function Home() {
 
   useEffect(() => {
     const fetchServiceCenterData = async () => {
-      if (userScId) {
+    if (userScId !== null && userScId !== undefined) {
         try {
           setLoadingInfo(true);
           setErrorInfo(null);
           const response = await API._get(`/servicecenters/${userScId}`);
-          console.log("srvice info", response)
+         // console.log("srvice info", response)
           setServiceCenterInfo(response.data.data);
         } catch (error) {
           console.error("Failed to fetch service center data:", error);
