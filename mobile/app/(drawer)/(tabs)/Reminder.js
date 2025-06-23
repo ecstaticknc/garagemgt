@@ -9,11 +9,11 @@ import {
   RefreshControl,
   ActivityIndicator,
   TouchableOpacity,
+  Platform, // Import Platform to check OS
 } from 'react-native';
 import { Appbar } from 'react-native-paper';
 import { useNavigation } from 'expo-router';
 import API from '../../config/axiosInstance';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useAuth } from '../../../context/AuthContext';
 import moment from 'moment';
 
@@ -27,46 +27,71 @@ const ReminderScreen = () => {
   const [customers, setCustomers] = useState([]);
   const { userScId } = useAuth();
 
-  const fetchCustomers = async () => {
+  // const fetchCustomers = async () => {
+  //   if (!userScId) {
+  //     setLoading(false);
+  //     setError('User service center ID not available. Please log in again.');
+  //     return;
+  //   }
+  //   setError(null);
+
+  //   try {
+  //     const response = await API._get(`/customers/by-sc?scId=${userScId}`);
+  //     console.log("customers in reminder", response.data.data);
+  //     setCustomers(response.data.data);
+  //   } catch (err) {
+  //     console.error('Failed to fetch customers:', err);
+  //     Alert.alert('Error', 'Failed to load customer list.');
+  //     setError('Failed to load customer list.');
+  //   }
+  // };
+
+  const fetchServiceHistory = useCallback(async () => {
     if (!userScId) {
       setLoading(false);
       setError('User service center ID not available. Please log in again.');
+      setRefreshing(false);
       return;
     }
-    setLoading(true);
-    setError(null);
 
-    try {
-      const response = await API._get(`/customers/by-sc?scId=${userScId}`);
-      setCustomers(response.data.data);
-    } catch (err) {
-      console.error('Failed to fetch customers:', err);
-      Alert.alert('Error', 'Failed to load customer list.');
-    }
-  };
-
-  const fetchServiceHistory = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
-      const response = await API._get('/servicehistory');
-      
-      // Filter for services older than 3 months AND from 2024 only
-      const now = moment();
-      const threeMonthsAgo = moment().subtract(3, 'months');
-      const startOf2024 = moment('2024-01-01');
-      const endOf2024 = moment('2030-12-31');
+      const response = await API._get(`/servicehistory/byServiceCenter?scId=${userScId}`);
+      console.log("raw service history response", response.data.data);
 
-      const filtered = response.data.data.filter(item => {
-        if (!item.serviceDate) return false;
-        
-        const serviceDate = moment(item.serviceDate);
-        return (
-          serviceDate.isBefore(threeMonthsAgo) && // Older than 3 months
-          serviceDate.isBetween(startOf2024, endOf2024, null, '[]') // Within 2024
-        );
+      let allServiceHistory = [];
+      response.data.data.forEach(customerData => {
+        if (customerData.serviceHistory && Array.isArray(customerData.serviceHistory)) {
+          const serviceHistoryWithCustomerInfo = customerData.serviceHistory.map(service => ({
+            ...service,
+            customerId: customerData.customerId,
+            customerName: customerData.customerName,
+            customerMobile: customerData.mobile,
+          }));
+          allServiceHistory = allServiceHistory.concat(serviceHistoryWithCustomerInfo);
+        }
       });
 
+      const now = moment();
+      const threeMonthsAgo = now.subtract(3, 'months');
+      // const threeMonthsAgo = moment().subtract(3, 'months');
+      // const startOf2024 = moment('2024-01-01');
+      // const endOf2024 = moment('2024-12-31').endOf('day');
+
+      const startOfCurrentYear = moment().startOf('year');
+const endOfCurrentYear = moment().endOf('year');  
+
+      const filtered = allServiceHistory.filter(item => {
+        if (!item.serviceDate) return false;
+
+        const serviceDate = moment(item.serviceDate);
+        return (
+          serviceDate.isBefore(threeMonthsAgo) &&
+          serviceDate.isBetween(startOfCurrentYear, endOfCurrentYear, null, '[]')
+          // serviceDate.isBetween(startOf2024, endOf2024, null, '[]')
+        );
+      });
       setServiceHistory(filtered);
     } catch (err) {
       console.error('Error fetching reminders:', err);
@@ -76,35 +101,25 @@ const ReminderScreen = () => {
       setLoading(false);
       setRefreshing(false);
     }
-  }, []);
+  }, [userScId]);
 
   useEffect(() => {
-    fetchServiceHistory();
-    fetchCustomers();
-  }, [fetchServiceHistory]);
-
-  useEffect(() => {
-    // Match service history with customer data
-    if (serviceHistory.length > 0 && customers.length > 0) {
-      const enrichedData = serviceHistory.map(service => {
-        const customer = customers.find(c => c.id === service.customerId);
-        return {
-          ...service,
-          customerName: customer?.customerName || 'Unknown Customer',
-          customerMobile: customer?.mobile || ''
-        };
-      });
-      setFilteredHistory(enrichedData);
-    } else {
-      setFilteredHistory(serviceHistory);
+    if (userScId) {
+      fetchServiceHistory();
+      //fetchCustomers();
     }
-  }, [serviceHistory, customers]);
+  }, [userScId, fetchServiceHistory]);
 
-  const handleSendReminder = (item) => {
+  useEffect(() => {
+    setFilteredHistory(serviceHistory);
+  }, [serviceHistory]);
+
+
+  const handleSendReminder = async (item) => { // Made async to use await with Linking.canOpenURL
     const mobile = item.customerMobile;
     const name = item.customerName;
-    const formattedDate = item.serviceDate 
-      ? moment(item.serviceDate).format('DD/MM/YYYY') 
+    const formattedDate = item.serviceDate
+      ? moment(item.serviceDate).format('DD/MM/YYYY')
       : 'N/A';
 
     if (!mobile) {
@@ -112,19 +127,78 @@ const ReminderScreen = () => {
       return;
     }
 
-    const whatsappMsg = `Hello ${name},\n\nThis is a friendly reminder for your ${item.selectedBike}. ` +
+    const whatsappMsg = `Hello ${name},\n\nThis is a friendly reminder for your ${item.selectedBike || 'vehicle'}. ` +
       `Your last service was on ${formattedDate}, which was more than 3 months ago. ` +
       `It's time to schedule your next service!\n\nThank you,\nYour Service Center`;
 
+    const phoneWithCountryCode = `91${mobile.replace(/\D/g, '')}`; // Assuming +91 for India
 
+    // 1. Try to open WhatsApp
+    const whatsappUrl = `whatsapp://send?phone=${phoneWithCountryCode}&text=${encodeURIComponent(whatsappMsg)}`;
 
-    const phoneWithCountryCode = `91${mobile.replace(/\D/g, '')}`;
-    const url = `whatsapp://send?phone=${phoneWithCountryCode}&text=${encodeURIComponent(whatsappMsg)}`;
-
-    Linking.openURL(url).catch(() => {
-      Alert.alert('Error', 'Could not open WhatsApp. Please make sure it is installed.');
-    });
+    try {
+      const supported = await Linking.canOpenURL(whatsappUrl);
+      if (supported) {
+        await Linking.openURL(whatsappUrl);
+      } else {
+        // If WhatsApp URL is not supported, try SMS
+        Alert.alert(
+          'WhatsApp Not Found',
+          'WhatsApp is not installed or the number is not registered. Do you want to send an SMS instead?',
+          [
+            {
+              text: 'Cancel',
+              style: 'cancel',
+            },
+            {
+              text: 'Send SMS',
+              onPress: () => sendSms(phoneWithCountryCode, whatsappMsg), // Use whatsappMsg for SMS
+            },
+          ],
+          { cancelable: true }
+        );
+      }
+    } catch (whatsappError) {
+      console.error('Failed to open WhatsApp:', whatsappError);
+      Alert.alert(
+        'Error Opening WhatsApp',
+        'Could not open WhatsApp. Do you want to send an SMS instead?',
+        [
+          {
+            text: 'Cancel',
+            style: 'cancel',
+          },
+          {
+            text: 'Send SMS',
+            onPress: () => sendSms(phoneWithCountryCode, whatsappMsg),
+          },
+        ],
+        { cancelable: true }
+      );
+    }
   };
+
+  const sendSms = async (phoneNumber, message) => {
+    let smsUrl;
+    if (Platform.OS === 'android') {
+      smsUrl = `sms:${phoneNumber}?body=${encodeURIComponent(message)}`;
+    } else { // iOS
+      smsUrl = `sms:${phoneNumber}&body=${encodeURIComponent(message)}`;
+    }
+
+    try {
+      const supported = await Linking.canOpenURL(smsUrl);
+      if (supported) {
+        await Linking.openURL(smsUrl);
+      } else {
+        Alert.alert('Error', 'Could not open SMS app on your device.');
+      }
+    } catch (smsError) {
+      console.error('Failed to open SMS:', smsError);
+      Alert.alert('Error', 'An unexpected error occurred while trying to send SMS.');
+    }
+  };
+
 
   const renderItem = ({ item }) => (
     <View style={styles.serviceCard}>
@@ -132,7 +206,7 @@ const ReminderScreen = () => {
         <Text style={styles.serviceTitle}>{item.selectedBike || 'Unknown Vehicle'}</Text>
         <Text style={styles.customerName}>{item.customerName}</Text>
       </View>
-      
+
       <View style={styles.serviceDetails}>
         <Text style={styles.detailText}>
           📅 Last Service: {moment(item.serviceDate).format('DD MMM YYYY')}
@@ -166,7 +240,11 @@ const ReminderScreen = () => {
         <Text style={styles.errorText}>{error}</Text>
         <TouchableOpacity
           style={styles.retryButton}
-          onPress={fetchServiceHistory}
+          onPress={() => {
+            setLoading(true);
+            fetchServiceHistory();
+            //fetchCustomers();
+          }}
         >
           <Text style={styles.retryButtonText}>Retry</Text>
         </TouchableOpacity>
@@ -177,16 +255,16 @@ const ReminderScreen = () => {
   return (
     <View style={styles.container}>
       <Appbar.Header style={styles.header}>
-        <Appbar.Content 
-          title="Service Reminders" 
+        <Appbar.Content
+          title="Service Reminders"
           titleStyle={styles.headerTitle}
         />
-        <Appbar.Action 
-          icon="refresh" 
+        <Appbar.Action
+          icon="refresh"
           onPress={() => {
             setRefreshing(true);
             fetchServiceHistory();
-          }} 
+          }}
         />
       </Appbar.Header>
 
@@ -195,8 +273,8 @@ const ReminderScreen = () => {
         keyExtractor={item => item.id.toString()}
         renderItem={renderItem}
         refreshControl={
-          <RefreshControl 
-            refreshing={refreshing} 
+          <RefreshControl
+            refreshing={refreshing}
             onRefresh={fetchServiceHistory}
             colors={['#4A8FE7']}
             tintColor="#4A8FE7"

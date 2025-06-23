@@ -44,6 +44,8 @@ const ServiceHistoryListScreen = () => {
 
       const response = await API._get(`/servicehistory/byServiceCenter?scId=${scId}`);
       const data = response.data?.data || [];
+console.log("response in history", data)
+console.log("response in history", data[0].serviceHistory)
 
       const filtered = data.filter(customer =>
         customer.serviceHistory && customer.serviceHistory.length > 0
@@ -159,7 +161,7 @@ const ServiceHistoryListScreen = () => {
                   >
                     Edit
                   </Button>
-                  <Button 
+                   <Button 
                     mode="contained-tonal" 
                     icon="delete" 
                     onPress={() => handleDeleteServiceEntry(sh.id)}
@@ -167,7 +169,7 @@ const ServiceHistoryListScreen = () => {
                     labelStyle={styles.buttonLabel}
                   >
                     Delete
-                  </Button>
+                  </Button> 
                 </View>
               </Card.Content>
             </Card>
