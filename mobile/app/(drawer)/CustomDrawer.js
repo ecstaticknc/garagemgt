@@ -1,4 +1,3 @@
-// CustomDrawer.js
 import React, { useEffect, useState } from 'react';
 import { DrawerContentScrollView } from '@react-navigation/drawer';
 import { useRouter } from 'expo-router';
@@ -179,25 +178,45 @@ export default function CustomDrawer(props) {
           {/* Dashboard is always visible */}
           <MenuItem label="Dashboard" iconName="home" routePath="/(drawer)/(tabs)/Home" />
 
-          <MenuItem
-            label="Service Center Management"
-            iconName="car-wrench"
-            routePath="servicecenters/SCList"
-            iconLib="MaterialCommunityIcons"
-          />
+          {/* Service Center Management - Only for Admins */}
+          {showAdminFeatures && (
+            <MenuItem
+              label="Service Center Management"
+              iconName="car-wrench"
+              routePath="servicecenters/SCList"
+              iconLib="MaterialCommunityIcons"
+            />
+          )}
 
-          <MenuItem
-            label="Service History"
-            iconName="history"
-            routePath="servicehistory/SHList"
-            iconLib="MaterialIcons"
-          />
-          <MenuItem
-            label="Reminder"
-            iconName="bell"
-            routePath="/(drawer)/(tabs)/Reminder"
-            iconLib="Feather"
-          />
+           {/* Service History - Only for Normal Users */}
+          {!showAdminFeatures && (
+            <MenuItem
+              label="Customers"
+              iconName="group"
+              routePath="customers/CList"
+              iconLib="MaterialIcons"
+            />
+          )}
+
+          {/* Service History - Only for Normal Users */}
+          {!showAdminFeatures && (
+            <MenuItem
+              label="Service History"
+              iconName="history"
+              routePath="servicehistory/SHList"
+              iconLib="MaterialIcons"
+            />
+          )}
+
+          {/* Reminder - Only for Normal Users */}
+          {!showAdminFeatures && (
+            <MenuItem
+              label="Reminder"
+              iconName="bell"
+              routePath="/(drawer)/(tabs)/Reminder"
+              iconLib="Feather"
+            />
+          )}
 
         </View>
       </DrawerContentScrollView>
@@ -212,7 +231,7 @@ export default function CustomDrawer(props) {
           </LinearGradient>
         </TouchableOpacity>
 
-        
+        <Text style={styles.versionText}>Version 1.0.0</Text>
       </View>
     </View>
   );
