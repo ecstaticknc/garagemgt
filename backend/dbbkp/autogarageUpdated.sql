@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jun 20, 2025 at 01:00 PM
+-- Generation Time: Jun 23, 2025 at 08:01 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.0.30
 
@@ -63,7 +63,8 @@ INSERT INTO `customers` (`id`, `customerName`, `mobile`, `vehicles`, `regDate`, 
 (62, 'Saheb23', '21546312', 'HR-10-ab-7282, Mh-12-sg-6542', '2025-09-06', 2),
 (63, 'Kriti sanon', '65431287964', 'Mh56ag7890', '2021-05-20', 2),
 (64, 'Raghini sawant', '9851456321', 'Mh-12-ad-1234, Mh-12-fg-1234', '2025-06-17', 1),
-(66, 'Somesh computer', '098765432', 'Mh13aa0011', '2025-01-06', 2);
+(66, 'Somesh computer', '098765432', 'Mh13aa0011', '2025-01-06', 2),
+(68, 'Ajit pujari', '9850456328', 'MH-01-HD-4345', '2025-06-22', 22);
 
 -- --------------------------------------------------------
 
@@ -85,13 +86,12 @@ CREATE TABLE `servicecenters` (
 --
 
 INSERT INTO `servicecenters` (`serviceCenterName`, `proprietorName`, `proprietorMobile`, `serviceCenterAddress`, `proprietorEmail`, `id`) VALUES
+('Admin', 'Admin', '9766474227', 'Bike Clinic - Admin', 'admin@luknos.com', 0),
 ('Akash Bike Service Center', 'Akash Shirolkar', '9876541230', 'Hiraj naka solapur', 'akash@test.com', 1),
 ('Jitesh Motor services', 'Jit megeri', '7879656565', 'sidhjin hous society', 'jit@test.com', 2),
 ('Ashish W service Partner', 'Ashish W', '5656566656', 'ashish w solapur', 'ashish@test.com', 3),
 ('Yogesh bike services', 'Yogesh mane', '6546589898', 'solapur city police', 'y@test.com', 4),
-('kc1', 'kc', '9898989898', 'kc pune', 'kc@test.com', 10),
-('Rajesh service1', 'Rajesh keni', '9850121314', 'Mumbai', 'Raj@gmail.com', 22),
-('Raghav centre', 'Raghav', '9876543120', 'Merut', 'Ragha@hotmail.com', 23);
+('Rajesh service1', 'Rajesh keni', '9850121314', 'Mumbai', 'Raj@gmail.com', 22);
 
 -- --------------------------------------------------------
 
@@ -118,9 +118,10 @@ INSERT INTO `servicehistory` (`id`, `selectedBike`, `selectedServices`, `service
 (12, 'MH13AB4547', 'oilChange, fullService, miscellaneous', '2024-11-18', 'chain cover', 4),
 (13, 'MH13AB4547', 'oilChange, fullService, mediumService', '2024-11-18', 'BUPER CHANGE', 4),
 (14, 'MH13AB4547', 'miscellaneous', '2024-11-19', 'BIKE STAND', 4),
-(15, 'MH13AB4547', 'fullService', '2025-06-17', 'Overalling\nParts changed', 4),
+(15, 'MH13AB4547', 'mediumService', '2025-06-15', 'Overalling\nParts changedqqq', 4),
 (16, 'MH-13-SD-4', 'miscellaneous', '2025-06-18', 'Change parts', 11),
-(17, 'Mh13aa0011', 'mediumService', '2025-06-19', 'Test bike service', 66);
+(17, 'Mh13aa0011', 'fullService', '2025-06-20', 'Test bike service123', 66),
+(18, 'Mh56ag7890', 'mediumService', '2025-02-02', 'Test\n', 63);
 
 -- --------------------------------------------------------
 
@@ -188,7 +189,7 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT for table `customers`
 --
 ALTER TABLE `customers`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=67;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=69;
 
 --
 -- AUTO_INCREMENT for table `servicecenters`
@@ -200,7 +201,7 @@ ALTER TABLE `servicecenters`
 -- AUTO_INCREMENT for table `servicehistory`
 --
 ALTER TABLE `servicehistory`
-  MODIFY `id` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
+  MODIFY `id` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=22;
 
 --
 -- AUTO_INCREMENT for table `users`
