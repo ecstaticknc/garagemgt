@@ -1,4 +1,4 @@
-
+// CustomDrawer.js
 import React, { useEffect, useState } from 'react';
 import { DrawerContentScrollView } from '@react-navigation/drawer';
 import { useRouter } from 'expo-router';
@@ -94,6 +94,7 @@ export default function CustomDrawer(props) {
     return pathname.includes(routePath);
   };
 
+  // Determine if the user is an admin
   const showAdminFeatures = loggedInUser && loggedInUser.role === 'admin';
 
   const MenuItem = ({ label, iconName, routePath, iconLib = 'Feather' }) => {
@@ -111,7 +112,7 @@ export default function CustomDrawer(props) {
         style={[
           styles.menuItem,
           isActive && styles.activeItem,
-          isActive && { transform: [{ scale: pulseAnim }] }
+          isActive && { transform: [{ scale: pulseAnim }] } // Apply animation when active
         ]}
       >
         <View style={styles.menuItemContent}>
@@ -161,31 +162,21 @@ export default function CustomDrawer(props) {
 
           {loggedInUser ? (
             <>
-              {/* <Text style={styles.userName}>Hello, {loggedInUser.username}!</Text> */}
               {(loggedInUser?.proprietorName || serviceCenterInfo?.proprietorName) && (
                 <Text style={styles.proprietorName}>
                   {loggedInUser?.proprietorName || serviceCenterInfo?.proprietorName}
                 </Text>
               )}
-              {/* <View
-                style={[
-                  styles.roleBadge,
-                  {
-                    backgroundColor:
-                      loggedInUser.role === 'admin' ? COLORS.accent : 'rgba(37, 152, 247, 0.3)',
-                  },
-                ]}>
-                <Text style={styles.roleText}>{loggedInUser.role}</Text>
-              </View> */}
             </>
-          ) : 
-          (
-            <Text style={styles.userName}>{serviceCenterInfo?.proprietorName}</Text>
-          )}
-        
+          ) :
+            (
+              <Text style={styles.userName}>{serviceCenterInfo?.proprietorName}</Text>
+            )}
+
         </LinearGradient>
 
         <View style={styles.menuContainer}>
+          {/* Dashboard is always visible */}
           <MenuItem label="Dashboard" iconName="home" routePath="/(drawer)/(tabs)/Home" />
 
           <MenuItem
@@ -205,10 +196,10 @@ export default function CustomDrawer(props) {
             label="Reminder"
             iconName="bell"
             routePath="/(drawer)/(tabs)/Reminder"
-            iconLib="MaterialCommunityIcons"
+            iconLib="Feather"
           />
 
-          </View>
+        </View>
       </DrawerContentScrollView>
 
       <View style={styles.footer}>
@@ -359,6 +350,7 @@ const styles = StyleSheet.create({
     width: 10,
     height: 10,
     borderRadius: 5,
+    // Add margin if needed to separate from text
   },
   footer: {
     padding: 20,

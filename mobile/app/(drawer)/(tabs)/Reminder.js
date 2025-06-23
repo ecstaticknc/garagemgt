@@ -202,9 +202,9 @@ const endOfCurrentYear = moment().endOf('year');
 
   const renderItem = ({ item }) => (
     <View style={styles.serviceCard}>
-      <View style={styles.serviceHeader}>
-        <Text style={styles.serviceTitle}>{item.selectedBike || 'Unknown Vehicle'}</Text>
+      <View style={styles.serviceHeader}>        
         <Text style={styles.customerName}>{item.customerName}</Text>
+        <Text style={styles.serviceTitle}>{item.selectedBike || 'Unknown Vehicle'}</Text>
       </View>
 
       <View style={styles.serviceDetails}>
@@ -283,8 +283,8 @@ const endOfCurrentYear = moment().endOf('year');
         contentContainerStyle={styles.listContent}
         ListEmptyComponent={
           <View style={styles.emptyState}>
-            <Text style={styles.emptyStateText}>No service reminders needed for 2024</Text>
-            <Text style={styles.emptyStateSubtext}>Services older than 3 months will appear here</Text>
+            {/* <Text style={styles.emptyStateText}>No service reminders needed for 2024</Text> */}
+            <Text style={styles.emptyStateSubtext}>Services older than 3 months will appear here from current date</Text>
           </View>
         }
       />
@@ -361,12 +361,12 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     marginBottom: 12,
   },
-  serviceTitle: {
+  customerName: {
     fontSize: 18,
     fontWeight: '600',
     color: '#1E40AF',
   },
-  customerName: {
+  serviceTitle: {
     fontSize: 16,
     color: '#6B7280',
   },
