@@ -11,22 +11,23 @@ import {
 } from 'react-native';
 import { Appbar, Card, Title, ActivityIndicator, Text, Button, useTheme } from 'react-native-paper';
 import API from '../../../config/axiosInstance';
-import { useNavigation, useLocalSearchParams } from 'expo-router';
+import { useNavigation, useLocalSearchParams, useRouter } from 'expo-router'; // Import useRouter
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
 const CustomerDetailScreen = () => {
   const navigation = useNavigation();
+  const router = useRouter(); // Initialize useRouter
   const theme = useTheme();
   const { colors } = theme;
   const params = useLocalSearchParams();
-  
+
   const customerId = params?.id || params?.customerId;
   const [customer, setCustomer] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [refreshing, setRefreshing] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
-  
+
   // Animation refs
   const shakeAnim = useRef(new Animated.Value(0)).current;
   const scaleAnim = useRef(new Animated.Value(1)).current;
@@ -43,7 +44,7 @@ const CustomerDetailScreen = () => {
       setError(null);
       setLoading(true);
       const response = await API._get(`/customers/${customerId}`);
-      
+
       if (!response.data?.data) {
         throw new Error('Customer not found');
       }
@@ -67,7 +68,11 @@ const CustomerDetailScreen = () => {
   };
 
   const handleEdit = () => {
-    navigation.navigate('CustomerForm', { 
+    // Assuming 'CustomerForm' is the correct route name/path for your customer edit form
+    // If CustomerForm is within the same stack as CustomerDetailScreen, navigation.navigate might work.
+    // Otherwise, use router.push with the full path like:
+    // router.push('/customers/CustomerForm', { ... })
+    navigation.navigate('CForm', { // Changed from 'CustomerForm' to 'CForm' to match the naming in CustomerListScreen.js
       customer: JSON.stringify(customer),
       onGoBack: fetchCustomerDetails
     });
@@ -75,7 +80,7 @@ const CustomerDetailScreen = () => {
 
   const startDeleteAnimation = () => {
     setIsDeleting(true);
-    
+
     // Shake animation
     Animated.sequence([
       Animated.timing(shakeAnim, {
@@ -131,13 +136,13 @@ const CustomerDetailScreen = () => {
       'Delete Customer',
       'Are you sure you want to delete this customer?',
       [
-        { 
-          text: 'Cancel', 
+        {
+          text: 'Cancel',
           style: 'cancel',
           onPress: () => resetDeleteAnimation()
         },
-        { 
-          text: 'Delete', 
+        {
+          text: 'Delete',
           style: 'destructive',
           onPress: async () => {
             try {
@@ -172,9 +177,13 @@ const CustomerDetailScreen = () => {
   };
 
   const handleServiceHistory = () => {
-    navigation.navigate('ServiceHistoryList', { 
-      customerId: customer.id,
-      customerName: customer.customerName 
+    // Use router.push with the absolute path for cross-tab/stack navigation
+    router.push({
+      pathname: '/servicehistory/SHList', // Corrected path based on typical Expo Router structure
+      params: {
+        customerId: customer.id,
+        customerName: customer.customerName
+      }
     });
   };
 
@@ -183,7 +192,7 @@ const CustomerDetailScreen = () => {
       <Animated.View
         style={[
           styles.deleteButtonContainer,
-          { 
+          {
             transform: [
               { translateX: shakeAnim },
               { scale: scaleAnim }
@@ -192,7 +201,7 @@ const CustomerDetailScreen = () => {
           }
         ]}
       >
-        <TouchableOpacity 
+        <TouchableOpacity
           onPress={startDeleteAnimation}
           disabled={isDeleting}
           style={styles.deleteButton}
@@ -226,8 +235,8 @@ const CustomerDetailScreen = () => {
           <Text style={[styles.errorText, { color: colors.error }]}>
             {error}
           </Text>
-          <Button 
-            mode="contained" 
+          <Button
+            mode="contained"
             onPress={handleRefresh}
             style={styles.button}
             icon="refresh"
@@ -245,8 +254,8 @@ const CustomerDetailScreen = () => {
           <Text style={[styles.errorText, { color: colors.text }]}>
             Customer not found
           </Text>
-          <Button 
-            mode="outlined" 
+          <Button
+            mode="outlined"
             onPress={() => navigation.goBack()}
             style={styles.button}
           >
@@ -340,20 +349,20 @@ const CustomerDetailScreen = () => {
         <Appbar.Content title="Customer Details" />
         {customer && (
           <>
-            <Appbar.Action 
-              icon="refresh" 
-              onPress={handleRefresh} 
+            <Appbar.Action
+              icon="refresh"
+              onPress={handleRefresh}
               color={colors.primary}
             />
-            <Appbar.Action 
-              icon="pencil" 
-              onPress={handleEdit} 
+            <Appbar.Action
+              icon="pencil"
+              onPress={handleEdit}
               color={colors.primary}
             />
           </>
         )}
       </Appbar.Header>
-      
+
       {renderContent()}
     </View>
   );

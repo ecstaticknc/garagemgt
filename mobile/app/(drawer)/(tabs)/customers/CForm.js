@@ -6,8 +6,10 @@ import { DateTimePickerAndroid } from '@react-native-community/datetimepicker';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import API from '../../../config/axiosInstance';
 import { useLocalSearchParams, useNavigation } from 'expo-router';
+import { useAuth } from '../../../../context/AuthContext';
 
 const CustomerFormScreen = () => {
+  const { userScId } = useAuth();
   const navigation = useNavigation();
   const localSearchParams = useLocalSearchParams();
   const existingCustomer = localSearchParams?.customer ? JSON.parse(localSearchParams.customer) : null;
@@ -120,7 +122,7 @@ const CustomerFormScreen = () => {
         mobile: mobile.trim(), 
         vehicles: vehicleNumbers, 
         regDate, 
-        scId: scId ? parseInt(scId) : null 
+        scId: scId ? parseInt(scId) : userScId 
       };
 
       if (existingCustomer) {

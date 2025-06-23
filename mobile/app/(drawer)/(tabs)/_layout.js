@@ -21,7 +21,9 @@ export default function TabLayout() {
   const pulseAnim = useRef(new Animated.Value(1)).current;
   const { loggedInUser } = useAuth();
 
-  const showServiceCentersTab = loggedInUser && loggedInUser.role === 'admin';
+  console.log("Logged usr role in layout", loggedInUser.role)
+
+  const isAdmin = loggedInUser && loggedInUser.role === 'admin';
 
   // Drawer button animation
   const drawerButton = () => (
@@ -96,38 +98,40 @@ export default function TabLayout() {
         }}
       />
 
-      {!showServiceCentersTab && (
-        <Tabs.Screen
-          name="customers"
-          options={{
-            title: 'Customers',
-            tabBarIcon: ({ color, size, focused }) =>
-              getAnimatedIcon(<FontAwesome name="users" size={size} color={color} />, focused),
-          }}
-        />
-      )}
 
-      {!showServiceCentersTab && (
-        <Tabs.Screen
-          name="servicehistory"
-          options={{
-            title: 'Service\nHistory',
-            tabBarIcon: ({ color, size, focused }) =>
-              getAnimatedIcon(<FontAwesome5 name="history" size={size} color={color} />, focused),
-          }}
-        />
-      )}
+      <Tabs.Screen
+        name="customers"
+        options={{
+          title: 'Customers',
+          tabBarIcon: ({ color, size, focused }) =>
+            getAnimatedIcon(<FontAwesome name="users" size={size} color={color} />, focused),
+          href: isAdmin ? null : undefined,
+        }}
+      />
 
-      {!showServiceCentersTab && (
-        <Tabs.Screen
-          name="Reminder"
-          options={{
-            title: 'Reminder',
-            tabBarIcon: ({ color, size, focused }) =>
-              getAnimatedIcon(<FontAwesome5 name="bell" size={size} color={color} />, focused),
-          }}
-        />
-      )}
+
+
+      <Tabs.Screen
+        name="servicehistory"
+        options={{
+          title: 'Service\nHistory',
+          tabBarIcon: ({ color, size, focused }) =>
+            getAnimatedIcon(<FontAwesome5 name="history" size={size} color={color} />, focused),
+           href: isAdmin ? null : undefined,
+        }}
+      />
+
+
+
+      <Tabs.Screen
+        name="Reminder"
+        options={{
+          title: 'Reminder',
+          tabBarIcon: ({ color, size, focused }) =>
+            getAnimatedIcon(<FontAwesome5 name="bell" size={size} color={color} />, focused),
+           href: isAdmin ? null : undefined
+        }}
+      />
 
       <Tabs.Screen
         name="servicecenters"
@@ -135,7 +139,7 @@ export default function TabLayout() {
           title: 'Service\nCenters',
           tabBarIcon: ({ color, size, focused }) =>
             getAnimatedIcon(<MaterialCommunityIcons name="garage" size={size} color={color} />, focused),
-          tabBarButton: () => (showServiceCentersTab ? undefined : null),
+         href: isAdmin ? undefined : null
         }}
       />
     </Tabs>
