@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { View, FlatList, StyleSheet, Alert, RefreshControl } from 'react-native';
-import { Appbar, List, FAB, ActivityIndicator, Text, Button, Card, Title, Paragraph } from 'react-native-paper';
+import { Appbar, List, FAB, ActivityIndicator, Text, Button, Card, Title, Paragraph, TextInput } from 'react-native-paper'; // Import TextInput
 import { useFocusEffect } from '@react-navigation/native';
 import API from '../../../config/axiosInstance';
 import { router, useLocalSearchParams, useNavigation } from 'expo-router';
@@ -32,6 +32,8 @@ const ServiceHistoryListScreen = () => {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState(null);
+  const [searchQuery, setSearchQuery] = useState(''); // State for search query
+  const [isSearchVisible, setIsSearchVisible] = useState(false); // State for search bar visibility
 
   const fetchData = async () => {
     setRefreshing(true);
@@ -44,8 +46,8 @@ const ServiceHistoryListScreen = () => {
 
       const response = await API._get(`/servicehistory/byServiceCenter?scId=${scId}`);
       const data = response.data?.data || [];
-console.log("response in history", data)
-console.log("response in history", data[0].serviceHistory)
+      console.log("response in history", data)
+      console.log("response in history", data[0]?.serviceHistory) // Added optional chaining to prevent error if data[0] is undefined
 
       const filtered = data.filter(customer =>
         customer.serviceHistory && customer.serviceHistory.length > 0
@@ -97,6 +99,36 @@ console.log("response in history", data[0].serviceHistory)
       }
     });
   };
+
+  // Filter customers based on search query
+  const getFilteredCustomers = useCallback(() => {
+    if (!searchQuery) {
+      return customersWithHistory;
+    }
+
+    const lowerCaseQuery = searchQuery.toLowerCase();
+
+    return customersWithHistory.filter(customer => {
+      // Check customer level details
+      const customerMatches =
+        customer.customerName?.toLowerCase().includes(lowerCaseQuery) ||
+        customer.mobile?.includes(lowerCaseQuery) || 
+        customer.vehicles?.toLowerCase().includes(lowerCaseQuery);
+
+      // Check service history details if customer itself doesn't match, or combine results
+      if (customer.serviceHistory && customer.serviceHistory.length > 0) {
+        const serviceHistoryMatches = customer.serviceHistory.some(sh =>
+          sh.selectedBike?.toLowerCase().includes(lowerCaseQuery) ||
+          sh.selectedServices?.toLowerCase().includes(lowerCaseQuery) ||
+          sh.serviceRemark?.toLowerCase().includes(lowerCaseQuery)
+        );
+        return customerMatches || serviceHistoryMatches;
+      }
+      return customerMatches; 
+    });
+  }, [customersWithHistory, searchQuery]);
+
+  const filteredCustomers = getFilteredCustomers(); // Get the filtered list
 
   const renderCustomerItem = ({ item: customer }) => (
     <Card style={styles.customerCard}>
@@ -187,10 +219,34 @@ console.log("response in history", data[0].serviceHistory)
       />
       
       <Appbar.Header style={styles.header}>
-        <Appbar.Content 
-          title="Service History" 
-          titleStyle={styles.headerTitle}
-        />
+        {isSearchVisible ? (
+          <>
+            <Appbar.Action icon="arrow-left" color={COLORS.card} onPress={() => {
+              setIsSearchVisible(false);
+              setSearchQuery(''); // Clear search when hiding
+            }} />
+            <TextInput
+              placeholder="Search service history..."
+              value={searchQuery}
+              onChangeText={setSearchQuery}
+              style={styles.searchInput}
+              underlineColor="transparent"
+              selectionColor={COLORS.primary}
+              placeholderTextColor={COLORS.card + '99'}
+              left={<TextInput.Icon icon="magnify" color={COLORS.card} />}
+              autoFocus
+            />
+            <Appbar.Action icon="close" color={COLORS.card} onPress={() => setSearchQuery('')} />
+          </>
+        ) : (
+          <>
+            <Appbar.Content 
+              title="Service History" 
+              titleStyle={styles.headerTitle}
+            />
+            <Appbar.Action icon="magnify" color={COLORS.card} onPress={() => setIsSearchVisible(true)} />
+          </>
+        )}
       </Appbar.Header>
 
       {loading && !refreshing ? (
@@ -211,7 +267,20 @@ console.log("response in history", data[0].serviceHistory)
             Try Again
           </Button>
         </View>
-      ) : customersWithHistory.length === 0 ? (
+      ) : filteredCustomers.length === 0 && searchQuery ? ( // Show specific message if no results for search query
+        <View style={styles.center}>
+          <MaterialIcons name="search-off" size={48} color={COLORS.lightText} />
+          <Text style={styles.emptyList}>No matching service history found for "{searchQuery}"</Text>
+          <Button 
+            mode="outlined" 
+            onPress={() => setSearchQuery('')}
+            style={styles.refreshButton}
+            labelStyle={{color: COLORS.primary}}
+          >
+            Clear Search
+          </Button>
+        </View>
+      ) : customersWithHistory.length === 0 ? ( // Original empty list message if no history at all
         <View style={styles.center}>
           <MaterialIcons name="history" size={48} color={COLORS.lightText} />
           <Text style={styles.emptyList}>No service history found</Text>
@@ -226,7 +295,7 @@ console.log("response in history", data[0].serviceHistory)
         </View>
       ) : (
         <FlatList
-          data={customersWithHistory}
+          data={filteredCustomers} // Use filtered data here
           keyExtractor={(item) => item.customerId.toString()}
           renderItem={renderCustomerItem}
           contentContainerStyle={styles.listContent}
@@ -259,18 +328,24 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.background,
   },
   header: {
-    backgroundColor: COLORS.card,
-    elevation: 2,
-    shadowColor: COLORS.primary,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
+    backgroundColor: COLORS.primary, // Changed to primary color
+    // Removed elevation and shadow properties
   },
   headerTitle: {
     fontSize: 20,
-    fontWeight: '600',
-    color: COLORS.text,
     marginLeft: 10,
+    fontWeight: 'bold', // Changed to bold
+    color: COLORS.card, // Changed to white
+    // Removed marginLeft
+  },
+  searchInput: {
+    flex: 1,
+    height: 40, // Adjust height as needed
+    backgroundColor: COLORS.primary, // Or a slightly darker variant for contrast
+    borderRadius: 8,
+    paddingHorizontal: 8,
+    color: COLORS.card, // Text color in search input
+    fontSize: 16,
   },
   center: {
     flex: 1,

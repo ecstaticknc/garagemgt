@@ -1,25 +1,25 @@
 import React, { useState, useCallback } from 'react';
 import { View, FlatList, StyleSheet, Alert, RefreshControl, TouchableOpacity, Animated } from 'react-native';
-import { Appbar, List, FAB, ActivityIndicator, Text, Button } from 'react-native-paper';
+import { Appbar, List, FAB, ActivityIndicator, Text, Button, TextInput } from 'react-native-paper'; // Import TextInput
 import { useFocusEffect } from '@react-navigation/native';
 import { useRouter, useNavigation } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
-import { MaterialIcons, FontAwesome } from '@expo/vector-icons'; // Added for more icon options
+import { MaterialIcons, FontAwesome } from '@expo/vector-icons'; 
 
 import API from '../../../config/axiosInstance';
 import { useAuth } from '../../../../context/AuthContext';
 
 // Define a modern color palette
 const COLORS = {
-  primary: '#6B42F6', // A vibrant purple
-  secondary: '#8A5DFE', // Lighter purple
-  accent: '#00C853',   // Green for success/add actions
-  background: '#F0F2F5', // Light grey background
-  text: '#344054',      // Dark grey for primary text
-  lightText: '#667085', // Medium grey for secondary text
-  cardBackground: '#FFFFFF', // White for cards
-  borderColor: '#E0E0E0', // Light border for subtle separation
-  danger: '#FF3D00',    // Red for delete actions
+  primary: '#6B42F6', 
+  secondary: '#8A5DFE', 
+  accent: '#00C853',   
+  background: '#F0F2F5', 
+  text: '#344054',      
+  lightText: '#667085', 
+  cardBackground: '#FFFFFF', 
+  borderColor: '#E0E0E0', 
+  danger: '#FF3D00',    
 };
 
 const CustomerListScreen = () => {
@@ -31,6 +31,8 @@ const CustomerListScreen = () => {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState(null);
+  const [searchQuery, setSearchQuery] = useState(''); // State for search query
+  const [isSearchVisible, setIsSearchVisible] = useState(false); // State for search bar visibility
 
   const fetchCustomers = async () => {
     if (!userScId) {
@@ -79,12 +81,29 @@ const CustomerListScreen = () => {
               Alert.alert('Error', 'Failed to delete customer. Please try again later.');
             }
           },
-          style: 'destructive', // Makes the delete button red on iOS
+          style: 'destructive', 
         },
       ],
       { cancelable: true }
     );
   };
+
+  // Filter customers based on search query
+  const getFilteredCustomers = useCallback(() => {
+    if (!searchQuery) {
+      return customers; 
+    }
+
+    const lowerCaseQuery = searchQuery.toLowerCase();
+
+    return customers.filter(customer =>
+      customer.customerName?.toLowerCase().includes(lowerCaseQuery) ||
+      customer.mobile?.includes(lowerCaseQuery) ||
+      customer.vehicles?.toLowerCase().includes(lowerCaseQuery)
+    );
+  }, [customers, searchQuery]);
+
+  const filteredCustomers = getFilteredCustomers(); 
 
   const renderItem = ({ item }) => (
     <TouchableOpacity
@@ -99,11 +118,11 @@ const CustomerListScreen = () => {
         <View style={styles.cardBody}>
           <Text style={styles.customerName}>{item.customerName}</Text>
           <Text style={styles.customerDetail}>
-            <MaterialIcons name="phone" size={14} color={COLORS.lightText} /> {item.mobile}
+            <MaterialIcons name="phone" size={14} color={COLORS.lightText} /> <Text>{item.mobile}</Text>
           </Text>
           {item.vehicles && (
             <Text style={styles.customerDetail}>
-              <MaterialIcons name="two-wheeler" size={14} color={COLORS.lightText} /> {item.vehicles}
+              <MaterialIcons name="two-wheeler" size={14} color={COLORS.lightText} /> <Text>{item.vehicles}</Text>
             </Text>
           )}
         </View>
@@ -156,14 +175,35 @@ const CustomerListScreen = () => {
   return (
     <View style={styles.container}>
       <Appbar.Header style={styles.appBar}>
-        <Appbar.Content title="Customers" titleStyle={styles.appBarTitle} />
-        <Appbar.Action icon="magnify" color={COLORS.cardBackground} onPress={() => { /* Search functionality */ }} />
-        {/* Potentially add sort/filter action */}
-        {/* <Appbar.Action icon="sort" color={COLORS.cardBackground} onPress={() => {}} /> */}
+        {isSearchVisible ? ( 
+          <>
+            <Appbar.Action icon="arrow-left" color={COLORS.cardBackground} onPress={() => {
+              setIsSearchVisible(false);
+              setSearchQuery(''); 
+            }} />
+            <TextInput
+              placeholder="Search customers..."
+              value={searchQuery}
+              onChangeText={setSearchQuery}
+              style={styles.searchInput} 
+              underlineColor="transparent"
+              selectionColor={COLORS.cardBackground} 
+              placeholderTextColor={COLORS.cardBackground + '99'}
+              left={<TextInput.Icon icon="magnify" color={COLORS.cardBackground} />}
+              autoFocus 
+            />
+            <Appbar.Action icon="close" color={COLORS.cardBackground} onPress={() => setSearchQuery('')} /> 
+          </>
+        ) : (
+          <>
+            <Appbar.Content title="Customers" titleStyle={styles.appBarTitle} />
+            <Appbar.Action icon="magnify" color={COLORS.cardBackground} onPress={() => setIsSearchVisible(true)} /> 
+          </>
+        )}
       </Appbar.Header>
 
       <FlatList
-        data={customers}
+        data={filteredCustomers} 
         keyExtractor={(item) => item.id.toString()}
         renderItem={renderItem}
         contentContainerStyle={styles.listContent}
@@ -171,16 +211,32 @@ const CustomerListScreen = () => {
           <RefreshControl
             refreshing={refreshing}
             onRefresh={fetchCustomers}
-            colors={[COLORS.primary]} // Customize refresh indicator color
+            colors={[COLORS.primary]} 
             tintColor={COLORS.primary}
           />
         }
         ListEmptyComponent={
-          <View style={styles.center}>
-            <FontAwesome name="frown-o" size={50} color={COLORS.lightText} style={{ marginBottom: 10 }} />
-            <Text style={styles.emptyList}>No customers found.</Text>
-            <Text style={styles.emptyListSecondary}>Start by adding a new customer!</Text>
-          </View>
+          filteredCustomers.length === 0 && searchQuery ? ( 
+            <View style={styles.center}>
+              <MaterialIcons name="search-off" size={50} color={COLORS.lightText} style={{ marginBottom: 10 }} />
+              <Text style={styles.emptyList}>No matching customers found for "{searchQuery}"</Text>
+              <Button 
+                mode="outlined" 
+                onPress={() => setSearchQuery('')}
+                contentStyle={{ paddingHorizontal: 20 }}
+                labelStyle={{ color: COLORS.primary }}
+                style={{ borderRadius: 8, marginTop: 10, borderColor: COLORS.primary }}
+              >
+                Clear Search
+              </Button>
+            </View>
+          ) : ( 
+            <View style={styles.center}>
+              <FontAwesome name="frown-o" size={50} color={COLORS.lightText} style={{ marginBottom: 10 }} />
+              <Text style={styles.emptyList}>No customers found.</Text>
+              <Text style={styles.emptyListSecondary}>Start by adding a new customer!</Text>
+            </View>
+          )
         }
       />
 
@@ -189,9 +245,9 @@ const CustomerListScreen = () => {
         icon="plus"
         label="Add Customer"
         onPress={() => navigation.navigate('CForm')}
-        color={COLORS.cardBackground} // Icon/label color
-        extended // Make it an extended FAB with label
-        visible={true} // Ensure visibility
+        color={COLORS.cardBackground} 
+        extended 
+        visible={true} 
         rippleColor="rgba(255,255,255,0.3)"
       />
     </View>
@@ -201,15 +257,25 @@ const CustomerListScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: COLORS.background, // Light grey background for the whole screen
+    backgroundColor: COLORS.background,
   },
   appBar: {
-    backgroundColor: COLORS.primary, // Primary color for the app bar
+    backgroundColor: COLORS.primary, 
   },
   appBarTitle: {
-    color: COLORS.cardBackground, // White title
+    color: COLORS.cardBackground, 
     fontSize: 20,
     fontWeight: 'bold',
+    marginLeft: 10,
+  },
+  searchInput: {
+    flex: 1,
+    height: 40, 
+    backgroundColor: COLORS.primary, 
+    borderRadius: 8,
+    paddingHorizontal: 8,
+    color: COLORS.cardBackground, 
+    fontSize: 16,
   },
   center: {
     flex: 1,
@@ -232,19 +298,19 @@ const styles = StyleSheet.create({
   listContent: {
     paddingVertical: 10,
     paddingHorizontal: 10,
-    paddingBottom: 90, // Make space for the FAB
+    paddingBottom: 90, 
   },
   customerCard: {
     backgroundColor: COLORS.cardBackground,
     borderRadius: 12,
     marginVertical: 8,
-    marginHorizontal: 5, // Keep a small margin
+    marginHorizontal: 5, 
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.1,
     shadowRadius: 8,
-    elevation: 5, // For Android shadow
-    overflow: 'hidden', // Ensures borderRadius clips content
+    elevation: 5, 
+    overflow: 'hidden', 
     borderWidth: 1,
     borderColor: COLORS.borderColor,
   },
@@ -279,7 +345,7 @@ const styles = StyleSheet.create({
   },
   actionButton: {
     padding: 8,
-    borderRadius: 20, // Circular buttons
+    borderRadius: 20, 
     marginLeft: 5,
   },
   fab: {
@@ -287,16 +353,16 @@ const styles = StyleSheet.create({
     margin: 20,
     right: 0,
     bottom: 0,
-    backgroundColor: COLORS.primary, // FAB primary color
-    borderRadius: 30, // Make it circular
-    shadowColor: COLORS.primary, // Shadow matching FAB color
+    backgroundColor: COLORS.primary,
+    borderRadius: 30,
+    shadowColor: COLORS.primary,
     shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 0.4,
     shadowRadius: 10,
-    elevation: 10, // Stronger elevation for FAB
-    paddingHorizontal: 15, // Give some padding around the label
+    elevation: 10,
+    paddingHorizontal: 15,
     paddingVertical: 10,
-    flexDirection: 'row', // Align icon and text
+    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
   },
