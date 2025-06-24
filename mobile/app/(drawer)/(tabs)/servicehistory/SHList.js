@@ -416,6 +416,9 @@ const styles = StyleSheet.create({
     borderLeftWidth: 4,
     borderLeftColor: COLORS.primary,
     elevation: 0,
+    borderRightWidth: 4,
+    borderRightColor: COLORS.primary,
+    borderLeftColor: COLORS.primary,
   },
   serviceHeader: {
     flexDirection: 'row',
