@@ -46,4 +46,4 @@ const _postCustom = (url, data = {}, config = {}) => {
 // Loader function
 
 // Export API methods
-export default { _get, _delete, _put, _post, _postCustom };
+export default { _get, _delete, _put, _post, _postCustom }; 
