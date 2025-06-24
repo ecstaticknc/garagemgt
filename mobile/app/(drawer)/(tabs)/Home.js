@@ -318,7 +318,7 @@ export default function Home() {
                 {/* Reminders Count Card */}
                 <TouchableOpacity
                   style={styles.countCardTouch}
-                  onPress={() => router.push('/reminders/Reminder')}
+                  onPress={() => router.push('/(drawer)/(tabs)/Reminder')}
                 >
                   <LinearGradient
                     colors={['#FF9800', '#FF5722']} // Orangish-red gradient
@@ -384,7 +384,7 @@ export default function Home() {
               <List.Item
                 title={`Service History (${totalServiceHistoryCount})`}
                 description="Track past services for all vehicles"
-                left={props => <List.Icon {...props} icon="car-history" color={colors.primary} />}
+                left={props => <List.Icon {...props} icon="bike" color={colors.primary} />}
                 onPress={() => router.push('/servicehistory/SHList')}
                 style={styles.listItem}
                 titleStyle={{ color: colors.text }}
