@@ -375,6 +375,7 @@ const styles = StyleSheet.create({
   },
   headerTitle: {
     fontSize: 20,
+    marginLeft: 10,
     fontWeight: 'bold', // Changed to bold
     color: COLORS.card, // Changed to white
     // Removed marginLeft
