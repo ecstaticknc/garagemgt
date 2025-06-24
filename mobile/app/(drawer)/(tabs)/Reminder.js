@@ -68,7 +68,7 @@ const ReminderScreen = () => {
     try {
       const response = await API._get(`/servicehistory/byServiceCenter?scId=${userScId}`);
       
-      let allServiceHistory = [];
+      let allServiceHistory = []; 
       response.data.data.forEach(customerData => {
         if (customerData.serviceHistory && Array.isArray(customerData.serviceHistory)) {
           const serviceHistoryWithCustomerInfo = customerData.serviceHistory.map(service => ({
