@@ -395,7 +395,7 @@ export default function Home() {
                 title={`Service Reminders (${reminderCount})`}
                 description="Customers needing a follow-up service"
                 left={props => <List.Icon {...props} icon="bell-ring" color={colors.primary} />}
-                onPress={() => router.push('/reminders/Reminder')}
+                onPress={() => router.push('/(drawer)/(tabs)/Reminder')}
                 style={styles.listItem}
                 titleStyle={{ color: colors.text }}
                 descriptionStyle={{ color: colors.lightText }}
