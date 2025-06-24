@@ -336,7 +336,7 @@ export default function Home() {
 
             {/* Pie Chart Section using d3-shapes and react-native-svg */}
             <View style={[styles.chartSection, { backgroundColor: colors.surface }]}>
-              <Text style={[styles.sectionTitle, { color: colors.text, marginBottom: 10 }]}>Activity Distribution</Text>
+              <Text style={[styles.sectionTitle, { color: colors.text, marginBottom: 8 }]}>Activity Distribution</Text>
               {pieData.length > 0 ? (
                 <View style={styles.pieChartContainer}>
                   <Svg width={pieChartRadius * 2} height={pieChartRadius * 2}>
@@ -409,28 +409,18 @@ export default function Home() {
 }
 
 const styles = StyleSheet.create({
-  // Base container styles
   container: {
     flex: 1,
   },
   scrollContainer: {
     flexGrow: 1,
-    paddingBottom: 20, // Add some bottom padding
   },
-
-  // Header styles with better shadow and z-index
   header: {
     paddingHorizontal: 24,
     paddingTop: 50,
     paddingBottom: 30,
     borderBottomLeftRadius: 24,
     borderBottomRightRadius: 24,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
-    shadowRadius: 8,
-    elevation: 8,
-    zIndex: 1, // Ensure header stays above other content
   },
   headerContent: {
     flexDirection: 'row',
@@ -442,40 +432,25 @@ const styles = StyleSheet.create({
   },
   welcomeText: {
     fontSize: 18,
-    color: 'rgba(255, 255, 255, 0.9)',
+    color: '#E0E0E0',
     fontWeight: '500',
-    textShadowColor: 'rgba(0, 0, 0, 0.2)',
-    textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 2,
   },
   serviceCenterName: {
     fontSize: 26,
     color: '#FFFFFF',
     fontWeight: 'bold',
     marginTop: 4,
-    textShadowColor: 'rgba(0, 0, 0, 0.3)',
-    textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 3,
   },
   iconContainer: {
-    padding: 12,
-    backgroundColor: 'rgba(255, 255, 255, 0.25)',
+    padding: 10,
+    backgroundColor: 'rgba(255,255,255,0.2)',
     borderRadius: 30,
     marginLeft: 20,
-    justifyContent: 'center',
-    alignItems: 'center',
-    width: 60,
-    height: 60,
   },
-
-  // Content area styles
   content: {
     padding: 20,
     paddingTop: 24,
-    marginTop: -16, // Pull up slightly under the header
   },
-
-  // Loading state styles
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',
@@ -485,21 +460,15 @@ const styles = StyleSheet.create({
   loadingText: {
     marginTop: 16,
     fontSize: 16,
-    textAlign: 'center',
-    maxWidth: '80%',
   },
-
-  // Card styles with better shadows and transitions
   infoCard: {
     borderRadius: 16,
     overflow: 'hidden',
-    elevation: 4,
+    elevation: 2,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
-    shadowRadius: 10,
-    marginBottom: 20,
-    transform: [{ translateY: 0 }],
+    shadowRadius: 8,
   },
   cardGradient: {
     position: 'absolute',
@@ -512,17 +481,14 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: 'bold',
     marginBottom: 2,
-    letterSpacing: 0.15,
   },
   cardSubtitle: {
     fontSize: 14,
     opacity: 0.8,
-    letterSpacing: 0.1,
   },
   divider: {
     marginHorizontal: 16,
-    backgroundColor: 'rgba(0, 0, 0, 0.12)',
-    height: 1,
+    backgroundColor: 'rgba(0,0,0,0.1)',
   },
   cardContent: {
     paddingVertical: 12,
@@ -530,7 +496,7 @@ const styles = StyleSheet.create({
   infoRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 12,
+    marginBottom: 8,
     paddingHorizontal: 16,
   },
   infoIcon: {
@@ -541,10 +507,7 @@ const styles = StyleSheet.create({
   infoText: {
     fontSize: 15,
     flexShrink: 1,
-    lineHeight: 22,
   },
-
-  // Empty state styles
   noInfoContainer: {
     alignItems: 'center',
     justifyContent: 'center',
@@ -552,26 +515,22 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
     borderRadius: 16,
     marginTop: 20,
-    elevation: 2,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 6,
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 2,
   },
   noInfoText: {
     marginTop: 16,
     fontSize: 16,
     textAlign: 'center',
-    lineHeight: 24,
   },
-
-  // Error state styles
   errorCard: {
     borderRadius: 16,
     marginTop: 20,
-    padding: 16,
+    padding: 10,
     backgroundColor: '#FFEBEE',
-    elevation: 2,
   },
   errorContent: {
     flexDirection: 'row',
@@ -582,19 +541,16 @@ const styles = StyleSheet.create({
     marginLeft: 10,
     fontSize: 16,
     fontWeight: '500',
-    flexShrink: 1,
   },
-
-  // Dashboard counts section
   dashboardCountsSection: {
-    marginTop: 20,
+    marginTop: 30,
     backgroundColor: '#FFFFFF',
     borderRadius: 16,
-    elevation: 2,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 6,
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 2,
     overflow: 'hidden',
     paddingBottom: 16,
   },
@@ -604,30 +560,27 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingTop: 16,
     paddingBottom: 8,
-    letterSpacing: 0.1,
   },
   countsGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    justifyContent: 'space-between',
+    justifyContent: 'space-around',
     paddingHorizontal: 10,
   },
   countCardTouch: {
     width: '30%',
-    minWidth: 100, // Ensure cards don't get too small
-    marginBottom: 10,
+    margin: 5,
     borderRadius: 12,
-    elevation: 2,
+    elevation: 1,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
     overflow: 'hidden',
   },
   gradientCardContent: {
     alignItems: 'center',
-    paddingVertical: 20,
-    paddingHorizontal: 5,
+    paddingVertical: 15,
     flex: 1,
     justifyContent: 'center',
     borderRadius: 12,
@@ -637,31 +590,24 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginTop: 8,
     color: '#FFFFFF',
-    textShadowColor: 'rgba(0, 0, 0, 0.2)',
-    textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 2,
   },
   countLabelWhite: {
     fontSize: 13,
     marginTop: 4,
     textAlign: 'center',
-    color: 'rgba(255, 255, 255, 0.9)',
-    textShadowColor: 'rgba(0, 0, 0, 0.2)',
-    textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 1,
+    color: '#E0E0E0',
   },
-
-  // Chart section styles
+  // Styles for the Pie Chart Section
   chartSection: {
     marginTop: 20,
     borderRadius: 16,
-    padding: 16,
+    padding: 10,
     elevation: 2,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 6,
-    alignItems: 'center',
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    alignItems: 'center', // Center the chart horizontally
   },
   pieChartContainer: {
     flexDirection: 'row',
@@ -669,19 +615,16 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     width: '100%',
     paddingVertical: 10,
-    flexWrap: 'wrap', // Allow wrapping on small screens
   },
   legendContainer: {
     marginLeft: 10,
     justifyContent: 'center',
-    flex: 1,
-    minWidth: 120, // Ensure legend doesn't get too narrow
+    flex: 1, // Take remaining space
   },
   legendItem: {
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 8,
-    paddingHorizontal: 8,
   },
   legendColorBox: {
     width: 16,
@@ -691,29 +634,25 @@ const styles = StyleSheet.create({
   },
   legendText: {
     fontSize: 14,
-    flexShrink: 1,
   },
   noChartDataText: {
     textAlign: 'center',
     padding: 20,
     fontSize: 16,
-    opacity: 0.7,
   },
-
-  // Navigation section styles
   navigationSection: {
     marginTop: 20,
     backgroundColor: '#FFFFFF',
     borderRadius: 16,
-    elevation: 2,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 6,
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 2,
     overflow: 'hidden',
   },
   listItem: {
-    paddingVertical: 12,
+    paddingVertical: 8,
     paddingHorizontal: 16,
   },
 });

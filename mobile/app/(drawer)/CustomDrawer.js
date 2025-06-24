@@ -369,8 +369,7 @@ const styles = StyleSheet.create({
     width: 10,
     height: 10,
     borderRadius: 5,
-    // Add margin if needed to separate from text
-  },
+     },
   footer: {
     padding: 20,
     borderTopWidth: 1,
