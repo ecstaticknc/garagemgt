@@ -170,7 +170,7 @@ const ReminderScreen = () => {
   const logReminder = async (logData) => {
     try {
       await API._post('/reminderlogs', logData);
-     // console.log('Reminder logged successfully:', logData);
+      //console.log('Reminder logged successfully:', logData);
       // After logging, refresh the data to show the status immediately
       fetchServiceHistory();
     } catch (logError) {
@@ -211,6 +211,9 @@ const ReminderScreen = () => {
       `कृपया मोकळ्या मनाने माझ्याशी संपर्क साधा 😊\n` +
       `📲 *${proprietorMobile}*`;
 
+    // NEW SMS Message for the user's request
+    const smsMessage = `${name} Ji, 3+ months since your ${item.selectedBike || 'vehicle'} service at ${selectedSCName}. कृपया सर्विस बुक करा: ${proprietorMobile}. Maintain safety & performance!`;
+
 
     const phoneWithCountryCode = `91${mobile.replace(/\D/g, '')}`;
 
@@ -250,7 +253,8 @@ const ReminderScreen = () => {
             {
               text: 'Send SMS',
               onPress: async () => {
-                const smsResult = await sendSms(phoneWithCountryCode, whatsappMsg, item);
+                // Pass smsMessage here
+                const smsResult = await sendSms(phoneWithCountryCode, smsMessage, item);
                 reminderStatus = smsResult.status;
                 failureReason = smsResult.failureReason;
                 sentVia = 'SMS';
@@ -297,7 +301,8 @@ const ReminderScreen = () => {
           {
             text: 'Send SMS',
             onPress: async () => {
-              const smsResult = await sendSms(phoneWithCountryCode, whatsappMsg, item);
+              // Pass smsMessage here
+              const smsResult = await sendSms(phoneWithCountryCode, smsMessage, item);
               reminderStatus = smsResult.status;
               failureReason = smsResult.failureReason;
               sentVia = 'SMS';
