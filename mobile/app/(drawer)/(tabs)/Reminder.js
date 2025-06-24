@@ -193,23 +193,42 @@ const ReminderScreen = () => {
       return;
     }
 
-    const whatsappMsg = `👋 Dear Customer, *${name}*\n\n` +
-      `This is a friendly reminder from *${selectedSCName}* that it's time to service your 🏍️ Vehicle No. *${vehicleNumber}*. ` +
-      `It has been over 3 months since your last service on ${formattedDate}, and we recommend scheduling a maintenance appointment to keep your vehicle running smoothly.\n\n` +
-      `🔹 If you have any questions or would like to book a service, please feel free to contact us at *${proprietorMobile}*. ` +
-      `We look forward to assisting you.\n\n` +
-      `Best regards, *${selectedSCName}*\n` +
-      `📲 *${proprietorMobile}*\n\n\n` +
-      `👋 आदरणीय ग्राहक, *${name}*\n\n` +
-      `🔹 *${selectedSCName}* कडून आपल्याला एक सौम्य आठवण देत आहोत की आपल्या वाहनाची 🏍️ *${vehicleNumber}* ची सर्विस करण्याची वेळ झाली आहे. ` +
-      `आपल्या वाहनाची शेवटची सर्विस ${formattedDate} रोजी झाली होती, आणि ३ महिन्यांपेक्षा जास्त काळ झाला आहे. `
-      + `आम्ही आपल्याला वाहनाची देखभाल करण्याचा सल्ला देतो.\n\n` +
-      `🔹 आपल्याला काही प्रश्न असल्यास किंवा सेवा बुक करायची असल्यास, कृपया आमच्याशी संपर्क साधा: *${proprietorMobile}*.\n` +
-      `🔹 आम्ही आपली सेवा करण्यास उत्सुक आहोत.\n\n` +
-      `धन्यवाद,\n` +
-      `*${selectedSCName}*\n\n` +
-      `कृपया मोकळ्या मनाने माझ्याशी संपर्क साधा 😊\n` +
-      `📲 *${proprietorMobile}*`;
+    const whatsappMsg = `👋 आदरणीय ग्राहक, \n  *${name}*
+
+*${scName}* कडून आपल्याला सौम्य आठवण करून देत आहोत की आपल्या 🏍️ *${bike}* ची सर्विस करण्याची वेळ झाली आहे. शेवटची सर्विस *${serviceDate}* रोजी झाली होती आणि त्यानंतर ३ महिन्यांपेक्षा जास्त कालावधी लोटला आहे.
+
+🔧 नियमित सर्विसिंग केल्यास वाहनाची मायलेज वाढते, सुरक्षितता टिकते आणि इंजिनचे आयुष्य वाढते.  
+❗ सेवा वेळेवर न केल्यास वाहनात अचानक बिघाड होण्याची शक्यता वाढते.
+
+📅 वेळेवर अपॉइंटमेंट घेतल्यास तुम्हाला प्राधान्य दिले जाईल व प्रतीक्षा करावी लागणार नाही.
+
+💬 वेळ ठरवण्यासाठी किंवा काही शंका असल्यास कृपया आमच्याशी संपर्क साधा: *${scMobile}*
+🔧 वेळेवर सर्विस केल्यास:
+✔️ मायलेज सुधारते  
+✔️ इंजिन आयुष्य वाढते  
+✔️ मोठ्या खर्चाची शक्यता कमी होते 
+आपल्या वाहनाची काळजी आम्हालाही आहे!  
+धन्यवाद,  
+*${scName}*  
+📲 *${scMobile}*
+
+🏍️⚙️🛠️━━━━━━━━━━━━━━━━━━━━━━━━━━━━🛠️⚙️🏍️
+
+👋 Dear Customer, \n  *${name}*
+
+This is a gentle reminder from *${scName}* that it's time to service your 🏍️ *${bike}*. Your last service was on *${serviceDate}*, and it's been over 3 months since then.
+
+🔧 Regular servicing improves mileage, maintains safety, and extends the engine life.  
+❗ Delaying service may lead to unexpected breakdowns or expensive repairs.
+
+📅 Booking your appointment in advance ensures priority service and no waiting.
+
+💬 For bookings or any queries, feel free to contact us at *${scMobile}*.
+
+We care for your bike just like you do!  
+Best regards,  
+*${scName}*  
+📲 *${scMobile}*`;
 
 
     const phoneWithCountryCode = `91${mobile.replace(/\D/g, '')}`;
@@ -398,7 +417,7 @@ const ReminderScreen = () => {
 
       <View style={styles.serviceDetails}>
         <Text style={styles.detailText}>
-          📅 Last Service: {moment(item.serviceDate).format('DD MMMYYYY')}
+          📅 Last Service: {moment(item.serviceDate).format('DD/MM/YYYY')}
         </Text>
         <Text style={styles.detailText}>
           🔧 Service Type: {item.selectedServices || 'Not specified'}
