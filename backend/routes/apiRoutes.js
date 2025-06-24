@@ -46,7 +46,7 @@ router.use(
     console.log("Attempting to hit POST /servicecenters route handler");
     serviceCenterRouter.post("/", serviceCenterController.create);
     serviceCenterRouter.put("/:id", serviceCenterController.update);
-    serviceCenterRouter.delete("/:id", serviceCenterRouter.delete);
+    serviceCenterRouter.delete("/:id", serviceCenterController.delete);
     return serviceCenterRouter;
   })()
 );
@@ -71,7 +71,7 @@ router.use(
 
     serviceHistoryRouter.post("/", serviceHistoryController.create);
     serviceHistoryRouter.put("/:id", serviceHistoryController.update);
-    serviceHistoryRouter.delete("/:id", serviceHistoryRouter.delete);
+    serviceHistoryRouter.delete("/:id", serviceHistoryController.delete);
     return serviceHistoryRouter;
   })()
 );
