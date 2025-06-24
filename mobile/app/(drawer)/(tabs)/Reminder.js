@@ -423,7 +423,7 @@ Best regards,
           🔧 Service Type: {item.selectedServices || 'Not specified'}
         </Text>
         <Text style={styles.detailText}>
-          🚗 Vehicle No: {item.vehicleNumber || 'N/A'}
+          🏍️ Vehicle No: {item.vehicleNumber || 'N/A'}
         </Text>
         {item.latestReminderLog && (
           <View style={styles.reminderStatusContainer}>
