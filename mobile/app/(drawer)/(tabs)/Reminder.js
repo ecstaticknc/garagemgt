@@ -185,6 +185,15 @@ const ReminderScreen = () => {
 
   const filteredReminders = getFilteredReminders();
 
+  useFocusEffect(
+    useCallback(() => {
+      if (userScId) {
+        fetchServiceHistory();
+        fetchServiceCenterInfo();
+      }
+    }, [userScId, fetchServiceHistory, fetchServiceCenterInfo])
+  );
+
 
   const logReminder = async (logData) => {
     try {
