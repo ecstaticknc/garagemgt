@@ -18,6 +18,7 @@ import API from '../../config/axiosInstance';
 import { useAuth } from '../../../context/AuthContext';
 import moment from 'moment';
 import { MaterialIcons, FontAwesome, Ionicons } from '@expo/vector-icons'; // Import Ionicons for checkmark/close icons
+import { useFocusEffect } from '@react-navigation/native';
 
 // Define a modern color palette consistent with CList.js and SHList.js
 const COLORS = {
@@ -44,11 +45,28 @@ const ReminderScreen = () => {
   const { userScId } = useAuth(); // Assuming userScId is available from auth context
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearchVisible, setIsSearchVisible] = useState(false);
+  const [serviceCenterInfo, setServiceCenterInfo] = useState(null); // State to store service center info
 
-  // You will likely get these from your AuthContext or a global state
-  // For demonstration, let's use placeholders. Replace with actual values.
-  const selectedSCName = "Your Service Center Name"; // Replace with actual value from auth context
-  const proprietorMobile = "Your Proprietor Mobile"; // Replace with actual value from auth context
+  const fetchServiceCenterInfo = useCallback(async () => {
+    if (!userScId) {
+      console.warn('userScId is not available for fetching service center info.');
+      return;
+    }
+    try {
+      const response = await API._get(`/servicecenters/${userScId}`);
+      if (response.data && response.data.data) {
+        setServiceCenterInfo(response.data.data);
+      } else {
+        console.warn('Service center info not found for ID:', userScId);
+        setServiceCenterInfo(null); // Ensure it's null if no data
+      }
+    } catch (err) {
+      console.error('Error fetching service center info:', err);
+      // It's okay to not set an error here, as main content will still load
+      // And we have placeholder values in case fetching fails
+      setServiceCenterInfo(null);
+    }
+  }, [userScId]);
 
   const fetchServiceHistory = useCallback(async () => {
     if (!userScId) {
@@ -144,8 +162,9 @@ const ReminderScreen = () => {
   useEffect(() => {
     if (userScId) {
       fetchServiceHistory();
+      fetchServiceCenterInfo(); // Call fetchServiceCenterInfo here
     }
-  }, [userScId, fetchServiceHistory]);
+  }, [userScId, fetchServiceHistory, fetchServiceCenterInfo]);
 
   const getFilteredReminders = useCallback(() => {
     if (!searchQuery) {
@@ -187,6 +206,10 @@ const ReminderScreen = () => {
     const formattedDate = item.serviceDate
       ? moment(item.serviceDate).format('DD/MM/YYYY')
       : 'N/A';
+
+    // Use fetched serviceCenterInfo, or fallback to placeholder if not available
+    const selectedSCName = serviceCenterInfo?.serviceCenterName || "Your Service Center Name";
+    const proprietorMobile = serviceCenterInfo?.proprietorMobile || "Your Proprietor Mobile";
 
     if (!mobile) {
       Alert.alert('Error', 'Customer mobile number not available');
@@ -286,16 +309,16 @@ const ReminderScreen = () => {
             text: 'Cancel',
             style: 'cancel',
             onPress: () => {
-                reminderStatus = 'Not Supported';
-                failureReason = 'Error opening WhatsApp, user cancelled SMS option.';
-                logReminder({
-                  customerId: item.customerId,
-                  serviceHistoryId: item.id,
-                  serviceCenterId: userScId,
-                  sentVia: sentVia,
-                  status: reminderStatus,
-                  failureReason: failureReason,
-                });
+              reminderStatus = 'Not Supported';
+              failureReason = 'Error opening WhatsApp, user cancelled SMS option.';
+              logReminder({
+                customerId: item.customerId,
+                serviceHistoryId: item.id,
+                serviceCenterId: userScId,
+                sentVia: sentVia,
+                status: reminderStatus,
+                failureReason: failureReason,
+              });
             }
           },
           {
