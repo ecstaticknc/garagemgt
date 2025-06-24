@@ -10,6 +10,7 @@ const GenericModel = require("../models/GenericModel");
 const createGenericController = require("../controllers/genericController");
 const serviceHistoryController = require("../controllers/serviceHistoryController");
 const serviceCenterController = require("../controllers/serviceCenterController");
+const reminderLogController = require("../controllers/reminderLogController");
 
 // --- Define your resources and their required fields for creation ---
 const customerModel = new GenericModel("customers");
@@ -73,6 +74,25 @@ router.use(
     serviceHistoryRouter.put("/:id", serviceHistoryController.update);
     serviceHistoryRouter.delete("/:id", serviceHistoryController.delete);
     return serviceHistoryRouter;
+  })()
+);
+
+// NEW: Reminder Logs Routes
+router.use(
+  "/reminderlogs",
+  (() => {
+    const reminderLogRouter = express.Router();
+    reminderLogRouter.post("/", reminderLogController.create);
+    reminderLogRouter.get("/", reminderLogController.getAll); // Get all reminder logs (might be too much data)
+    reminderLogRouter.get(
+      "/customer/:customerId",
+      reminderLogController.getRemindersByCustomer
+    ); // Get logs for a specific customer
+    reminderLogRouter.get(
+      "/servicecenter/:serviceCenterId",
+      reminderLogController.getRemindersByServiceCenter
+    ); // Get logs for a specific service center
+    return reminderLogRouter;
   })()
 );
 
