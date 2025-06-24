@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jun 23, 2025 at 08:01 AM
+-- Generation Time: Jun 24, 2025 at 04:44 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.0.30
 
@@ -60,11 +60,35 @@ INSERT INTO `customers` (`id`, `customerName`, `mobile`, `vehicles`, `regDate`, 
 (41, 'jitesh', '8989898989', 'MH-13-SD-4578', '2024-11-18', 1),
 (42, 'Yogesh', '8983458515', 'MH-13-CN-5265', '2024-11-19', 1),
 (43, 'Saheb', '123456789', 'Mh-13-ab-7867, Mh-08-gf-7890', '2022-01-08', 2),
-(62, 'Saheb23', '21546312', 'HR-10-ab-7282, Mh-12-sg-6542', '2025-09-06', 2),
 (63, 'Kriti sanon', '65431287964', 'Mh56ag7890', '2021-05-20', 2),
 (64, 'Raghini sawant', '9851456321', 'Mh-12-ad-1234, Mh-12-fg-1234', '2025-06-17', 1),
 (66, 'Somesh computer', '098765432', 'Mh13aa0011', '2025-01-06', 2),
 (68, 'Ajit pujari', '9850456328', 'MH-01-HD-4345', '2025-06-22', 22);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `reminder_logs`
+--
+
+CREATE TABLE `reminder_logs` (
+  `id` int(11) NOT NULL,
+  `customerId` int(11) NOT NULL,
+  `serviceHistoryId` int(11) DEFAULT NULL,
+  `serviceCenterId` int(11) NOT NULL,
+  `reminderDate` datetime DEFAULT current_timestamp(),
+  `sentVia` enum('WhatsApp','SMS') NOT NULL,
+  `status` enum('Sent','Failed','Attempted','Not Supported') NOT NULL,
+  `failureReason` text DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `reminder_logs`
+--
+
+INSERT INTO `reminder_logs` (`id`, `customerId`, `serviceHistoryId`, `serviceCenterId`, `reminderDate`, `sentVia`, `status`, `failureReason`) VALUES
+(3, 66, 17, 2, '2025-06-24 20:03:03', 'WhatsApp', 'Attempted', NULL),
+(4, 66, 17, 2, '2025-06-24 20:12:25', 'WhatsApp', 'Attempted', NULL);
 
 -- --------------------------------------------------------
 
@@ -120,8 +144,9 @@ INSERT INTO `servicehistory` (`id`, `selectedBike`, `selectedServices`, `service
 (14, 'MH13AB4547', 'miscellaneous', '2024-11-19', 'BIKE STAND', 4),
 (15, 'MH13AB4547', 'mediumService', '2025-06-15', 'Overalling\nParts changedqqq', 4),
 (16, 'MH-13-SD-4', 'miscellaneous', '2025-06-18', 'Change parts', 11),
-(17, 'Mh13aa0011', 'fullService', '2025-06-20', 'Test bike service123', 66),
-(18, 'Mh56ag7890', 'mediumService', '2025-02-02', 'Test\n', 63);
+(17, 'Mh13aa0011', 'fullService', '2025-02-02', 'Test bike service123', 66),
+(18, 'Mh56ag7890', 'mediumService', '2025-02-02', 'Test\n', 63),
+(22, 'Mh56ag7890', 'mediumService', '2025-06-23', 'Test12345', 63);
 
 -- --------------------------------------------------------
 
@@ -162,6 +187,15 @@ ALTER TABLE `customers`
   ADD PRIMARY KEY (`id`);
 
 --
+-- Indexes for table `reminder_logs`
+--
+ALTER TABLE `reminder_logs`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `customerId` (`customerId`),
+  ADD KEY `serviceCenterId` (`serviceCenterId`),
+  ADD KEY `serviceHistoryId` (`serviceHistoryId`);
+
+--
 -- Indexes for table `servicecenters`
 --
 ALTER TABLE `servicecenters`
@@ -192,6 +226,12 @@ ALTER TABLE `customers`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=69;
 
 --
+-- AUTO_INCREMENT for table `reminder_logs`
+--
+ALTER TABLE `reminder_logs`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+
+--
 -- AUTO_INCREMENT for table `servicecenters`
 --
 ALTER TABLE `servicecenters`
@@ -201,13 +241,25 @@ ALTER TABLE `servicecenters`
 -- AUTO_INCREMENT for table `servicehistory`
 --
 ALTER TABLE `servicehistory`
-  MODIFY `id` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=22;
+  MODIFY `id` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=24;
 
 --
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+
+--
+-- Constraints for dumped tables
+--
+
+--
+-- Constraints for table `reminder_logs`
+--
+ALTER TABLE `reminder_logs`
+  ADD CONSTRAINT `reminder_logs_ibfk_1` FOREIGN KEY (`customerId`) REFERENCES `customers` (`id`),
+  ADD CONSTRAINT `reminder_logs_ibfk_2` FOREIGN KEY (`serviceCenterId`) REFERENCES `servicecenters` (`id`),
+  ADD CONSTRAINT `reminder_logs_ibfk_3` FOREIGN KEY (`serviceHistoryId`) REFERENCES `servicehistory` (`id`);
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
