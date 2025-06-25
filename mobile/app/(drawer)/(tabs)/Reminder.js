@@ -1,4 +1,3 @@
-// Reminder.js (Updated)
 import React, { useEffect, useState, useCallback } from 'react';
 import {
   View,
@@ -17,22 +16,22 @@ import { useNavigation } from 'expo-router';
 import API from '../../config/axiosInstance';
 import { useAuth } from '../../../context/AuthContext';
 import moment from 'moment';
-import { MaterialIcons, FontAwesome, Ionicons } from '@expo/vector-icons'; // Import Ionicons for checkmark/close icons
+import { MaterialIcons, FontAwesome, Ionicons } from '@expo/vector-icons';
 import { useFocusEffect } from '@react-navigation/native';
 
 // Define a modern color palette consistent with CList.js and SHList.js
 const COLORS = {
   primary: '#6B42F6', // A vibrant purple
   secondary: '#8A5DFE', // Lighter purple
-  accent: '#FFD700',   // Gold for secondary accents (used in SHList)
+  accent: '#FFD700', // Gold for secondary accents (used in SHList)
   background: '#F0F2F5', // Light grey background (similar to CList.js background)
-  text: '#344054',      // Dark grey for primary text
+  text: '#344054', // Dark grey for primary text
   lightText: '#667085', // Medium grey for secondary text
-  card: '#FFFFFF',      // White for cards (cardBackground in CList.js, card in SHList.js)
-  danger: '#F04438',    // Red for delete actions (similar to danger in SHList.js)
-  success: '#12B76A',   // Green for success (from SHList.js)
-  warning: '#F79009',   // Warning color (from SHList.js)
-  info: '#06AED4',      // Info color (from SHList.js)
+  card: '#FFFFFF', // White for cards (cardBackground in CList.js, card in SHList.js)
+  danger: '#F04438', // Red for delete actions (similar to danger in SHList.js)
+  success: '#12B76A', // Green for success (from SHList.js)
+  warning: '#F79009', // Warning color (from SHList.js)
+  info: '#06AED4', // Info color (from SHList.js)
   borderColor: '#E0E0E0', // Light border for subtle separation (from CList.js)
 };
 
@@ -42,10 +41,10 @@ const ReminderScreen = () => {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState(null);
-  const { userScId } = useAuth(); // Assuming userScId is available from auth context
+  const { userScId } = useAuth();
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearchVisible, setIsSearchVisible] = useState(false);
-  const [serviceCenterInfo, setServiceCenterInfo] = useState(null); // State to store service center info
+  const [serviceCenterInfo, setServiceCenterInfo] = useState(null);
 
   const fetchServiceCenterInfo = useCallback(async () => {
     if (!userScId) {
@@ -58,12 +57,10 @@ const ReminderScreen = () => {
         setServiceCenterInfo(response.data.data);
       } else {
         console.warn('Service center info not found for ID:', userScId);
-        setServiceCenterInfo(null); // Ensure it's null if no data
+        setServiceCenterInfo(null);
       }
     } catch (err) {
       console.error('Error fetching service center info:', err);
-      // It's okay to not set an error here, as main content will still load
-      // And we have placeholder values in case fetching fails
       setServiceCenterInfo(null);
     }
   }, [userScId]);
@@ -81,7 +78,7 @@ const ReminderScreen = () => {
     try {
       const [serviceHistoryResponse, reminderLogsResponse] = await Promise.all([
         API._get(`/servicehistory/byServiceCenter?scId=${userScId}`),
-        API._get(`/reminderlogs/servicecenter/${userScId}`), // Fetch reminder logs for the SC
+        API._get(`/reminderlogs/servicecenter/${userScId}`),
       ]);
 
       let allServiceHistory = [];
@@ -92,7 +89,7 @@ const ReminderScreen = () => {
             customerId: customerData.customerId,
             customerName: customerData.customerName,
             customerMobile: customerData.mobile,
-            vehicleNumber: customerData.vehicles, // Assuming 'vehicles' field contains the vehicle number
+            vehicleNumber: customerData.vehicles,
           }));
           allServiceHistory = allServiceHistory.concat(serviceHistoryWithCustomerInfo);
         }
@@ -103,7 +100,6 @@ const ReminderScreen = () => {
       const startOfCurrentYear = moment().startOf('year');
       const endOfCurrentYear = moment().endOf('year');
 
-      // Group service history by customer and find the latest service date for each
       const customerLatestServiceMap = new Map();
       allServiceHistory.forEach(item => {
         const serviceDate = moment(item.serviceDate);
@@ -117,23 +113,19 @@ const ReminderScreen = () => {
         }
       });
 
-      // Filter based on the latest service date for each customer
       let filteredReminders = Array.from(customerLatestServiceMap.values()).filter(item => {
         if (!item.serviceDate) return false;
 
         const serviceDate = moment(item.serviceDate);
-        // Ensure the latest service date is OLDER than 3 months AND within the current year
         return serviceDate.isBefore(threeMonthsAgo) && serviceDate.isBetween(startOfCurrentYear, endOfCurrentYear, null, '[]');
       });
 
-      // Process reminder logs and attach to filtered service history
       const reminderLogs = reminderLogsResponse.data.data || [];
       const serviceHistoryIdToLatestLog = new Map();
 
       reminderLogs.forEach(log => {
         if (log.serviceHistoryId) {
           const existingLog = serviceHistoryIdToLatestLog.get(log.serviceHistoryId);
-          // Keep the latest log entry for a given serviceHistoryId
           if (!existingLog || moment(log.reminderDate).isAfter(moment(existingLog.reminderDate))) {
             serviceHistoryIdToLatestLog.set(log.serviceHistoryId, log);
           }
@@ -141,10 +133,10 @@ const ReminderScreen = () => {
       });
 
       filteredReminders = filteredReminders.map(item => {
-        const latestLog = serviceHistoryIdToLatestLog.get(item.id); // 'item.id' is serviceHistoryId
+        const latestLog = serviceHistoryIdToLatestLog.get(item.id);
         return {
           ...item,
-          latestReminderLog: latestLog || null, // Attach the latest log or null
+          latestReminderLog: latestLog || null,
         };
       });
 
@@ -162,7 +154,7 @@ const ReminderScreen = () => {
   useEffect(() => {
     if (userScId) {
       fetchServiceHistory();
-      fetchServiceCenterInfo(); // Call fetchServiceCenterInfo here
+      fetchServiceCenterInfo();
     }
   }, [userScId, fetchServiceHistory, fetchServiceCenterInfo]);
 
@@ -179,7 +171,7 @@ const ReminderScreen = () => {
       item.selectedBike?.toLowerCase().includes(lowerCaseQuery) ||
       item.selectedServices?.toLowerCase().includes(lowerCaseQuery) ||
       item.serviceRemark?.toLowerCase().includes(lowerCaseQuery) ||
-      item.vehicleNumber?.toLowerCase().includes(lowerCaseQuery) // Include vehicle number in search
+      item.vehicleNumber?.toLowerCase().includes(lowerCaseQuery)
     );
   }, [serviceHistory, searchQuery]);
 
@@ -194,29 +186,24 @@ const ReminderScreen = () => {
     }, [userScId, fetchServiceHistory, fetchServiceCenterInfo])
   );
 
-
   const logReminder = async (logData) => {
     try {
       await API._post('/reminderlogs', logData);
-      //console.log('Reminder logged successfully:', logData);
-      // After logging, refresh the data to show the status immediately
       fetchServiceHistory();
     } catch (logError) {
       console.error('Failed to log reminder:', logError.response?.data || logError.message);
-      // You might want to show an alert here or simply log to console
     }
   };
 
-
   const handleSendReminder = async (item) => {
     const mobile = item.customerMobile;
+    console.log('Mobile number:', mobile);
     const name = item.customerName;
     const vehicleNumber = item.vehicleNumber || 'N/A';
     const formattedDate = item.serviceDate
       ? moment(item.serviceDate).format('DD/MM/YYYY')
       : 'N/A';
 
-    // Use fetched serviceCenterInfo, or fallback to placeholder if not available
     const selectedSCName = serviceCenterInfo?.serviceCenterName || "Your Service Center Name";
     const proprietorMobile = serviceCenterInfo?.proprietorMobile || "Your Proprietor Mobile";
 
@@ -243,118 +230,34 @@ const ReminderScreen = () => {
       `कृपया मोकळ्या मनाने माझ्याशी संपर्क साधा 😊\n` +
       `📲 *${proprietorMobile}*`;
 
-    // NEW SMS Message for the user's request
     const smsMessage = `${name} Ji, 3+ months since your ${item.selectedBike || 'vehicle'} service at ${selectedSCName}. कृपया सर्विस बुक करा: ${proprietorMobile}. Maintain safety & performance!`;
 
-
-    const phoneWithCountryCode = `91${mobile.replace(/\D/g, '')}`;
-
-    const whatsappUrl = `whatsapp://send?phone=${phoneWithCountryCode}&text=${encodeURIComponent(whatsappMsg)}`;
-
-    let reminderStatus = 'Attempted'; // Default status for direct attempt
+    const isWhatsAppEligible = mobile && mobile.length >= 10;
+    let reminderStatus = 'Failed';
     let failureReason = null;
     let sentVia = 'WhatsApp';
+    const phoneWithCountryCode = `91${mobile.replace(/\D/g, '')}`; // Ensure proper country code for SMS/WhatsApp API
 
-    try {
-      const supported = await Linking.canOpenURL(whatsappUrl);
-      if (supported) {
-        await Linking.openURL(whatsappUrl);
-        reminderStatus = 'Attempted'; // App opened, but actual message sent status is unknown via Linking
-      } else {
-        // WhatsApp not found. Prompt user for SMS.
-        Alert.alert(
-          'WhatsApp Not Found',
-          'WhatsApp is not installed or the number is not registered. Do you want to send an SMS instead?',
-          [
-            {
-              text: 'Cancel',
-              style: 'cancel',
-              onPress: () => {
-                reminderStatus = 'Not Supported';
-                failureReason = 'WhatsApp not found, user cancelled SMS option.';
-                logReminder({
-                  customerId: item.customerId,
-                  serviceHistoryId: item.id, // Use item.id as serviceHistoryId
-                  serviceCenterId: userScId,
-                  sentVia: sentVia,
-                  status: reminderStatus,
-                  failureReason: failureReason,
-                });
-              }
-            },
-            {
-              text: 'Send SMS',
-              onPress: async () => {
-                // Pass smsMessage here
-                const smsResult = await sendSms(phoneWithCountryCode, smsMessage, item);
-                reminderStatus = smsResult.status;
-                failureReason = smsResult.failureReason;
-                sentVia = 'SMS';
-                logReminder({
-                  customerId: item.customerId,
-                  serviceHistoryId: item.id,
-                  serviceCenterId: userScId,
-                  sentVia: sentVia,
-                  status: reminderStatus,
-                  failureReason: failureReason,
-                });
-              },
-            },
-          ],
-          { cancelable: false }
-        );
-        return; // Exit here, as logging will happen after user choice
+    if (isWhatsAppEligible) {
+      const waURL = `https://api.whatsapp.com/send?phone=${phoneWithCountryCode}&text=${encodeURIComponent(whatsappMsg)}`;
+      try {
+        await Linking.openURL(waURL);
+        reminderStatus = 'Attempted';
+      } catch (waError) {
+        console.error('Failed to open WhatsApp:', waError);
+        failureReason = 'Failed to open WhatsApp. Attempting SMS.';
+        sentVia = 'SMS';
+        const smsResult = await sendSms(phoneWithCountryCode, smsMessage);
+        reminderStatus = smsResult.status;
+        failureReason = smsResult.failureReason;
       }
-    } catch (whatsappError) {
-      console.error('Failed to open WhatsApp:', whatsappError);
-      reminderStatus = 'Failed';
-      failureReason = `Failed to open WhatsApp: ${whatsappError.message}`;
-      sentVia = 'WhatsApp';
-      Alert.alert(
-        'Error Opening WhatsApp',
-        'Could not open WhatsApp. Do you want to send an SMS instead?',
-        [
-          {
-            text: 'Cancel',
-            style: 'cancel',
-            onPress: () => {
-              reminderStatus = 'Not Supported';
-              failureReason = 'Error opening WhatsApp, user cancelled SMS option.';
-              logReminder({
-                customerId: item.customerId,
-                serviceHistoryId: item.id,
-                serviceCenterId: userScId,
-                sentVia: sentVia,
-                status: reminderStatus,
-                failureReason: failureReason,
-              });
-            }
-          },
-          {
-            text: 'Send SMS',
-            onPress: async () => {
-              // Pass smsMessage here
-              const smsResult = await sendSms(phoneWithCountryCode, smsMessage, item);
-              reminderStatus = smsResult.status;
-              failureReason = smsResult.failureReason;
-              sentVia = 'SMS';
-              logReminder({
-                customerId: item.customerId,
-                serviceHistoryId: item.id,
-                serviceCenterId: userScId,
-                sentVia: sentVia,
-                status: reminderStatus,
-                failureReason: failureReason,
-              });
-            },
-          },
-        ],
-        { cancelable: false }
-      );
-      return; // Exit here, as logging will happen after user choice
+    } else {
+      sentVia = 'SMS';
+      const smsResult = await sendSms(phoneWithCountryCode, smsMessage);
+      reminderStatus = smsResult.status;
+      failureReason = smsResult.failureReason;
     }
 
-    // If we reach here, it means WhatsApp attempt was made and no SMS prompt was shown or opted.
     logReminder({
       customerId: item.customerId,
       serviceHistoryId: item.id,
@@ -365,7 +268,7 @@ const ReminderScreen = () => {
     });
   };
 
-  const sendSms = async (phoneNumber, message, item) => {
+  const sendSms = async (phoneNumber, message) => {
     let smsUrl;
     if (Platform.OS === 'android') {
       smsUrl = `sms:${phoneNumber}?body=${encodeURIComponent(message)}`;
@@ -406,7 +309,7 @@ const ReminderScreen = () => {
       case 'Not Supported':
         return <Ionicons name="warning" size={24} color={COLORS.warning} />;
       default:
-        return null; // No icon if no reminder attempt yet
+        return null;
     }
   };
 
@@ -424,7 +327,6 @@ const ReminderScreen = () => {
         return 'No Reminder Sent Yet';
     }
   };
-
 
   const renderItem = ({ item }) => (
     <View style={styles.serviceCard}>
@@ -454,7 +356,7 @@ const ReminderScreen = () => {
           </View>
         )}
         {!item.latestReminderLog && (
-            <Text style={styles.noReminderText}>No reminder sent yet</Text>
+          <Text style={styles.noReminderText}>No reminder sent yet</Text>
         )}
       </View>
 
