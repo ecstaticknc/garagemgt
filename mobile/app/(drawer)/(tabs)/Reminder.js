@@ -1,3 +1,4 @@
+// Reminder.js (Updated)
 import React, { useEffect, useState, useCallback } from 'react';
 import {
   View,
@@ -9,9 +10,9 @@ import {
   RefreshControl,
   ActivityIndicator,
   TouchableOpacity,
-  Platform, // Import Platform to check OS
+  Platform,
 } from 'react-native';
-import { Appbar } from 'react-native-paper';
+import { Appbar, TextInput } from 'react-native-paper';
 import { useNavigation } from 'expo-router';
 import API from '../../config/axiosInstance';
 import { useAuth } from '../../../context/AuthContext';
@@ -38,7 +39,6 @@ const COLORS = {
 const ReminderScreen = () => {
   const navigation = useNavigation();
   const [serviceHistory, setServiceHistory] = useState([]);
-  const [filteredHistory, setFilteredHistory] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState(null);
@@ -76,46 +76,83 @@ const ReminderScreen = () => {
       return;
     }
 
-    setLoading(true);
+    setRefreshing(true);
     setError(null);
     try {
-      const response = await API._get(`/servicehistory/byServiceCenter?scId=${userScId}`);
-      //console.log("raw service history response", response.data.data);
+      const [serviceHistoryResponse, reminderLogsResponse] = await Promise.all([
+        API._get(`/servicehistory/byServiceCenter?scId=${userScId}`),
+        API._get(`/reminderlogs/servicecenter/${userScId}`), // Fetch reminder logs for the SC
+      ]);
 
       let allServiceHistory = [];
-      response.data.data.forEach(customerData => {
+      serviceHistoryResponse.data.data.forEach(customerData => {
         if (customerData.serviceHistory && Array.isArray(customerData.serviceHistory)) {
           const serviceHistoryWithCustomerInfo = customerData.serviceHistory.map(service => ({
             ...service,
             customerId: customerData.customerId,
             customerName: customerData.customerName,
             customerMobile: customerData.mobile,
+            vehicleNumber: customerData.vehicles, // Assuming 'vehicles' field contains the vehicle number
           }));
           allServiceHistory = allServiceHistory.concat(serviceHistoryWithCustomerInfo);
         }
       });
 
       const now = moment();
-      const threeMonthsAgo = now.subtract(3, 'months');
-
+      const threeMonthsAgo = now.clone().subtract(3, 'months');
       const startOfCurrentYear = moment().startOf('year');
-const endOfCurrentYear = moment().endOf('year');  
+      const endOfCurrentYear = moment().endOf('year');
 
-      const filtered = allServiceHistory.filter(item => {
+      // Group service history by customer and find the latest service date for each
+      const customerLatestServiceMap = new Map();
+      allServiceHistory.forEach(item => {
+        const serviceDate = moment(item.serviceDate);
+        if (customerLatestServiceMap.has(item.customerId)) {
+          const existingLatest = customerLatestServiceMap.get(item.customerId).serviceDate;
+          if (serviceDate.isAfter(moment(existingLatest))) {
+            customerLatestServiceMap.set(item.customerId, item);
+          }
+        } else {
+          customerLatestServiceMap.set(item.customerId, item);
+        }
+      });
+
+      // Filter based on the latest service date for each customer
+      let filteredReminders = Array.from(customerLatestServiceMap.values()).filter(item => {
         if (!item.serviceDate) return false;
 
         const serviceDate = moment(item.serviceDate);
-        return (
-          serviceDate.isBefore(threeMonthsAgo) &&
-          serviceDate.isBetween(startOfCurrentYear, endOfCurrentYear, null, '[]')
-          // serviceDate.isBetween(startOf2024, endOf2024, null, '[]')
-        );
+        // Ensure the latest service date is OLDER than 3 months AND within the current year
+        return serviceDate.isBefore(threeMonthsAgo) && serviceDate.isBetween(startOfCurrentYear, endOfCurrentYear, null, '[]');
       });
-      setServiceHistory(filtered);
+
+      // Process reminder logs and attach to filtered service history
+      const reminderLogs = reminderLogsResponse.data.data || [];
+      const serviceHistoryIdToLatestLog = new Map();
+
+      reminderLogs.forEach(log => {
+        if (log.serviceHistoryId) {
+          const existingLog = serviceHistoryIdToLatestLog.get(log.serviceHistoryId);
+          // Keep the latest log entry for a given serviceHistoryId
+          if (!existingLog || moment(log.reminderDate).isAfter(moment(existingLog.reminderDate))) {
+            serviceHistoryIdToLatestLog.set(log.serviceHistoryId, log);
+          }
+        }
+      });
+
+      filteredReminders = filteredReminders.map(item => {
+        const latestLog = serviceHistoryIdToLatestLog.get(item.id); // 'item.id' is serviceHistoryId
+        return {
+          ...item,
+          latestReminderLog: latestLog || null, // Attach the latest log or null
+        };
+      });
+
+      setServiceHistory(filteredReminders);
     } catch (err) {
-      console.error('Error fetching reminders:', err);
-      setError('Failed to load service reminders.');
-      Alert.alert('Error', 'Could not fetch service reminders.');
+      console.error('Error fetching reminders or logs:', err);
+      setError('Failed to load service reminders or reminder logs.');
+      Alert.alert('Error', 'Could not fetch service reminders or logs.');
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -129,9 +166,24 @@ const endOfCurrentYear = moment().endOf('year');
     }
   }, [userScId, fetchServiceHistory, fetchServiceCenterInfo]);
 
-  useEffect(() => {
-    setFilteredHistory(serviceHistory);
-  }, [serviceHistory]);
+  const getFilteredReminders = useCallback(() => {
+    if (!searchQuery) {
+      return serviceHistory;
+    }
+
+    const lowerCaseQuery = searchQuery.toLowerCase();
+
+    return serviceHistory.filter(item =>
+      item.customerName?.toLowerCase().includes(lowerCaseQuery) ||
+      item.customerMobile?.includes(lowerCaseQuery) ||
+      item.selectedBike?.toLowerCase().includes(lowerCaseQuery) ||
+      item.selectedServices?.toLowerCase().includes(lowerCaseQuery) ||
+      item.serviceRemark?.toLowerCase().includes(lowerCaseQuery) ||
+      item.vehicleNumber?.toLowerCase().includes(lowerCaseQuery) // Include vehicle number in search
+    );
+  }, [serviceHistory, searchQuery]);
+
+  const filteredReminders = getFilteredReminders();
 
   useFocusEffect(
     useCallback(() => {
@@ -143,9 +195,23 @@ const endOfCurrentYear = moment().endOf('year');
   );
 
 
-  const handleSendReminder = async (item) => { // Made async to use await with Linking.canOpenURL
+  const logReminder = async (logData) => {
+    try {
+      await API._post('/reminderlogs', logData);
+      //console.log('Reminder logged successfully:', logData);
+      // After logging, refresh the data to show the status immediately
+      fetchServiceHistory();
+    } catch (logError) {
+      console.error('Failed to log reminder:', logError.response?.data || logError.message);
+      // You might want to show an alert here or simply log to console
+    }
+  };
+
+
+  const handleSendReminder = async (item) => {
     const mobile = item.customerMobile;
     const name = item.customerName;
+    const vehicleNumber = item.vehicleNumber || 'N/A';
     const formattedDate = item.serviceDate
       ? moment(item.serviceDate).format('DD/MM/YYYY')
       : 'N/A';
@@ -159,21 +225,43 @@ const endOfCurrentYear = moment().endOf('year');
       return;
     }
 
-    const whatsappMsg = `Hello ${name},\n\nThis is a friendly reminder for your ${item.selectedBike || 'vehicle'}. ` +
-      `Your last service was on ${formattedDate}, which was more than 3 months ago. ` +
-      `It's time to schedule your next service!\n\nThank you,\nYour Service Center`;
+    const whatsappMsg = `👋 Dear Customer, *${name}*\n\n` +
+      `This is a friendly reminder from *${selectedSCName}* that it's time to service your 🏍️ Vehicle No. *${vehicleNumber}*. ` +
+      `It has been over 3 months since your last service on ${formattedDate}, and we recommend scheduling a maintenance appointment to keep your vehicle running smoothly.\n\n` +
+      `🔹 If you have any questions or would like to book a service, please feel free to contact us at *${proprietorMobile}*. ` +
+      `We look forward to assisting you.\n\n` +
+      `Best regards, *${selectedSCName}*\n` +
+      `📲 *${proprietorMobile}*\n\n\n` +
+      `👋 आदरणीय ग्राहक, *${name}*\n\n` +
+      `🔹 *${selectedSCName}* कडून आपल्याला एक सौम्य आठवण देत आहोत की आपल्या वाहनाची 🏍️ *${vehicleNumber}* ची सर्विस करण्याची वेळ झाली आहे. ` +
+      `आपल्या वाहनाची शेवटची सर्विस ${formattedDate} रोजी झाली होती, आणि ३ महिन्यांपेक्षा जास्त काळ झाला आहे. `
+      + `आम्ही आपल्याला वाहनाची देखभाल करण्याचा सल्ला देतो.\n\n` +
+      `🔹 आपल्याला काही प्रश्न असल्यास किंवा सेवा बुक करायची असल्यास, कृपया आमच्याशी संपर्क साधा: *${proprietorMobile}*.\n` +
+      `🔹 आम्ही आपली सेवा करण्यास उत्सुक आहोत..\n\n` +
+      `धन्यवाद,\n` +
+      `*${selectedSCName}*\n\n` +
+      `कृपया मोकळ्या मनाने माझ्याशी संपर्क साधा 😊\n` +
+      `📲 *${proprietorMobile}*`;
 
-    const phoneWithCountryCode = `91${mobile.replace(/\D/g, '')}`; // Assuming +91 for India
+    // NEW SMS Message for the user's request
+    const smsMessage = `${name} Ji, 3+ months since your ${item.selectedBike || 'vehicle'} service at ${selectedSCName}. कृपया सर्विस बुक करा: ${proprietorMobile}. Maintain safety & performance!`;
 
-    // 1. Try to open WhatsApp
+
+    const phoneWithCountryCode = `91${mobile.replace(/\D/g, '')}`;
+
     const whatsappUrl = `whatsapp://send?phone=${phoneWithCountryCode}&text=${encodeURIComponent(whatsappMsg)}`;
+
+    let reminderStatus = 'Attempted'; // Default status for direct attempt
+    let failureReason = null;
+    let sentVia = 'WhatsApp';
 
     try {
       const supported = await Linking.canOpenURL(whatsappUrl);
       if (supported) {
         await Linking.openURL(whatsappUrl);
+        reminderStatus = 'Attempted'; // App opened, but actual message sent status is unknown via Linking
       } else {
-        // If WhatsApp URL is not supported, try SMS
+        // WhatsApp not found. Prompt user for SMS.
         Alert.alert(
           'WhatsApp Not Found',
           'WhatsApp is not installed or the number is not registered. Do you want to send an SMS instead?',
@@ -181,17 +269,47 @@ const endOfCurrentYear = moment().endOf('year');
             {
               text: 'Cancel',
               style: 'cancel',
+              onPress: () => {
+                reminderStatus = 'Not Supported';
+                failureReason = 'WhatsApp not found, user cancelled SMS option.';
+                logReminder({
+                  customerId: item.customerId,
+                  serviceHistoryId: item.id, // Use item.id as serviceHistoryId
+                  serviceCenterId: userScId,
+                  sentVia: sentVia,
+                  status: reminderStatus,
+                  failureReason: failureReason,
+                });
+              }
             },
             {
               text: 'Send SMS',
-              onPress: () => sendSms(phoneWithCountryCode, whatsappMsg), // Use whatsappMsg for SMS
+              onPress: async () => {
+                // Pass smsMessage here
+                const smsResult = await sendSms(phoneWithCountryCode, smsMessage, item);
+                reminderStatus = smsResult.status;
+                failureReason = smsResult.failureReason;
+                sentVia = 'SMS';
+                logReminder({
+                  customerId: item.customerId,
+                  serviceHistoryId: item.id,
+                  serviceCenterId: userScId,
+                  sentVia: sentVia,
+                  status: reminderStatus,
+                  failureReason: failureReason,
+                });
+              },
             },
           ],
-          { cancelable: true }
+          { cancelable: false }
         );
+        return; // Exit here, as logging will happen after user choice
       }
     } catch (whatsappError) {
       console.error('Failed to open WhatsApp:', whatsappError);
+      reminderStatus = 'Failed';
+      failureReason = `Failed to open WhatsApp: ${whatsappError.message}`;
+      sentVia = 'WhatsApp';
       Alert.alert(
         'Error Opening WhatsApp',
         'Could not open WhatsApp. Do you want to send an SMS instead?',
@@ -214,50 +332,130 @@ const endOfCurrentYear = moment().endOf('year');
           },
           {
             text: 'Send SMS',
-            onPress: () => sendSms(phoneWithCountryCode, whatsappMsg),
+            onPress: async () => {
+              // Pass smsMessage here
+              const smsResult = await sendSms(phoneWithCountryCode, smsMessage, item);
+              reminderStatus = smsResult.status;
+              failureReason = smsResult.failureReason;
+              sentVia = 'SMS';
+              logReminder({
+                customerId: item.customerId,
+                serviceHistoryId: item.id,
+                serviceCenterId: userScId,
+                sentVia: sentVia,
+                status: reminderStatus,
+                failureReason: failureReason,
+              });
+            },
           },
         ],
-        { cancelable: true }
+        { cancelable: false }
       );
+      return; // Exit here, as logging will happen after user choice
     }
+
+    // If we reach here, it means WhatsApp attempt was made and no SMS prompt was shown or opted.
+    logReminder({
+      customerId: item.customerId,
+      serviceHistoryId: item.id,
+      serviceCenterId: userScId,
+      sentVia: sentVia,
+      status: reminderStatus,
+      failureReason: failureReason,
+    });
   };
 
-  const sendSms = async (phoneNumber, message) => {
+  const sendSms = async (phoneNumber, message, item) => {
     let smsUrl;
     if (Platform.OS === 'android') {
       smsUrl = `sms:${phoneNumber}?body=${encodeURIComponent(message)}`;
-    } else { // iOS
+    } else {
       smsUrl = `sms:${phoneNumber}&body=${encodeURIComponent(message)}`;
     }
+
+    let status = 'Failed';
+    let reason = null;
 
     try {
       const supported = await Linking.canOpenURL(smsUrl);
       if (supported) {
         await Linking.openURL(smsUrl);
+        status = 'Attempted';
       } else {
+        status = 'Not Supported';
+        reason = 'Could not open SMS app on your device.';
         Alert.alert('Error', 'Could not open SMS app on your device.');
       }
     } catch (smsError) {
       console.error('Failed to open SMS:', smsError);
+      status = 'Failed';
+      reason = `An unexpected error occurred while trying to send SMS: ${smsError.message}`;
       Alert.alert('Error', 'An unexpected error occurred while trying to send SMS.');
+    }
+    return { status, failureReason: reason };
+  };
+
+  const getStatusIcon = (status) => {
+    switch (status) {
+      case 'Sent':
+        return <Ionicons name="checkmark-circle" size={24} color={COLORS.success} />;
+      case 'Attempted':
+        return <Ionicons name="information-circle" size={24} color={COLORS.info} />;
+      case 'Failed':
+        return <Ionicons name="close-circle" size={24} color={COLORS.danger} />;
+      case 'Not Supported':
+        return <Ionicons name="warning" size={24} color={COLORS.warning} />;
+      default:
+        return null; // No icon if no reminder attempt yet
+    }
+  };
+
+  const getStatusText = (status) => {
+    switch (status) {
+      case 'Sent':
+        return 'Sent';
+      case 'Attempted':
+        return 'Attempted';
+      case 'Failed':
+        return 'Failed';
+      case 'Not Supported':
+        return 'Not Supported';
+      default:
+        return 'No Reminder Sent Yet';
     }
   };
 
 
   const renderItem = ({ item }) => (
     <View style={styles.serviceCard}>
-      <View style={styles.serviceHeader}>        
+      <View style={styles.serviceHeader}>
         <Text style={styles.customerName}>{item.customerName}</Text>
         <Text style={styles.serviceTitle}>{item.selectedBike || 'Unknown Vehicle'}</Text>
       </View>
 
       <View style={styles.serviceDetails}>
         <Text style={styles.detailText}>
-          📅 Last Service: {moment(item.serviceDate).format('DD MMM YYYY')}
+          📅 Last Service: {moment(item.serviceDate).format('DD MMMYYYY')}
         </Text>
         <Text style={styles.detailText}>
           🔧 Service Type: {item.selectedServices || 'Not specified'}
         </Text>
+        <Text style={styles.detailText}>
+          🚗 Vehicle No: {item.vehicleNumber || 'N/A'}
+        </Text>
+        {item.latestReminderLog && (
+          <View style={styles.reminderStatusContainer}>
+            {getStatusIcon(item.latestReminderLog.status)}
+            <Text style={[styles.reminderStatusText, { color: item.latestReminderLog.status === 'Sent' ? COLORS.success : item.latestReminderLog.status === 'Failed' ? COLORS.danger : COLORS.info }]}>
+              {getStatusText(item.latestReminderLog.status)} via {item.latestReminderLog.sentVia}
+              {item.latestReminderLog.failureReason ? ` (${item.latestReminderLog.failureReason})` : ''}
+              {moment(item.latestReminderLog.reminderDate).isValid() ? ` on ${moment(item.latestReminderLog.reminderDate).format('DD MMM, LT')}` : ''}
+            </Text>
+          </View>
+        )}
+        {!item.latestReminderLog && (
+            <Text style={styles.noReminderText}>No reminder sent yet</Text>
+        )}
       </View>
 
       <TouchableOpacity
@@ -272,7 +470,7 @@ const endOfCurrentYear = moment().endOf('year');
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#4A8FE7" />
+        <ActivityIndicator size="large" color={COLORS.primary} />
         <Text style={styles.loadingText}>Loading service reminders...</Text>
       </View>
     );
@@ -281,6 +479,7 @@ const endOfCurrentYear = moment().endOf('year');
   if (error) {
     return (
       <View style={styles.errorContainer}>
+        <MaterialIcons name="error-outline" size={50} color={COLORS.danger} style={{ marginBottom: 10 }} />
         <Text style={styles.errorText}>{error}</Text>
         <TouchableOpacity
           style={styles.retryButton}
@@ -298,37 +497,76 @@ const endOfCurrentYear = moment().endOf('year');
   return (
     <View style={styles.container}>
       <Appbar.Header style={styles.header}>
-        <Appbar.Content
-          title="Service Reminders"
-          titleStyle={styles.headerTitle}
-        />
-        <Appbar.Action
-          icon="refresh"
-          onPress={() => {
-            setRefreshing(true);
-            fetchServiceHistory();
-          }}
-        />
+        {isSearchVisible ? (
+          <>
+            <Appbar.Action icon="arrow-left" color={COLORS.card} onPress={() => {
+              setIsSearchVisible(false);
+              setSearchQuery('');
+            }} />
+            <TextInput
+              placeholder="Search reminders..."
+              value={searchQuery}
+              onChangeText={setSearchQuery}
+              style={styles.searchInput}
+              underlineColor="transparent"
+              selectionColor={COLORS.card}
+              placeholderTextColor={COLORS.card + '99'}
+              left={<TextInput.Icon icon="magnify" color={COLORS.card} />}
+              autoFocus
+            />
+            <Appbar.Action icon="close" color={COLORS.card} onPress={() => setSearchQuery('')} />
+          </>
+        ) : (
+          <>
+            <Appbar.Content
+              title="Service Reminders"
+              titleStyle={styles.headerTitle}
+            />
+            <Appbar.Action icon="magnify" color={COLORS.card} onPress={() => setIsSearchVisible(true)} />
+            <Appbar.Action
+              icon="refresh"
+              color={COLORS.card}
+              onPress={() => {
+                setRefreshing(true);
+                fetchServiceHistory();
+              }}
+            />
+          </>
+        )}
       </Appbar.Header>
 
       <FlatList
-        data={filteredHistory}
+        data={filteredReminders}
         keyExtractor={item => item.id.toString()}
         renderItem={renderItem}
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
             onRefresh={fetchServiceHistory}
-            colors={['#4A8FE7']}
-            tintColor="#4A8FE7"
+            colors={[COLORS.primary]}
+            tintColor={COLORS.primary}
           />
         }
         contentContainerStyle={styles.listContent}
         ListEmptyComponent={
-          <View style={styles.emptyState}>
-            {/* <Text style={styles.emptyStateText}>No service reminders needed for 2024</Text> */}
-            <Text style={styles.emptyStateSubtext}>Services older than 3 months will appear here from current date</Text>
-          </View>
+          filteredReminders.length === 0 && searchQuery ? (
+            <View style={styles.emptyState}>
+              <MaterialIcons name="search-off" size={48} color={COLORS.lightText} style={{ marginBottom: 10 }} />
+              <Text style={styles.emptyStateText}>No matching reminders found for "{searchQuery}"</Text>
+              <TouchableOpacity
+                style={styles.retryButton}
+                onPress={() => setSearchQuery('')}
+              >
+                <Text style={styles.retryButtonText}>Clear Search</Text>
+              </TouchableOpacity>
+            </View>
+          ) : (
+            <View style={styles.emptyState}>
+              <FontAwesome name="bell-o" size={48} color={COLORS.lightText} style={{ marginBottom: 10 }} />
+              <Text style={styles.emptyStateText}>No service reminders needed</Text>
+              <Text style={styles.emptyStateSubtext}>Services older than 3 months will appear here from the current date</Text>
+            </View>
+          )
         }
       />
     </View>
@@ -338,98 +576,152 @@ const endOfCurrentYear = moment().endOf('year');
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F8FAFC',
+    backgroundColor: COLORS.background,
   },
   header: {
-    backgroundColor: '#FFFFFF',
-    elevation: 1,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
+    backgroundColor: COLORS.primary,
+    elevation: 2,
+    shadowColor: COLORS.primary,
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
-    shadowRadius: 2,
+    shadowRadius: 4,
   },
   headerTitle: {
     fontSize: 20,
     fontWeight: '600',
-    color: '#1F2937',
+    color: COLORS.card,
+    marginLeft: 10,
+  },
+  searchInput: {
+    flex: 1,
+    height: 40,
+    backgroundColor: COLORS.primary,
+    borderRadius: 8,
+    paddingHorizontal: 8,
+    color: COLORS.card,
+    fontSize: 16,
+    marginRight: 10,
   },
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#F8FAFC',
+    backgroundColor: COLORS.background,
   },
   loadingText: {
     marginTop: 16,
     fontSize: 16,
-    color: '#4A8FE7',
+    color: COLORS.primary,
   },
   errorContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
     padding: 20,
+    backgroundColor: COLORS.background,
   },
   errorText: {
     fontSize: 16,
-    color: '#EF4444',
+    color: COLORS.danger,
     marginBottom: 20,
     textAlign: 'center',
+    maxWidth: '80%',
   },
   retryButton: {
-    backgroundColor: '#4A8FE7',
+    backgroundColor: COLORS.primary,
     paddingVertical: 12,
     paddingHorizontal: 24,
     borderRadius: 8,
+    marginTop: 8,
   },
   retryButtonText: {
-    color: '#FFFFFF',
+    color: COLORS.card,
     fontWeight: '600',
     fontSize: 16,
   },
   serviceCard: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 12,
+    backgroundColor: COLORS.card,
+    borderRadius: 14,
     padding: 16,
     marginHorizontal: 16,
     marginVertical: 8,
-    shadowColor: '#000',
+    shadowColor: COLORS.primary,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.05,
-    shadowRadius: 4,
-    elevation: 2,
+    shadowRadius: 8,
+    elevation: 1,
+    overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: COLORS.borderColor,
   },
   serviceHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
+    alignItems: 'center',
     marginBottom: 12,
   },
   customerName: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#1E40AF',
+    color: COLORS.text,
+    flexShrink: 1,
+    marginRight: 10,
   },
   serviceTitle: {
     fontSize: 16,
-    color: '#6B7280',
+    color: COLORS.lightText,
+    textAlign: 'right',
   },
   serviceDetails: {
     marginBottom: 16,
+    borderTopWidth: 1,
+    borderTopColor: COLORS.borderColor,
+    paddingTop: 12,
   },
   detailText: {
     fontSize: 14,
-    color: '#374151',
+    color: COLORS.text,
     marginBottom: 6,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  reminderStatusContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 8,
+    paddingTop: 8,
+    borderTopWidth: 1,
+    borderTopColor: COLORS.borderColor,
+  },
+  reminderStatusText: {
+    marginLeft: 8,
+    fontSize: 14,
+    fontWeight: '500',
+  },
+  noReminderText: {
+    marginLeft: 8,
+    fontSize: 14,
+    fontWeight: '500',
+    color: COLORS.lightText,
+    marginTop: 8,
+    paddingTop: 8,
+    borderTopWidth: 1,
+    borderTopColor: COLORS.borderColor,
   },
   remindButton: {
-    backgroundColor: '#4A8FE7',
+    backgroundColor: COLORS.primary,
     borderRadius: 8,
     paddingVertical: 12,
     alignItems: 'center',
     justifyContent: 'center',
+    shadowColor: COLORS.primary,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 2,
   },
   remindButtonText: {
-    color: '#FFFFFF',
+    color: COLORS.card,
     fontWeight: '600',
     fontSize: 16,
   },
@@ -442,13 +734,13 @@ const styles = StyleSheet.create({
   emptyStateText: {
     fontSize: 18,
     fontWeight: '500',
-    color: '#1F2937',
+    color: COLORS.text,
     textAlign: 'center',
     marginBottom: 8,
   },
   emptyStateSubtext: {
     fontSize: 14,
-    color: '#6B7280',
+    color: COLORS.lightText,
     textAlign: 'center',
   },
   listContent: {
