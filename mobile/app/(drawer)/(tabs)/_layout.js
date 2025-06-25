@@ -21,7 +21,7 @@ export default function TabLayout() {
   const pulseAnim = useRef(new Animated.Value(1)).current;
   const { loggedInUser } = useAuth();
 
-  console.log("Logged usr role in layout", loggedInUser.role)
+  console.log("Logged usr role in layout", loggedInUser)
 
   const isAdmin = loggedInUser && loggedInUser.role === 'admin';
 

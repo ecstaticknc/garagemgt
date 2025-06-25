@@ -162,11 +162,22 @@ export default function Home() {
     outputRange: ['0deg', '360deg']
   });
 
-  const pieData = [
-    { label: "Customers", value: customerCount, color: colors.primary },
-    { label: "Services Done", value: totalServiceHistoryCount, color: colors.secondary },
-    { label: "Reminders", value: reminderCount, color: colors.danger },
-  ].filter(d => d.value > 0); // Filter out zero values to avoid empty slices
+  const chartColors = [
+  '#4CAF50', // Green
+  '#2196F3', // Blue
+  '#FF9800', // Orange
+  '#4a6da7', // Purple
+  '#c9123f', // Red
+  '#607D8B', // Blue Grey
+  '#FFC107', // Amber
+  '#11c7db', // Teal
+];
+
+const pieData = [
+  { label: "Customers", value: customerCount, color: chartColors[3] },
+  { label: "Services Done", value: totalServiceHistoryCount, color: chartColors[7] },
+  { label: "Reminders", value: reminderCount, color: chartColors[6] },
+].filter(d => d.value > 0);
 
   const pieChartRadius = screenWidth * 0.3; // Example radius, adjust as needed
   const innerRadius = pieChartRadius * 0.6; // For donut chart effect

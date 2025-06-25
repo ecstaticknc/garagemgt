@@ -16,6 +16,24 @@ import { useNavigation } from 'expo-router';
 import API from '../../config/axiosInstance';
 import { useAuth } from '../../../context/AuthContext';
 import moment from 'moment';
+import { MaterialIcons, FontAwesome, Ionicons } from '@expo/vector-icons'; // Import Ionicons for checkmark/close icons
+import { useFocusEffect } from '@react-navigation/native';
+
+// Define a modern color palette consistent with CList.js and SHList.js
+const COLORS = {
+  primary: '#6B42F6', // A vibrant purple
+  secondary: '#8A5DFE', // Lighter purple
+  accent: '#FFD700',   // Gold for secondary accents (used in SHList)
+  background: '#F0F2F5', // Light grey background (similar to CList.js background)
+  text: '#344054',      // Dark grey for primary text
+  lightText: '#667085', // Medium grey for secondary text
+  card: '#FFFFFF',      // White for cards (cardBackground in CList.js, card in SHList.js)
+  danger: '#F04438',    // Red for delete actions (similar to danger in SHList.js)
+  success: '#12B76A',   // Green for success (from SHList.js)
+  warning: '#F79009',   // Warning color (from SHList.js)
+  info: '#06AED4',      // Info color (from SHList.js)
+  borderColor: '#E0E0E0', // Light border for subtle separation (from CList.js)
+};
 
 const ReminderScreen = () => {
   const navigation = useNavigation();
@@ -24,8 +42,31 @@ const ReminderScreen = () => {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState(null);
-  const [customers, setCustomers] = useState([]);
-  const { userScId } = useAuth();
+  const { userScId } = useAuth(); // Assuming userScId is available from auth context
+  const [searchQuery, setSearchQuery] = useState('');
+  const [isSearchVisible, setIsSearchVisible] = useState(false);
+  const [serviceCenterInfo, setServiceCenterInfo] = useState(null); // State to store service center info
+
+  const fetchServiceCenterInfo = useCallback(async () => {
+    if (!userScId) {
+      console.warn('userScId is not available for fetching service center info.');
+      return;
+    }
+    try {
+      const response = await API._get(`/servicecenters/${userScId}`);
+      if (response.data && response.data.data) {
+        setServiceCenterInfo(response.data.data);
+      } else {
+        console.warn('Service center info not found for ID:', userScId);
+        setServiceCenterInfo(null); // Ensure it's null if no data
+      }
+    } catch (err) {
+      console.error('Error fetching service center info:', err);
+      // It's okay to not set an error here, as main content will still load
+      // And we have placeholder values in case fetching fails
+      setServiceCenterInfo(null);
+    }
+  }, [userScId]);
 
   const fetchServiceHistory = useCallback(async () => {
     if (!userScId) {
@@ -84,13 +125,22 @@ const endOfCurrentYear = moment().endOf('year');
   useEffect(() => {
     if (userScId) {
       fetchServiceHistory();
-      //fetchCustomers();
+      fetchServiceCenterInfo(); // Call fetchServiceCenterInfo here
     }
-  }, [userScId, fetchServiceHistory]);
+  }, [userScId, fetchServiceHistory, fetchServiceCenterInfo]);
 
   useEffect(() => {
     setFilteredHistory(serviceHistory);
   }, [serviceHistory]);
+
+  useFocusEffect(
+    useCallback(() => {
+      if (userScId) {
+        fetchServiceHistory();
+        fetchServiceCenterInfo();
+      }
+    }, [userScId, fetchServiceHistory, fetchServiceCenterInfo])
+  );
 
 
   const handleSendReminder = async (item) => { // Made async to use await with Linking.canOpenURL
@@ -99,6 +149,10 @@ const endOfCurrentYear = moment().endOf('year');
     const formattedDate = item.serviceDate
       ? moment(item.serviceDate).format('DD/MM/YYYY')
       : 'N/A';
+
+    // Use fetched serviceCenterInfo, or fallback to placeholder if not available
+    const selectedSCName = serviceCenterInfo?.serviceCenterName || "Your Service Center Name";
+    const proprietorMobile = serviceCenterInfo?.proprietorMobile || "Your Proprietor Mobile";
 
     if (!mobile) {
       Alert.alert('Error', 'Customer mobile number not available');
@@ -145,6 +199,18 @@ const endOfCurrentYear = moment().endOf('year');
           {
             text: 'Cancel',
             style: 'cancel',
+            onPress: () => {
+              reminderStatus = 'Not Supported';
+              failureReason = 'Error opening WhatsApp, user cancelled SMS option.';
+              logReminder({
+                customerId: item.customerId,
+                serviceHistoryId: item.id,
+                serviceCenterId: userScId,
+                sentVia: sentVia,
+                status: reminderStatus,
+                failureReason: failureReason,
+              });
+            }
           },
           {
             text: 'Send SMS',
