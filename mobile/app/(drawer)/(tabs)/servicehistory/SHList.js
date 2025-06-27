@@ -47,8 +47,8 @@ const ServiceHistoryListScreen = () => {
 
       const response = await API._get(`/servicehistory/byServiceCenter?scId=${scId}`);
       const data = response.data?.data || [];
-      console.log("response in history", data)
-      console.log("response in history", data[0]?.serviceHistory) // Added optional chaining to prevent error if data[0] is undefined
+      //console.log("response in history", data)
+      //console.log("response in history", data[0]?.serviceHistory) // Added optional chaining to prevent error if data[0] is undefined
 
       const filtered = data.filter(customer =>
         customer.serviceHistory && customer.serviceHistory.length > 0

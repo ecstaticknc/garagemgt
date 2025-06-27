@@ -39,7 +39,7 @@ export const AuthProvider = ({ children }) => {
     try {
       const response = await API._post('/login', { username, password });
       const userData = response?.data?.data;
-      console.log("response in login", response);
+     // console.log("response in login", response);
 
       // Corrected condition: Check if userData exists AND scId is explicitly not null or undefined
       // This allows 0 to be a valid scId.
@@ -48,7 +48,7 @@ export const AuthProvider = ({ children }) => {
         await AsyncStorage.setItem('loggedInUser', JSON.stringify(userData)); // Store the full user data
         setUserScId(userData.scId);
         setLoggedInUser(userData); // Set the full user data in state
-        console.log('Login successful. scId>', userData.scId, 'role>', userData.role);
+       // console.log('Login successful. scId>', userData.scId, 'role>', userData.role);
         return true;
       } else {
         // This else block will now only hit if scId is genuinely missing or null/undefined

@@ -67,7 +67,7 @@ const CustomerListScreen = () => {
       fetchCustomers();
     }, [userScId]);
 
-    console.log('customers:', customers);
+   // console.log('customers:', customers);
 
   const handleDeleteCustomer = async (id) => {
     Alert.alert(
