@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { View, FlatList, StyleSheet, Alert, RefreshControl, TouchableOpacity, Animated } from 'react-native';
 import { Appbar, List, FAB, ActivityIndicator, Text, Button, TextInput } from 'react-native-paper'; // Import TextInput
 import { useFocusEffect } from '@react-navigation/native';
@@ -62,6 +62,12 @@ const CustomerListScreen = () => {
       return () => {};
     }, [userScId])
   );
+
+  useEffect(() => {    
+      fetchCustomers();
+    }, [userScId]);
+
+    console.log('customers:', customers);
 
   const handleDeleteCustomer = async (id) => {
     Alert.alert(

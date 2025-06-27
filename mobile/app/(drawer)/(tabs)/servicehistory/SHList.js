@@ -7,6 +7,7 @@ import { router, useLocalSearchParams, useNavigation } from 'expo-router';
 import { useAuth } from '../../../../context/AuthContext';
 import { MaterialIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
+import moment from 'moment';
 
 const COLORS = {
   primary: '#6B42F6',
@@ -163,7 +164,7 @@ const ServiceHistoryListScreen = () => {
               <Card.Content>
                 <View style={styles.serviceHeader}>
                   <MaterialIcons name="calendar-today" size={18} color={COLORS.text} />
-                  <Paragraph style={styles.serviceDate}>{sh.serviceDate}</Paragraph>
+                  <Paragraph style={styles.serviceDate}>{moment(sh.serviceDate).format('DD MMM YYYY')}</Paragraph>
                 </View>
                 
                 <View style={styles.serviceDetail}>

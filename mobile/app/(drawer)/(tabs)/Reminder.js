@@ -337,7 +337,7 @@ const ReminderScreen = () => {
 
       <View style={styles.serviceDetails}>
         <Text style={styles.detailText}>
-          📅 Last Service: {moment(item.serviceDate).format('DD MMMYYYY')}
+          📅 Last Service: {moment(item.serviceDate).format('DD MMM YYYY')}
         </Text>
         <Text style={styles.detailText}>
           🔧 Service Type: {item.selectedServices || 'Not specified'}
