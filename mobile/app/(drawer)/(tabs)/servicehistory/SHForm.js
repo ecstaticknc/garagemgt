@@ -11,6 +11,9 @@ import API from '../../../config/axiosInstance';
 import { useLocalSearchParams, useNavigation } from 'expo-router';
 import { useAuth } from '../../../../context/AuthContext';
 import DateTimePicker from '@react-native-community/datetimepicker';
+import { 
+  SERVICE_TYPES
+} from '../../../../utils/constants';
 import moment from 'moment';
 
 const ServiceHistoryFormScreen = () => {
@@ -147,12 +150,12 @@ const ServiceHistoryFormScreen = () => {
   };
 
   // Handle checkbox change
-  const handleServiceCheckboxChange = (service) => {
+  const handleServiceCheckboxChange = (serviceId) => {
     setSelectedServices((prevSelectedServices) => {
-      if (prevSelectedServices.includes(service)) {
-        return prevSelectedServices.filter((s) => s !== service);
+      if (prevSelectedServices.includes(serviceId)) {
+        return prevSelectedServices.filter((s) => s !== serviceId);
       } else {
-        return [...prevSelectedServices, service];
+        return [...prevSelectedServices, serviceId];
       }
     });
   };
@@ -274,32 +277,26 @@ const ServiceHistoryFormScreen = () => {
           {/* Service Type Checkboxes */}
           <View style={styles.radioGroup}>
   <Text style={styles.radioGroupLabel}>Select Service Type:</Text>
-  {['fullService', 'mediumService', 'oilChange', 'miscellaneous'].map((service) => {
-    const displayName = service
-      .replace(/([A-Z])/g, ' $1')
-      .replace(/^./, str => str.toUpperCase());
-    
-    return (
-      <TouchableOpacity
-        key={service}
-        style={styles.checkboxItem}
-        onPress={() => handleServiceCheckboxChange(service)}
-        activeOpacity={0.7}
-      >
-        <View style={styles.checkboxWrapper}>
-          <Checkbox
-            status={selectedServices.includes(service) ? 'checked' : 'unchecked'}
-            onPress={() => handleServiceCheckboxChange(service)}
-            color="#6200ee"
-            uncheckedColor="#888"
-          />
-        </View>
-        <Text style={styles.checkboxLabel}>
-          {displayName}
-        </Text>
-      </TouchableOpacity>
-    );
-  })}
+{SERVICE_TYPES.map((service) => (
+  <TouchableOpacity
+    key={service.id}
+    style={styles.checkboxItem}
+    onPress={() => handleServiceCheckboxChange(service.id)}
+    activeOpacity={0.7}
+  >
+    <View style={styles.checkboxWrapper}>
+      <Checkbox
+        status={selectedServices.includes(service.id) ? 'checked' : 'unchecked'}
+        onPress={() => handleServiceCheckboxChange(service.id)}
+        color="#6200ee"
+        uncheckedColor="#888"
+      />
+    </View>
+    <Text style={styles.checkboxLabel}>
+      {service.label}
+    </Text>
+  </TouchableOpacity>
+))}
 </View>
 
           {/* Miscellaneous Input */}
