@@ -5,12 +5,13 @@ import {
 } from 'react-native';
 import {
   Appbar, TextInput, Button, ActivityIndicator, Text, List,
-  Searchbar, RadioButton
+  Searchbar, RadioButton, Checkbox // Import Checkbox
 } from 'react-native-paper';
 import API from '../../../config/axiosInstance';
 import { useLocalSearchParams, useNavigation } from 'expo-router';
 import { useAuth } from '../../../../context/AuthContext';
 import DateTimePicker from '@react-native-community/datetimepicker';
+import moment from 'moment';
 
 const ServiceHistoryFormScreen = () => {
   const navigation = useNavigation();
@@ -22,12 +23,17 @@ const ServiceHistoryFormScreen = () => {
   const customerDataFromParams = localSearchParams?.customerData ? JSON.parse(localSearchParams.customerData) : null;
 
   const [selectedBike, setSelectedBike] = useState(existingServiceHistory?.selectedBike || '');
-  const [selectedServices, setSelectedServices] = useState(existingServiceHistory?.selectedServices || '');
+  // Change selectedServices to an array for multiple selections
+  const [selectedServices, setSelectedServices] = useState(
+    existingServiceHistory?.selectedServices
+      ? existingServiceHistory.selectedServices.split(',').map(s => s.trim())
+      : []
+  );
   const [miscellaneousServiceText, setMiscellaneousServiceText] = useState(
-    existingServiceHistory?.selectedServices === 'miscellaneous' ? existingServiceHistory?.serviceRemark : ''
+    existingServiceHistory?.selectedServices.includes('miscellaneous') ? existingServiceHistory?.serviceRemark : ''
   );
   const [serviceDate, setServiceDate] = useState(
-    existingServiceHistory?.serviceDate ? existingServiceHistory.serviceDate.split('T')[0] : ''
+    existingServiceHistory?.serviceDate ? existingServiceHistory.serviceDate.split('T')[0] : new Date().toISOString().split('T')[0]
   );
   const [serviceRemark, setServiceRemark] = useState(existingServiceHistory?.serviceRemark || '');
 
@@ -140,10 +146,21 @@ const ServiceHistoryFormScreen = () => {
     setServiceDate(date.toISOString().split('T')[0]);
   };
 
+  // Handle checkbox change
+  const handleServiceCheckboxChange = (service) => {
+    setSelectedServices((prevSelectedServices) => {
+      if (prevSelectedServices.includes(service)) {
+        return prevSelectedServices.filter((s) => s !== service);
+      } else {
+        return [...prevSelectedServices, service];
+      }
+    });
+  };
+
   const handleSave = async () => {
     let finalRemark = serviceRemark;
 
-    if (selectedServices === 'miscellaneous') {
+    if (selectedServices.includes('miscellaneous')) {
       if (!miscellaneousServiceText.trim()) {
         Alert.alert('Validation Error', 'Miscellaneous details are required.');
         return;
@@ -151,8 +168,8 @@ const ServiceHistoryFormScreen = () => {
       finalRemark = miscellaneousServiceText;
     }
 
-    if (!selectedBike || !selectedServices || !serviceDate || !selectedCustomer) {
-      Alert.alert('Validation Error', 'All fields are required.');
+    if (!selectedBike || selectedServices.length === 0 || !serviceDate || !selectedCustomer) {
+      Alert.alert('Validation Error', 'All required fields are needed. Please select at least one service type.');
       return;
     }
 
@@ -160,7 +177,7 @@ const ServiceHistoryFormScreen = () => {
     try {
       const payload = {
         selectedBike,
-        selectedServices,
+        selectedServices: selectedServices.join(', '), // Join array back to string for backend
         serviceDate,
         serviceRemark: finalRemark,
         customerId: parseInt(selectedCustomer.id),
@@ -238,7 +255,7 @@ const ServiceHistoryFormScreen = () => {
           <TouchableOpacity onPress={() => setShowDatePicker(true)} style={styles.input}>
             <TextInput
               label="Service Date"
-              value={serviceDate}
+              value={moment(serviceDate).format('DD MMM YYYY')}
               mode="outlined"
               editable={false}
               right={<TextInput.Icon icon="calendar" />}
@@ -254,27 +271,39 @@ const ServiceHistoryFormScreen = () => {
             />
           )}
 
-          {/* Service Type */}
+          {/* Service Type Checkboxes */}
           <View style={styles.radioGroup}>
-            <Text style={styles.radioGroupLabel}>Select Service Type:</Text>
-            <RadioButton.Group
-              onValueChange={(val) => {
-                setSelectedServices(val);
-                if (val !== 'miscellaneous') setMiscellaneousServiceText('');
-              }}
-              value={selectedServices}
-            >
-              {['fullService', 'mediumService', 'oilChange', 'miscellaneous'].map((service) => (
-                <View key={service} style={styles.radioItem}>
-                  <RadioButton value={service} />
-                  <Text>{service.replace(/([A-Z])/g, ' $1')}</Text>
-                </View>
-              ))}
-            </RadioButton.Group>
-          </View>
+  <Text style={styles.radioGroupLabel}>Select Service Type:</Text>
+  {['fullService', 'mediumService', 'oilChange', 'miscellaneous'].map((service) => {
+    const displayName = service
+      .replace(/([A-Z])/g, ' $1')
+      .replace(/^./, str => str.toUpperCase());
+    
+    return (
+      <TouchableOpacity
+        key={service}
+        style={styles.checkboxItem}
+        onPress={() => handleServiceCheckboxChange(service)}
+        activeOpacity={0.7}
+      >
+        <View style={styles.checkboxWrapper}>
+          <Checkbox
+            status={selectedServices.includes(service) ? 'checked' : 'unchecked'}
+            onPress={() => handleServiceCheckboxChange(service)}
+            color="#6200ee"
+            uncheckedColor="#888"
+          />
+        </View>
+        <Text style={styles.checkboxLabel}>
+          {displayName}
+        </Text>
+      </TouchableOpacity>
+    );
+  })}
+</View>
 
           {/* Miscellaneous Input */}
-          {selectedServices === 'miscellaneous' && (
+          {selectedServices.includes('miscellaneous') && (
             <TextInput
               label="Miscellaneous Details"
               value={miscellaneousServiceText}
@@ -329,12 +358,12 @@ const ServiceHistoryFormScreen = () => {
               data={filteredCustomers}
               keyExtractor={(item) => item.id.toString()}
               renderItem={({ item }) => (
-                <List.Item
-                  title={item.customerName}
-                  description={`Mobile: ${item.mobile} | Vehicles: ${item.vehicles || 'N/A'}`}
-                  onPress={() => handleSelectCustomer(item)}
-                  left={(props) => <List.Icon {...props} icon="account" />}
-                />
+               <List.Item
+  title={item.customerName}
+  description={`Mobile: ${item.mobile || 'N/A'} | Vehicles: ${item.vehicles || 'N/A'}`}
+  onPress={() => handleSelectCustomer(item)}
+  left={(props) => <List.Icon {...props} icon="account" />}
+/>
               )}
               ListEmptyComponent={<Text style={styles.emptyList}>No customers found.</Text>}
             />
@@ -354,9 +383,9 @@ const styles = StyleSheet.create({
   errorText: { color: 'red', textAlign: 'center', marginVertical: 10 },
   modalContent: { flex: 1, padding: 16 },
   searchBar: { marginBottom: 10 },
-  radioGroup: { marginBottom: 12, padding: 12, backgroundColor: '#fff', borderRadius: 8 },
+  radioGroup: { marginBottom: 12, padding: 12, backgroundColor: '#fff', borderRadius: 8 }, // Renamed to clarify its general use for grouping
   radioGroupLabel: { fontSize: 16, fontWeight: 'bold', marginBottom: 8 },
-  radioItem: { flexDirection: 'row', alignItems: 'center', marginBottom: 4 },
+  radioItem: { flexDirection: 'row', alignItems: 'center', marginBottom: 4 }, // Renamed to clarify its general use for list items
   emptyList: { textAlign: 'center', marginTop: 20, fontSize: 16, color: '#888' },
   readOnlyBox: {
     backgroundColor: '#f0f0f0',
@@ -374,6 +403,30 @@ const styles = StyleSheet.create({
     fontSize: 15,
     color: '#222',
   },
+checkboxItem: {
+  flexDirection: 'row',
+  alignItems: 'center',
+  backgroundColor: '#fff',
+  borderRadius: 8,
+  paddingVertical: 10,
+  paddingHorizontal: 12,
+  marginBottom: 10,
+  shadowColor: '#000',
+  shadowOffset: { width: 0, height: 1 },
+  shadowOpacity: 0.1,
+  shadowRadius: 2,
+  elevation: 2,
+},
+checkboxWrapper: {
+  transform: [{ scaleX: 1.3 }, { scaleY: 1.3 }],
+},
+checkboxLabel: {
+  fontSize: 16,
+  color: '#333',
+  marginLeft: 12,
+  flexShrink: 1,
+},
+
 });
 
 export default ServiceHistoryFormScreen;
