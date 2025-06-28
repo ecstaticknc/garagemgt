@@ -7,6 +7,8 @@ import axios from 'axios';
 //const BASE_URL = 'http://192.168.1.123:3000/api';
 //const BASE_URL = 'https://lsbackend.laxmipanditservices.com/api';
 //const BASE_URL = 'http://192.168.1.121:3000/api';
+const BASE_URL = 'https://bikeclinicbackend.luknos.com/api';
+
 
 const apiClient = axios.create({
   baseURL: BASE_URL,
@@ -20,6 +22,17 @@ const apiClient1 = axios.create({
   headers: {
     'Content-Type': 'multipart/form-data',
   },
+});
+
+apiClient.interceptors.request.use((config) => {
+  if (config.method === 'get') {
+    const url = new URL(config.url, 'http://dummybase'); // dummy base required for relative URLs
+    url.searchParams.set('_ts', Date.now());
+    config.url = url.pathname + url.search;
+  }
+  return config;
+}, (error) => {
+  return Promise.reject(error);
 });
 
 // Define common API methods

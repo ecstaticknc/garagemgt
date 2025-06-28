@@ -7,6 +7,7 @@ import { router, useLocalSearchParams, useNavigation } from 'expo-router';
 import { useAuth } from '../../../../context/AuthContext';
 import { MaterialIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
+import moment from 'moment';
 
 const COLORS = {
   primary: '#6B42F6',
@@ -46,8 +47,8 @@ const ServiceHistoryListScreen = () => {
 
       const response = await API._get(`/servicehistory/byServiceCenter?scId=${scId}`);
       const data = response.data?.data || [];
-      console.log("response in history", data)
-      console.log("response in history", data[0]?.serviceHistory) // Added optional chaining to prevent error if data[0] is undefined
+      //console.log("response in history", data)
+      //console.log("response in history", data[0]?.serviceHistory) // Added optional chaining to prevent error if data[0] is undefined
 
       const filtered = data.filter(customer =>
         customer.serviceHistory && customer.serviceHistory.length > 0
@@ -163,7 +164,7 @@ const ServiceHistoryListScreen = () => {
               <Card.Content>
                 <View style={styles.serviceHeader}>
                   <MaterialIcons name="calendar-today" size={18} color={COLORS.text} />
-                  <Paragraph style={styles.serviceDate}>{sh.serviceDate}</Paragraph>
+                  <Paragraph style={styles.serviceDate}>{moment(sh.serviceDate).format('DD MMM YYYY')}</Paragraph>
                 </View>
                 
                 <View style={styles.serviceDetail}>

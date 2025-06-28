@@ -7,6 +7,7 @@ import Icon from 'react-native-vector-icons/FontAwesome';
 import API from '../../../config/axiosInstance';
 import { useLocalSearchParams, useNavigation } from 'expo-router';
 import { useAuth } from '../../../../context/AuthContext';
+import moment from 'moment';
 
 const CustomerFormScreen = () => {
   const { userScId } = useAuth();
@@ -17,7 +18,7 @@ const CustomerFormScreen = () => {
   const [customerName, setCustomerName] = useState(existingCustomer?.customerName || '');
   const [mobile, setMobile] = useState(existingCustomer?.mobile || '');
   const [vehicles, setVehicles] = useState(existingCustomer?.vehicles ? existingCustomer.vehicles.split(',').map(v => ({ vehicleNumber: v.trim() })) : [{ vehicleNumber: '' }]);
-  const [regDate, setRegDate] = useState(existingCustomer?.regDate ? existingCustomer.regDate.split('T')[0] : '');
+  const [regDate, setRegDate] = useState(existingCustomer?.regDate ? existingCustomer.regDate.split('T')[0] : new Date().toISOString().split('T')[0]);
   const [scId, setScId] = useState(existingCustomer?.scId ? String(existingCustomer.scId) : '');
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({
@@ -218,7 +219,7 @@ const CustomerFormScreen = () => {
 
           <TextInput
             label="Registration Date"
-            value={regDate}
+            value={moment(regDate).format('DD-MM-YYYY')}
             mode="outlined"
             style={styles.input}
             right={<TextInput.Icon icon="calendar" onPress={showDatePicker} />}
