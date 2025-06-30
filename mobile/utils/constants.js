@@ -5,14 +5,14 @@ export const SERVICE_TYPES = [
   },
   {
     id: 'mediumService',
-    label: 'Medium Service',
+    label: 'Half Service',
   },
-  {
-    id: 'oilChange',
-    label: 'Oil Change',
-  },
+  // {
+  //   id: 'oilChange',
+  //   label: 'Oil Change',
+  // },
   {
     id: 'miscellaneous',
-    label: 'Miscellaneous',
+    label: 'Other Services',
   },
 ];

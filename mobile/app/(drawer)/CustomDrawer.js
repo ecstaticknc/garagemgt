@@ -157,7 +157,7 @@ export default function CustomDrawer(props) {
             <View style={styles.onlineIndicator} />
           </View>
 
-          <Text style={styles.appName}>Bike Clinic</Text>
+          <Text style={styles.appName}>बाईक क्लिनिक</Text>
 
           {loggedInUser ? (
             <>
@@ -176,7 +176,7 @@ export default function CustomDrawer(props) {
 
         <View style={styles.menuContainer}>
           {/* Dashboard is always visible */}
-          <MenuItem label="Dashboard" iconName="home" routePath="/(drawer)/(tabs)/Home" />
+          <MenuItem label="डॅशबोर्ड" iconName="home" routePath="/(drawer)/(tabs)/Home" />
 
           {/* Service Center Management - Only for Admins */}
           {showAdminFeatures && (
@@ -191,7 +191,7 @@ export default function CustomDrawer(props) {
            {/* Service History - Only for Normal Users */}
           {!showAdminFeatures && (
             <MenuItem
-              label="Customers"
+              label="ग्राहक"
               iconName="group"
               routePath="customers/CList"
               iconLib="MaterialIcons"
@@ -201,7 +201,7 @@ export default function CustomDrawer(props) {
           {/* Service History - Only for Normal Users */}
           {!showAdminFeatures && (
             <MenuItem
-              label="Service History"
+              label="सर्विसेस"
               iconName="history"
               routePath="servicehistory/SHList"
               iconLib="MaterialIcons"
@@ -211,7 +211,7 @@ export default function CustomDrawer(props) {
           {/* Reminder - Only for Normal Users */}
           {!showAdminFeatures && (
             <MenuItem
-              label="Reminder"
+              label="रिमाइंडर्स"
               iconName="bell"
               routePath="/(drawer)/(tabs)/Reminder"
               iconLib="Feather"
@@ -227,7 +227,7 @@ export default function CustomDrawer(props) {
             colors={['rgba(240, 68, 56, 0.1)', 'rgba(247, 104, 94, 0.42)']}
             style={styles.logoutGradient}>
             <Entypo name="log-out" size={20} color={COLORS.danger} />
-            <Text style={[styles.logoutText, { color: COLORS.danger }]}>Exit App</Text>
+            <Text style={[styles.logoutText, { color: COLORS.danger }]}>लॉग आऊट</Text>
           </LinearGradient>
         </TouchableOpacity>
 

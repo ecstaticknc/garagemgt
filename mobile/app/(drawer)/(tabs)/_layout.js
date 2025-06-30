@@ -92,7 +92,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="Home"
         options={{
-          title: 'Home',
+          title: 'डॅशबोर्ड',
           tabBarIcon: ({ color, size, focused }) =>
             getAnimatedIcon(<MaterialIcons name="home" size={size} color={color} />, focused),
         }}
@@ -102,7 +102,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="customers"
         options={{
-          title: 'Customers',
+          title: 'ग्राहक',
           tabBarIcon: ({ color, size, focused }) =>
             getAnimatedIcon(<FontAwesome name="users" size={size} color={color} />, focused),
           href: isAdmin ? null : undefined,
@@ -114,7 +114,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="servicehistory"
         options={{
-          title: 'Service\nHistory',
+          title: 'सर्विसेस',
           tabBarIcon: ({ color, size, focused }) =>
             getAnimatedIcon(<FontAwesome5 name="history" size={size} color={color} />, focused),
            href: isAdmin ? null : undefined,
@@ -126,7 +126,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="Reminder"
         options={{
-          title: 'Reminder',
+          title: 'रिमाइंडर्स',
           tabBarIcon: ({ color, size, focused }) =>
             getAnimatedIcon(<FontAwesome5 name="bell" size={size} color={color} />, focused),
            href: isAdmin ? null : undefined

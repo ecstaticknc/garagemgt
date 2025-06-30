@@ -174,9 +174,9 @@ export default function Home() {
 ];
 
 const pieData = [
-  { label: "Customers", value: customerCount, color: chartColors[3] },
-  { label: "Services Done", value: totalServiceHistoryCount, color: chartColors[7] },
-  { label: "Reminders", value: reminderCount, color: chartColors[6] },
+  { label: "ग्राहक", value: customerCount, color: chartColors[3] },
+  { label: "सर्विस झालेले", value: totalServiceHistoryCount, color: chartColors[7] },
+  { label: "रिमाइंडर्स", value: reminderCount, color: chartColors[6] },
 ].filter(d => d.value > 0);
 
   const pieChartRadius = screenWidth * 0.3; // Example radius, adjust as needed
@@ -219,7 +219,7 @@ const pieData = [
           <View style={styles.loadingContainer}>
             <ActivityIndicator size="large" color={colors.primary} />
             <Text style={[styles.loadingText, { color: colors.text }]}>
-              Loading dashboard information...
+              डॅशबोर्ड डेटा लोड होत आहे...
             </Text>
           </View>
         ) : errorInfo || errorCounts ? (
@@ -290,7 +290,7 @@ const pieData = [
 
             {/* Dashboard Counts Section - Now with colorful gradients! */}
             <View style={styles.dashboardCountsSection}>
-              <Text style={[styles.sectionTitle, { color: colors.text }]}>Overview</Text>
+              <Text style={[styles.sectionTitle, { color: colors.text }]}>सारांश</Text>
               <View style={styles.countsGrid}>
                 {/* Customer Count Card */}
                 <TouchableOpacity
@@ -305,7 +305,7 @@ const pieData = [
                   >
                     <Icon name="account-group" size={30} color="#fff" />
                     <Text style={styles.countTextWhite}>{customerCount}</Text>
-                    <Text style={styles.countLabelWhite}>Customers</Text>
+                    <Text style={styles.countLabelWhite}>ग्राहक</Text>
                   </LinearGradient>
                 </TouchableOpacity>
 
@@ -322,7 +322,7 @@ const pieData = [
                   >
                     <Icon name="tools" size={30} color="#fff" />
                     <Text style={styles.countTextWhite}>{totalServiceHistoryCount}</Text>
-                    <Text style={styles.countLabelWhite}>Services Done</Text>
+                    <Text style={styles.countLabelWhite}>सर्विसेस</Text>
                   </LinearGradient>
                 </TouchableOpacity>
 
@@ -339,7 +339,7 @@ const pieData = [
                   >
                     <Icon name="bell-ring" size={30} color="#fff" />
                     <Text style={styles.countTextWhite}>{reminderCount}</Text>
-                    <Text style={styles.countLabelWhite}>Reminders</Text>
+                    <Text style={styles.countLabelWhite}>रिमाइंडर्स</Text>
                   </LinearGradient>
                 </TouchableOpacity>
               </View>
@@ -347,7 +347,7 @@ const pieData = [
 
             {/* Pie Chart Section using d3-shapes and react-native-svg */}
             <View style={[styles.chartSection, { backgroundColor: colors.surface }]}>
-              <Text style={[styles.sectionTitle, { color: colors.text, marginBottom: 8 }]}>Activity Distribution</Text>
+              <Text style={[styles.sectionTitle, { color: colors.text, marginBottom: 8 }]}>कार्याची विभागणी</Text>
               {pieData.length > 0 ? (
                 <View style={styles.pieChartContainer}>
                   <Svg width={pieChartRadius * 2} height={pieChartRadius * 2}>
@@ -383,8 +383,8 @@ const pieData = [
             <View style={styles.navigationSection}>
               <Text style={[styles.sectionTitle, { color: colors.text }]}>Quick Actions</Text>
               <List.Item
-                title={`Customer List (${customerCount})`}
-                description="View and manage all your customers"
+                title={`ग्राहक लिस्ट (${customerCount})`}
+                description="तुमचे सर्व ग्राहक पहा आणि व्यवस्थापित करा"
                 left={props => <List.Icon {...props} icon="account-group" color={colors.primary} />}
                 onPress={() => router.push('/customers/CList')}
                 style={styles.listItem}
@@ -393,8 +393,8 @@ const pieData = [
               />
               <Divider style={styles.divider} />
               <List.Item
-                title={`Service History (${totalServiceHistoryCount})`}
-                description="Track past services for all vehicles"
+                title={`सर्विस इतिहास (${totalServiceHistoryCount})`}
+                description="सर्व वाहनांसाठी मागील सेवांचा इतिहास पहा"
                 left={props => <List.Icon {...props} icon="bike" color={colors.primary} />}
                 onPress={() => router.push('/servicehistory/SHList')}
                 style={styles.listItem}
@@ -403,8 +403,8 @@ const pieData = [
               />
               <Divider style={styles.divider} />
               <List.Item
-                title={`Service Reminders (${reminderCount})`}
-                description="Customers needing a follow-up service"
+                title={`सर्विस रिमाइंडर्स (${reminderCount})`}
+                description="ज्या ग्राहकांना फॉलो-अप सेवेची आवश्यकता आहे त्यांना रिमाइंडर पाठवा"
                 left={props => <List.Icon {...props} icon="bell-ring" color={colors.primary} />}
                 onPress={() => router.push('/(drawer)/(tabs)/Reminder')}
                 style={styles.listItem}
@@ -606,7 +606,7 @@ const styles = StyleSheet.create({
     fontSize: 13,
     marginTop: 4,
     textAlign: 'center',
-    color: '#E0E0E0',
+    color: '#f1f1f1',
   },
   // Styles for the Pie Chart Section
   chartSection: {

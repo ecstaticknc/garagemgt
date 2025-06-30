@@ -157,7 +157,7 @@ const CustomerListScreen = () => {
     return (
       <View style={styles.center}>
         <ActivityIndicator animating={true} size="large" color={COLORS.primary} />
-        <Text style={styles.loadingText}>Loading Customers...</Text>
+        <Text style={styles.loadingText}>ग्राहक लोड करत आहे...</Text>
       </View>
     );
   }
@@ -202,7 +202,7 @@ const CustomerListScreen = () => {
           </>
         ) : (
           <>
-            <Appbar.Content title="Customers" titleStyle={styles.appBarTitle} />
+            <Appbar.Content title="ग्राहक लिस्ट" titleStyle={styles.appBarTitle} />
             <Appbar.Action icon="magnify" color={COLORS.cardBackground} onPress={() => setIsSearchVisible(true)} /> 
           </>
         )}
@@ -249,7 +249,7 @@ const CustomerListScreen = () => {
       <FAB
         style={styles.fab}
         icon="plus"
-        label="Add Customer"
+        label="ग्राहक ऍड करा"
         onPress={() => navigation.navigate('CForm')}
         color={COLORS.cardBackground} 
         extended 
@@ -276,7 +276,7 @@ const styles = StyleSheet.create({
   },
   searchInput: {
     flex: 1,
-    height: 40, 
+    height: 20, 
     backgroundColor: COLORS.primary, 
     borderRadius: 8,
     paddingHorizontal: 8,
