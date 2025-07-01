@@ -487,6 +487,12 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
+     backgroundColor: COLORS.primary, 
+    height: 48,
+    justifyContent: 'center', 
+    marginTop: -28,
+    borderTopRightRadius: 15,
+    borderTopLeftRadius: 15,
   },
   headerTitle: {
     fontSize: 20,
