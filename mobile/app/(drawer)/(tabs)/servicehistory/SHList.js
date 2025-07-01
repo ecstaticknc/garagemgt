@@ -243,7 +243,7 @@ const ServiceHistoryListScreen = () => {
   return (
     <View style={styles.container}>
       <LinearGradient
-        colors={['rgba(107, 66, 246, 0.05)', 'rgba(138, 93, 254, 0.02)']}
+        colors={['rgba(107, 66, 246, 0.05)', 'rgba(138, 168, 252, 0.28)']}
         style={StyleSheet.absoluteFill}
       />
 
@@ -355,7 +355,7 @@ const ServiceHistoryListScreen = () => {
       <FAB
         style={styles.fab}
         icon="plus"
-        label="Add Service"
+        label="नवीन सर्व्हिस नोंदणी"
         onPress={() => navigation.navigate('SHForm')}
         color={COLORS.card}
         mode="flat"

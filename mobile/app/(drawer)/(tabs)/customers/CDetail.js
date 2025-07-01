@@ -300,7 +300,7 @@ const CustomerDetailScreen = () => {
             </View>
 
             <View style={styles.detailRow}>
-              <Icon name="car" size={20} color={colors.text} />
+              <Icon name="bike" size={20} color={colors.text} />
               <Text style={[styles.detailText, { color: colors.text }]}>
                 Vehicles: {customer.vehicles || 'N/A'}
               </Text>
@@ -349,7 +349,7 @@ const CustomerDetailScreen = () => {
         <Appbar.Content title="Customer Details" />
         {customer && (
           <>
-            <Appbar.Action
+            {/* <Appbar.Action
               icon="refresh"
               onPress={handleRefresh}
               color={colors.primary}
@@ -358,7 +358,7 @@ const CustomerDetailScreen = () => {
               icon="pencil"
               onPress={handleEdit}
               color={colors.primary}
-            />
+            /> */}
           </>
         )}
       </Appbar.Header>

@@ -454,7 +454,7 @@ const styles = StyleSheet.create({
   },
   iconContainer: {
     padding: 10,
-    backgroundColor: 'rgba(255,255,255,0.2)',
+    backgroundColor: 'rgba(255, 255, 255, 0.12)',
     borderRadius: 30,
     marginLeft: 20,
   },
@@ -499,7 +499,7 @@ const styles = StyleSheet.create({
   },
   divider: {
     marginHorizontal: 16,
-    backgroundColor: 'rgba(0,0,0,0.1)',
+    backgroundColor: 'rgba(0, 0, 0, 0.69)',
   },
   cardContent: {
     paddingVertical: 12,
