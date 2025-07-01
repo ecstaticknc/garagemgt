@@ -328,7 +328,7 @@ const ServiceHistoryFormScreen = () => {
           )}
 
           <TextInput
-            label="Service Remark (Optional)"
+            label="सेवा संदर्भातील टिप्पणी (पर्यायी)"
             value={serviceRemark}
             onChangeText={setServiceRemark}
             mode="outlined"
