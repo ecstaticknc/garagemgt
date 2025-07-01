@@ -215,7 +215,7 @@ const ServiceHistoryListScreen = () => {
   return (
     <View style={styles.container}>
       <LinearGradient
-        colors={['rgba(107, 66, 246, 0.05)', 'rgba(138, 93, 254, 0.02)']}
+        colors={['rgba(107, 66, 246, 0.05)', 'rgba(138, 168, 252, 0.28)']}
         style={StyleSheet.absoluteFill}
       />
       
@@ -242,7 +242,7 @@ const ServiceHistoryListScreen = () => {
         ) : (
           <>
             <Appbar.Content 
-              title="Service History" 
+              title="सर्व्हिस हिस्ट्री" 
               titleStyle={styles.headerTitle}
             />
             <Appbar.Action icon="magnify" color={COLORS.card} onPress={() => setIsSearchVisible(true)} />
@@ -314,7 +314,7 @@ const ServiceHistoryListScreen = () => {
       <FAB
         style={styles.fab}
         icon="plus"
-        label="Add Service"
+        label="नवीन सर्व्हिस नोंदणी"
         onPress={() => navigation.navigate('SHForm')}
         color={COLORS.card}
         mode="flat"
