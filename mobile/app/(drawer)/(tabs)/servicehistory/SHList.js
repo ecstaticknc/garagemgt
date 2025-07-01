@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { View, FlatList, StyleSheet, Alert, RefreshControl } from 'react-native';
-import { Appbar, List, FAB, ActivityIndicator, Text, Button, Card, Title, Paragraph, TextInput } from 'react-native-paper'; // Import TextInput
+import { Appbar, List, FAB, ActivityIndicator, Text, Button, Card, Title, Paragraph, TextInput } from 'react-native-paper';
 import { useFocusEffect } from '@react-navigation/native';
 import API from '../../../config/axiosInstance';
 import { router, useLocalSearchParams, useNavigation } from 'expo-router';
@@ -8,6 +8,7 @@ import { useAuth } from '../../../../context/AuthContext';
 import { MaterialIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import moment from 'moment';
+import Pagination from '../../../../components/Pagination'; // Adjust path as needed
 
 const COLORS = {
   primary: '#6B42F6',
@@ -29,12 +30,19 @@ const ServiceHistoryListScreen = () => {
   const scId = userScId;
   const navigation = useNavigation();
 
-  const [customersWithHistory, setCustomersWithHistory] = useState([]);
+  const [allCustomersWithHistory, setAllCustomersWithHistory] = useState([]); // Store all data
+  const [customersWithHistory, setCustomersWithHistory] = useState([]); // Data to display (after search/pagination)
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState(null);
-  const [searchQuery, setSearchQuery] = useState(''); // State for search query
-  const [isSearchVisible, setIsSearchVisible] = useState(false); // State for search bar visibility
+  const [searchQuery, setSearchQuery] = useState('');
+  const [isSearchVisible, setIsSearchVisible] = useState(false);
+  const [expandedCustomer, setExpandedCustomer] = useState(null);
+
+  // Pagination states
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(5); // You can make this configurable
+  const [totalFilteredItems, setTotalFilteredItems] = useState(0); // New state to store count of items after search filter
 
   const fetchData = async () => {
     setRefreshing(true);
@@ -47,13 +55,11 @@ const ServiceHistoryListScreen = () => {
 
       const response = await API._get(`/servicehistory/byServiceCenter?scId=${scId}`);
       const data = response.data?.data || [];
-      //console.log("response in history", data)
-      //console.log("response in history", data[0]?.serviceHistory) // Added optional chaining to prevent error if data[0] is undefined
 
       const filtered = data.filter(customer =>
         customer.serviceHistory && customer.serviceHistory.length > 0
       );
-      setCustomersWithHistory(filtered);
+      setAllCustomersWithHistory(filtered); // Store all fetched data
     } catch (err) {
       console.error('Error fetching service history:', err);
       setError(err.response?.data?.message || 'Failed to fetch service history.');
@@ -67,6 +73,9 @@ const ServiceHistoryListScreen = () => {
     useCallback(() => {
       if (scId) fetchData();
       else setLoading(false);
+      // Reset pagination and expanded customer when screen focuses
+      setCurrentPage(1);
+      setExpandedCustomer(null);
     }, [scId])
   );
 
@@ -80,7 +89,7 @@ const ServiceHistoryListScreen = () => {
           try {
             await API._delete(`/servicehistory/${id}`);
             Alert.alert('Success', 'Service entry deleted successfully!');
-            fetchData();
+            fetchData(); // Re-fetch data after deletion
           } catch (err) {
             console.error('Delete error:', err);
             Alert.alert('Error', err.response?.data?.message || 'Failed to delete service entry.');
@@ -101,122 +110,133 @@ const ServiceHistoryListScreen = () => {
     });
   };
 
-  // Filter customers based on search query
-  const getFilteredCustomers = useCallback(() => {
-    if (!searchQuery) {
-      return customersWithHistory;
+  // Filter and paginate data
+  useEffect(() => {
+    let filteredData = allCustomersWithHistory;
+
+    if (searchQuery) {
+      const lowerCaseQuery = searchQuery.toLowerCase();
+      filteredData = allCustomersWithHistory.filter(customer => {
+        const customerMatches =
+          customer.customerName?.toLowerCase().includes(lowerCaseQuery) ||
+          customer.mobile?.includes(lowerCaseQuery) ||
+          customer.vehicles?.toLowerCase().includes(lowerCaseQuery);
+
+        if (customer.serviceHistory && customer.serviceHistory.length > 0) {
+          const serviceHistoryMatches = customer.serviceHistory.some(sh =>
+            sh.selectedBike?.toLowerCase().includes(lowerCaseQuery) ||
+            sh.selectedServices?.toLowerCase().includes(lowerCaseQuery) ||
+            sh.serviceRemark?.toLowerCase().includes(lowerCaseQuery) ||
+            (sh.lastKM && String(sh.lastKM).includes(lowerCaseQuery))
+          );
+          return customerMatches || serviceHistoryMatches;
+        }
+        return customerMatches;
+      });
     }
 
-    const lowerCaseQuery = searchQuery.toLowerCase();
+    setTotalFilteredItems(filteredData.length); // Update total filtered items count
 
-    return customersWithHistory.filter(customer => {
-      // Check customer level details
-      const customerMatches =
-        customer.customerName?.toLowerCase().includes(lowerCaseQuery) ||
-        customer.mobile?.includes(lowerCaseQuery) || 
-        customer.vehicles?.toLowerCase().includes(lowerCaseQuery);
+    // Apply pagination
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    setCustomersWithHistory(filteredData.slice(startIndex, endIndex));
 
-      // Check service history details if customer itself doesn't match, or combine results
-      if (customer.serviceHistory && customer.serviceHistory.length > 0) {
-        const serviceHistoryMatches = customer.serviceHistory.some(sh =>
-          sh.selectedBike?.toLowerCase().includes(lowerCaseQuery) ||
-          sh.selectedServices?.toLowerCase().includes(lowerCaseQuery) ||
-          sh.serviceRemark?.toLowerCase().includes(lowerCaseQuery) ||
-          (sh.lastKM && String(sh.lastKM).includes(lowerCaseQuery))
-        );
-        return customerMatches || serviceHistoryMatches;
-      }
-      return customerMatches; 
-    });
-  }, [customersWithHistory, searchQuery]);
+    // If current page becomes empty after filter/pagination, go back to first page
+    if (filteredData.slice(startIndex, endIndex).length === 0 && currentPage > 1) {
+      setCurrentPage(1);
+    }
 
-  const filteredCustomers = getFilteredCustomers(); // Get the filtered list
+  }, [allCustomersWithHistory, searchQuery, currentPage, itemsPerPage]);
+
+
+  const handleAccordionPress = (customerId) => {
+    setExpandedCustomer(prev => (prev === customerId ? null : customerId));
+  };
 
   const renderCustomerItem = ({ item: customer }) => (
     <Card style={styles.customerCard}>
-      <Card.Content>
-        <View style={styles.customerHeader}>
-          <MaterialIcons name="person" size={24} color={COLORS.primary} />
-          <Title style={styles.customerName}>{customer.customerName}</Title>
-        </View>
-        
-        <View style={styles.customerInfo}>
-          <Paragraph style={styles.infoText}>
-            <MaterialIcons name="phone" size={16} color={COLORS.lightText} /> {customer.mobile}
-          </Paragraph>
-          <Paragraph style={styles.infoText}>
-            <MaterialIcons name="directions-bike" size={16} color={COLORS.lightText} /> {customer.vehicles}
-          </Paragraph>
-        </View>
-
-        <FlatList
-          data={customer.serviceHistory.map(sh => ({
-            ...sh,
-            customerData: {
-              id: customer.customerId,
-              customerName: customer.customerName,
-              mobile: customer.mobile,
-              vehicles: customer.vehicles
-            }
-          }))}
-          keyExtractor={(sh) => sh.id.toString()}
-          renderItem={({ item: sh }) => (
-            <Card style={styles.serviceCard}>
-              <Card.Content>
-                <View style={styles.serviceHeader}>
-                  <MaterialIcons name="calendar-today" size={18} color={COLORS.text} />
-                  <Paragraph style={styles.serviceDate}>{moment(sh.serviceDate).format('DD MMM YYYY')}</Paragraph>
-                </View>
-                
-                <View style={styles.serviceDetail}>
-                  <MaterialIcons name="two-wheeler" size={16} color={COLORS.lightText} />
-                  <Paragraph style={styles.serviceText}>{sh.selectedBike}</Paragraph>
-                </View>
-
-                {sh.lastKM && ( // Display Last KM if available
-                  <View style={styles.serviceDetail}>
-                    <MaterialIcons name="speed" size={16} color={COLORS.lightText} />
-                    <Paragraph style={styles.serviceText}>Last KM: {sh.lastKM}</Paragraph>
+      <List.Accordion
+        title={customer.customerName}
+        description={`Mobile: ${customer.mobile || 'N/A'} | Vehicles: ${customer.vehicles || 'N/A'}`}
+        left={props => <List.Icon {...props} icon="account" />}
+        expanded={expandedCustomer === customer.customerId}
+        onPress={() => handleAccordionPress(customer.customerId)}
+        titleStyle={styles.accordionTitle}
+        descriptionStyle={styles.accordionDescription}
+        style={styles.accordionHeader}
+        theme={{ colors: { primary: COLORS.primary } }}
+      >
+        <List.Section style={styles.accordionContentSection}>
+          <FlatList
+            data={customer.serviceHistory.map(sh => ({
+              ...sh,
+              customerData: {
+                id: customer.customerId,
+                customerName: customer.customerName,
+                mobile: customer.mobile,
+                vehicles: customer.vehicles
+              }
+            }))}
+            keyExtractor={(sh) => sh.id.toString()}
+            renderItem={({ item: sh }) => (
+              <Card style={styles.serviceCard}>
+                <Card.Content>
+                  <View style={styles.serviceHeader}>
+                    <MaterialIcons name="calendar-today" size={18} color={COLORS.text} />
+                    <Paragraph style={styles.serviceDate}>{moment(sh.serviceDate).format('DD MMMYYYY')}</Paragraph>
                   </View>
-                )}
-                
-                <View style={styles.serviceDetail}>
-                  <MaterialIcons name="build" size={16} color={COLORS.lightText} />
-                  <Paragraph style={styles.serviceText}>{sh.selectedServices}</Paragraph>
-                </View>
-                
-                {sh.serviceRemark && (
-                  <View style={styles.serviceDetail}>
-                    <MaterialIcons name="notes" size={16} color={COLORS.lightText} />
-                    <Paragraph style={styles.serviceText}>{sh.serviceRemark}</Paragraph>
-                  </View>
-                )}
 
-                <View style={styles.serviceActions}>
-                  <Button 
-                    mode="contained-tonal" 
-                    icon="pencil" 
-                    onPress={() => handleEditServiceEntry(sh)}
-                    style={styles.editButton}
-                    labelStyle={styles.buttonLabel}
-                  >
-                    Edit
-                  </Button>
-                   <Button 
-                    mode="contained-tonal" 
-                    icon="delete" 
-                    onPress={() => handleDeleteServiceEntry(sh.id)}
-                    style={styles.deleteButton}
-                    labelStyle={styles.buttonLabel}
-                  >
-                    Delete
-                  </Button> 
-                </View>
-              </Card.Content>
-            </Card>
-          )}
-        />
-      </Card.Content>
+                  <View style={styles.serviceDetail}>
+                    <MaterialIcons name="two-wheeler" size={16} color={COLORS.lightText} />
+                    <Paragraph style={styles.serviceText}>{sh.selectedBike}</Paragraph>
+                  </View>
+
+                  {sh.lastKM && (
+                    <View style={styles.serviceDetail}>
+                      <MaterialIcons name="speed" size={16} color={COLORS.lightText} />
+                      <Paragraph style={styles.serviceText}>Last KM: {sh.lastKM}</Paragraph>
+                    </View>
+                  )}
+
+                  <View style={styles.serviceDetail}>
+                    <MaterialIcons name="build" size={16} color={COLORS.lightText} />
+                    <Paragraph style={styles.serviceText}>{sh.selectedServices}</Paragraph>
+                  </View>
+
+                  {sh.serviceRemark && (
+                    <View style={styles.serviceDetail}>
+                      <MaterialIcons name="notes" size={16} color={COLORS.lightText} />
+                      <Paragraph style={styles.serviceText}>{sh.serviceRemark}</Paragraph>
+                    </View>
+                  )}
+
+                  <View style={styles.serviceActions}>
+                    <Button
+                      mode="contained-tonal"
+                      icon="pencil"
+                      onPress={() => handleEditServiceEntry(sh)}
+                      style={styles.editButton}
+                      labelStyle={styles.buttonLabel}
+                    >
+                      Edit
+                    </Button>
+                    <Button
+                      mode="contained-tonal"
+                      icon="delete"
+                      onPress={() => handleDeleteServiceEntry(sh.id)}
+                      style={styles.deleteButton}
+                      labelStyle={styles.buttonLabel}
+                    >
+                      Delete
+                    </Button>
+                  </View>
+                </Card.Content>
+              </Card>
+            )}
+          />
+        </List.Section>
+      </List.Accordion>
     </Card>
   );
 
@@ -226,13 +246,13 @@ const ServiceHistoryListScreen = () => {
         colors={['rgba(107, 66, 246, 0.05)', 'rgba(138, 93, 254, 0.02)']}
         style={StyleSheet.absoluteFill}
       />
-      
+
       <Appbar.Header style={styles.header}>
         {isSearchVisible ? (
           <>
             <Appbar.Action icon="arrow-left" color={COLORS.card} onPress={() => {
               setIsSearchVisible(false);
-              setSearchQuery(''); // Clear search when hiding
+              setSearchQuery('');
             }} />
             <TextInput
               placeholder="Search service history..."
@@ -249,8 +269,8 @@ const ServiceHistoryListScreen = () => {
           </>
         ) : (
           <>
-            <Appbar.Content 
-              title="Service History" 
+            <Appbar.Content
+              title="Service History"
               titleStyle={styles.headerTitle}
             />
             <Appbar.Action icon="magnify" color={COLORS.card} onPress={() => setIsSearchVisible(true)} />
@@ -267,8 +287,8 @@ const ServiceHistoryListScreen = () => {
         <View style={styles.center}>
           <MaterialIcons name="error-outline" size={48} color={COLORS.danger} />
           <Text style={styles.errorText}>{error}</Text>
-          <Button 
-            mode="contained" 
+          <Button
+            mode="contained"
             onPress={fetchData}
             style={styles.retryButton}
             labelStyle={styles.buttonLabel}
@@ -276,12 +296,12 @@ const ServiceHistoryListScreen = () => {
             Try Again
           </Button>
         </View>
-      ) : filteredCustomers.length === 0 && searchQuery ? ( // Show specific message if no results for search query
+      ) : totalFilteredItems === 0 && searchQuery ? ( // Check totalFilteredItems for search empty state
         <View style={styles.center}>
           <MaterialIcons name="search-off" size={48} color={COLORS.lightText} />
           <Text style={styles.emptyList}>No matching service history found for "{searchQuery}"</Text>
-          <Button 
-            mode="outlined" 
+          <Button
+            mode="outlined"
             onPress={() => setSearchQuery('')}
             style={styles.refreshButton}
             labelStyle={{color: COLORS.primary}}
@@ -289,12 +309,12 @@ const ServiceHistoryListScreen = () => {
             Clear Search
           </Button>
         </View>
-      ) : customersWithHistory.length === 0 ? ( // Original empty list message if no history at all
+      ) : allCustomersWithHistory.length === 0 ? ( // Check allCustomersWithHistory for overall empty state
         <View style={styles.center}>
           <MaterialIcons name="history" size={48} color={COLORS.lightText} />
           <Text style={styles.emptyList}>No service history found</Text>
-          <Button 
-            mode="contained" 
+          <Button
+            mode="contained"
             onPress={fetchData}
             style={styles.refreshButton}
             labelStyle={styles.buttonLabel}
@@ -304,18 +324,31 @@ const ServiceHistoryListScreen = () => {
         </View>
       ) : (
         <FlatList
-          data={filteredCustomers} // Use filtered data here
+          data={customersWithHistory} // Use paginated data here
           keyExtractor={(item) => item.customerId.toString()}
           renderItem={renderCustomerItem}
           contentContainerStyle={styles.listContent}
           refreshControl={
-            <RefreshControl 
-              refreshing={refreshing} 
+            <RefreshControl
+              refreshing={refreshing}
               onRefresh={fetchData}
               colors={[COLORS.primary]}
               tintColor={COLORS.primary}
             />
           }
+        />
+      )}
+
+      {/* Pagination Component */}
+      {!loading && !error && totalFilteredItems > 0 && ( // Use totalFilteredItems
+        <Pagination
+          currentPage={currentPage}
+          totalItems={totalFilteredItems} // Pass the total filtered items count
+          itemsPerPage={itemsPerPage}
+          onPageChange={(page) => {
+            setCurrentPage(page);
+            setExpandedCustomer(null); // Collapse all accordions on page change
+          }}
         />
       )}
 
@@ -337,23 +370,23 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.background,
   },
   header: {
-    backgroundColor: COLORS.primary, // Changed to primary color
-    // Removed elevation and shadow properties
+    backgroundColor: COLORS.primary,
+    height: 48,
+    marginTop: -48,
   },
   headerTitle: {
     fontSize: 20,
     marginLeft: 10,
-    fontWeight: 'bold', // Changed to bold
-    color: COLORS.card, // Changed to white
-    // Removed marginLeft
+    fontWeight: 'bold',
+    color: COLORS.card,
   },
   searchInput: {
     flex: 1,
-    height: 40, // Adjust height as needed
-    backgroundColor: COLORS.primary, // Or a slightly darker variant for contrast
+    height: 35,
+    backgroundColor: COLORS.primary,
     borderRadius: 8,
     paddingHorizontal: 8,
-    color: COLORS.card, // Text color in search input
+    color: COLORS.card,
     fontSize: 16,
   },
   center: {
@@ -381,7 +414,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   listContent: {
-    paddingBottom: 90,
+    paddingBottom: 90, // Make space for the pagination component
     paddingHorizontal: 16,
     paddingTop: 16,
   },
@@ -396,27 +429,25 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     overflow: 'hidden',
   },
-  customerHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 8,
+  accordionHeader: {
+    backgroundColor: COLORS.card,
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.border,
+    paddingVertical: 0,
   },
-  customerName: {
-    fontSize: 18,
-    fontWeight: '600',
+  accordionTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
     color: COLORS.text,
-    marginLeft: 8,
   },
-  customerInfo: {
-    marginBottom: 12,
-    paddingLeft: 8,
-  },
-  infoText: {
-    color: COLORS.text,
+  accordionDescription: {
     fontSize: 14,
-    marginVertical: 2,
-    flexDirection: 'row',
-    alignItems: 'center',
+    color: COLORS.lightText,
+  },
+  accordionContentSection: {
+    paddingHorizontal: 16,
+    paddingBottom: 8,
+    backgroundColor: COLORS.background,
   },
   serviceCard: {
     backgroundColor: COLORS.card,
@@ -427,7 +458,6 @@ const styles = StyleSheet.create({
     elevation: 0,
     borderRightWidth: 4,
     borderRightColor: COLORS.primary,
-    borderLeftColor: COLORS.primary,
   },
   serviceHeader: {
     flexDirection: 'row',
@@ -481,9 +511,9 @@ const styles = StyleSheet.create({
   },
   fab: {
     position: 'absolute',
-    margin: 24,
+    margin: 10,
     right: 0,
-    bottom: 0,
+    bottom: 80, // Adjusted FAB bottom to be above pagination
     backgroundColor: COLORS.primary,
     borderRadius: 50,
     elevation: 4,
