@@ -37,7 +37,7 @@ const CustomerListScreen = () => {
 
   // Pagination states
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(5); // You can make this configurable
+  const [itemsPerPage, setItemsPerPage] = useState(10); // You can make this configurable
   const [totalFilteredItems, setTotalFilteredItems] = useState(0); // New state for total filtered items after search
 
   const fetchCustomers = async () => {
@@ -205,7 +205,7 @@ const CustomerListScreen = () => {
               underlineColor="transparent"
               selectionColor={COLORS.cardBackground} 
               placeholderTextColor={COLORS.cardBackground + '99'}
-              left={<TextInput.Icon icon="magnify" color={COLORS.cardBackground} />}
+              left={<TextInput.Icon icon="magnify" color={COLORS.cardBackground} style={styles.mangify} />}
               autoFocus 
             />
             <Appbar.Action icon="close" color={COLORS.cardBackground} onPress={() => setSearchQuery('')} /> 
@@ -289,7 +289,9 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.primary, 
     height: 48,
     justifyContent: 'center', 
-    marginTop: -48,
+    marginTop: -28,
+    borderTopRightRadius: 15,
+    borderTopLeftRadius: 15,
   },
   appBarTitle: {
     color: COLORS.cardBackground, 
@@ -407,6 +409,10 @@ const styles = StyleSheet.create({
     fontSize: 15,
     color: COLORS.lightText,
     marginTop: 5,
+  },
+  mangify: {
+    marginTop: 8, // Adjusted margin for better alignment
+    color: COLORS.cardBackground, // Ensure icon color matches the app bar
   },
 });
 

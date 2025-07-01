@@ -26,70 +26,6 @@ const Pagination = ({ currentPage, totalItems, itemsPerPage, onPageChange }) => 
     return null;
   }
 
-  const renderPageNumbers = () => {
-    const pages = [];
-    const maxPageButtons = 5; // Maximum number of page buttons to display
-
-    let startPage = Math.max(1, currentPage - Math.floor(maxPageButtons / 2));
-    let endPage = Math.min(totalPages, startPage + maxPageButtons - 1);
-
-    if (endPage - startPage + 1 < maxPageButtons) {
-      startPage = Math.max(1, endPage - maxPageButtons + 1);
-    }
-
-    // Always show first page
-    if (startPage > 1) {
-      pages.push(
-        <Button
-          key={1}
-          onPress={() => onPageChange(1)}
-          mode={currentPage === 1 ? 'contained' : 'outlined'}
-          style={[styles.pageButton, currentPage === 1 && styles.activePageButton]}
-          labelStyle={[styles.pageButtonLabel, currentPage === 1 && styles.activePageButtonLabel]}
-        >
-          1
-        </Button>
-      );
-      if (startPage > 2) {
-        pages.push(<Text key="dots-start" style={styles.dots}>...</Text>);
-      }
-    }
-
-    for (let i = startPage; i <= endPage; i++) {
-      pages.push(
-        <Button
-          key={i}
-          onPress={() => onPageChange(i)}
-          mode={currentPage === i ? 'contained' : 'outlined'}
-          style={[styles.pageButton, currentPage === i && styles.activePageButton]}
-          labelStyle={[styles.pageButtonLabel, currentPage === i && styles.activePageButtonLabel]}
-        >
-          {i}
-        </Button>
-      );
-    }
-
-    // Always show last page
-    if (endPage < totalPages) {
-      if (endPage < totalPages - 1) {
-        pages.push(<Text key="dots-end" style={styles.dots}>...</Text>);
-      }
-      pages.push(
-        <Button
-          key={totalPages}
-          onPress={() => onPageChange(totalPages)}
-          mode={currentPage === totalPages ? 'contained' : 'outlined'}
-          style={[styles.pageButton, currentPage === totalPages && styles.activePageButton]}
-          labelStyle={[styles.pageButtonLabel, currentPage === totalPages && styles.activePageButtonLabel]}
-        >
-          {totalPages}
-        </Button>
-      );
-    }
-
-    return pages;
-  };
-
   return (
     <View style={styles.paginationContainer}>
       <Button
@@ -100,11 +36,14 @@ const Pagination = ({ currentPage, totalItems, itemsPerPage, onPageChange }) => 
         style={styles.navButton}
         contentStyle={styles.navButtonContent}
       >
-        <Text style={currentPage === 1 ? styles.disabledNavText : styles.navText}>Prev</Text>
+        {/* Removed "Prev" Text */}
       </Button>
 
-      <View style={styles.pageNumbersContainer}>
-        {renderPageNumbers()}
+      <View style={styles.currentPageContainer}>
+        <View style={styles.currentPageCircle}>
+          <Text style={styles.currentPageText}>{currentPage}</Text>
+        </View>
+        <Text style={styles.pageOfTotalText}>of {totalPages}</Text>
       </View>
 
       <Button
@@ -114,9 +53,9 @@ const Pagination = ({ currentPage, totalItems, itemsPerPage, onPageChange }) => 
         icon={() => <MaterialIcons name="chevron-right" size={24} color={currentPage === totalPages ? COLORS.lightText : COLORS.primary} />}
         style={styles.navButton}
         contentStyle={styles.navButtonContent}
-        labelStyle={{flexDirection: 'row-reverse'}} // To put icon on right
+        // labelStyle removed as no text to reverse
       >
-        <Text style={currentPage === totalPages ? styles.disabledNavText : styles.navText}>Next</Text>
+        {/* Removed "Next" Text */}
       </Button>
     </View>
   );
@@ -125,7 +64,7 @@ const Pagination = ({ currentPage, totalItems, itemsPerPage, onPageChange }) => 
 const styles = StyleSheet.create({
   paginationContainer: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    justifyContent: 'space-between', // Reverted to space-between to align arrows left/right
     alignItems: 'center',
     paddingVertical: 10,
     paddingHorizontal: 16,
@@ -138,58 +77,40 @@ const styles = StyleSheet.create({
     right: 0,
     zIndex: 10, // Ensure it's above other content
   },
-  pageNumbersContainer: {
+  currentPageContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    flexWrap: 'wrap', // Allow wrapping for many pages
-    justifyContent: 'center',
-    flex: 1, // Take available space
-    marginHorizontal: 5,
+    marginHorizontal: 10, // Keep some margin for spacing
   },
-  pageButton: {
-    marginHorizontal: 2,
-    minWidth: 35,
+  currentPageCircle: {
+    width: 35,
     height: 35,
+    borderRadius: 17.5, // Half of width/height for a perfect circle
+    backgroundColor: COLORS.primary,
     justifyContent: 'center',
     alignItems: 'center',
-    borderRadius: 5,
-    borderColor: COLORS.primary,
-    borderWidth: 1,
-    backgroundColor: 'transparent',
+    marginRight: 5,
   },
-  activePageButton: {
-    backgroundColor: COLORS.primary,
-    borderColor: COLORS.primary,
-  },
-  pageButtonLabel: {
-    color: COLORS.primary,
-    fontSize: 14,
+  currentPageText: {
+    color: COLORS.card,
+    fontSize: 16,
     fontWeight: 'bold',
   },
-  activePageButtonLabel: {
-    color: COLORS.card,
+  pageOfTotalText: {
+    fontSize: 14,
+    color: COLORS.text,
   },
   navButton: {
-    borderRadius: 5,
-    borderColor: COLORS.primary,
-    borderWidth: 1,
-    minWidth: 80,
+    // Removed borderRadius and borderColor
+    borderWidth: 0, // Set borderWidth to 0
+    minWidth: 35, // Set minWidth to 35
+    paddingHorizontal: 0, // Remove horizontal padding from the button itself
   },
   navButtonContent: {
-    flexDirection: 'row',
+    width: 20, // Set width to 20
+    justifyContent: 'center', // Center the icon horizontally
   },
-  navText: {
-    color: COLORS.primary,
-    fontWeight: 'bold',
-  },
-  disabledNavText: {
-    color: COLORS.lightText,
-  },
-  dots: {
-    color: COLORS.lightText,
-    marginHorizontal: 5,
-    fontSize: 18,
-  },
+  // Removed navText, disabledNavText styles as no text is displayed
 });
 
 export default Pagination;
