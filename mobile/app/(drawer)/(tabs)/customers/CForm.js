@@ -30,7 +30,7 @@ const CustomerFormScreen = () => {
 
   useEffect(() => {
     navigation.setOptions({
-      headerTitle: existingCustomer ? 'Edit Customer' : 'Add New Customer',
+      headerTitle: existingCustomer ? 'ग्राहक संपादित करा' : 'नवीन ग्राहक जोडा',
       headerShown: false,
     });
   }, [navigation, existingCustomer]);
@@ -148,7 +148,7 @@ const CustomerFormScreen = () => {
         <Appbar.Header>
           <Appbar.BackAction onPress={() => navigation.goBack()} />
           <Appbar.Content 
-            title={existingCustomer ? 'Edit Customer' : 'Add Customer'} 
+            title={existingCustomer ? 'ग्राहक संपादित करा' : 'नवीन ग्राहक जोडा'} 
             titleStyle={styles.headerTitle}
           />
         </Appbar.Header>
@@ -158,7 +158,7 @@ const CustomerFormScreen = () => {
           keyboardShouldPersistTaps="handled"
         >
           <TextInput
-            label="Customer Name *"
+            label="ग्राहकाचे नाव *"
             value={customerName}
             onChangeText={setCustomerName}
             mode="outlined"
@@ -170,7 +170,7 @@ const CustomerFormScreen = () => {
           </HelperText>
 
           <TextInput
-            label="Mobile *"
+            label="मोबाईल *"
             value={mobile}
             onChangeText={(text) => {
               if (validateMobile(text)) {
@@ -187,11 +187,11 @@ const CustomerFormScreen = () => {
             {errors.mobile}
           </HelperText>
 
-          <Text style={styles.label}>Vehicle Numbers:</Text>
+          <Text style={styles.label}>वाहन क्रमांक:</Text>
           {vehicles.map((vehicle, index) => (
             <View key={index} style={styles.vehicleContainer}>
               <TextInput
-                label={`Vehicle ${index + 1}`}
+                label={`वाहन ${index + 1}`}
                 value={vehicle.vehicleNumber}
                 onChangeText={(text) => handleVehicleChange(index, text)}
                 mode="outlined"
@@ -218,7 +218,7 @@ const CustomerFormScreen = () => {
           </HelperText>
 
           <TextInput
-            label="Registration Date"
+            label="नोंदणी तारीख"
             value={moment(regDate).format('DD-MM-YYYY')}
             mode="outlined"
             style={styles.input}
@@ -236,7 +236,7 @@ const CustomerFormScreen = () => {
             labelStyle={styles.buttonLabel}
             contentStyle={styles.buttonContent}
           >
-            {existingCustomer ? 'Update Customer' : 'Add Customer'}
+            {existingCustomer ? 'ग्राहक संपादित करा' : 'नवीन ग्राहक जोडा'}
           </Button>
         </ScrollView>
       </View>
