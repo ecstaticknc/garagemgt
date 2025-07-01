@@ -246,7 +246,7 @@ const ServiceHistoryFormScreen = () => {
           {/* Vehicle Selection */}
           {selectedCustomer && customerVehicles.length > 0 && (
             <View style={styles.radioGroup}>
-              <Text style={styles.radioGroupLabel}>Select Vehicle:</Text>
+              <Text style={styles.radioGroupLabel}>वाहन निवडा:</Text>
               <RadioButton.Group onValueChange={setSelectedBike} value={selectedBike}>
                 {customerVehicles.map((v, i) => (
                   <View key={i} style={styles.radioItem}>
@@ -262,7 +262,7 @@ const ServiceHistoryFormScreen = () => {
           <TouchableOpacity onPress={() => setShowDatePicker(true)} style={styles.input}>
             <TextInput
               label="Service Date"
-              value={moment(serviceDate).format('DD MMM YYYY')}
+              value={moment(serviceDate).format('DD MM YYYY')}
               mode="outlined"
               editable={false}
               right={<TextInput.Icon icon="calendar" />}
@@ -280,7 +280,7 @@ const ServiceHistoryFormScreen = () => {
 
           {/* Last KM Input */}
           <TextInput
-            label="Last KM Reading"
+            label="शेवटचा किमी मीटर "
             value={lastKM}
             onChangeText={(text) => setLastKM(text.replace(/[^0-9]/g, ''))} // Allow only numbers
             mode="outlined"
@@ -317,13 +317,13 @@ const ServiceHistoryFormScreen = () => {
           {/* Miscellaneous Input */}
           {selectedServices.includes('miscellaneous') && (
             <TextInput
-              label="Other services Details"
+              label="इतर सेवांची माहिती"
               value={miscellaneousServiceText}
               onChangeText={setMiscellaneousServiceText}
               mode="outlined"
               multiline
               style={styles.input}
-              placeholder="e.g. Brake fix, chain set"
+              placeholder="उदा. ब्रेकची दुरुस्ती, साखळीचा सेट बदलणे, इत्यादी"
             />
           )}
 
