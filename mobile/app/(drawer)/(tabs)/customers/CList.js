@@ -1,13 +1,13 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { View, FlatList, StyleSheet, Alert, RefreshControl, TouchableOpacity, Animated } from 'react-native';
-import { Appbar, List, FAB, ActivityIndicator, Text, Button, TextInput } from 'react-native-paper'; // Import TextInput
+import { Appbar, List, FAB, ActivityIndicator, Text, Button, TextInput } from 'react-native-paper';
 import { useFocusEffect } from '@react-navigation/native';
 import { useRouter, useNavigation } from 'expo-router';
-import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialIcons, FontAwesome } from '@expo/vector-icons'; 
 
 import API from '../../../config/axiosInstance';
 import { useAuth } from '../../../../context/AuthContext';
+import Pagination from '../../../../components/Pagination'; 
 
 // Define a modern color palette
 const COLORS = {
@@ -27,12 +27,18 @@ const CustomerListScreen = () => {
   const navigation = useNavigation();
   const { userScId } = useAuth();
 
-  const [customers, setCustomers] = useState([]);
+  const [allCustomers, setAllCustomers] = useState([]); // Stores all fetched customers
+  const [displayedCustomers, setDisplayedCustomers] = useState([]); // Stores filtered and paginated customers
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState(null);
   const [searchQuery, setSearchQuery] = useState(''); // State for search query
   const [isSearchVisible, setIsSearchVisible] = useState(false); // State for search bar visibility
+
+  // Pagination states
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(5); // You can make this configurable
+  const [totalFilteredItems, setTotalFilteredItems] = useState(0); // New state for total filtered items after search
 
   const fetchCustomers = async () => {
     if (!userScId) {
@@ -45,7 +51,7 @@ const CustomerListScreen = () => {
     setError(null);
     try {
       const response = await API._get(`/customers/by-sc?scId=${userScId}`);
-      setCustomers(response.data.data);
+      setAllCustomers(response.data.data); 
     } catch (err) {
       console.error('Error fetching customers:', err);
       setError('Failed to load customers. Please try again.');
@@ -59,15 +65,36 @@ const CustomerListScreen = () => {
   useFocusEffect(
     useCallback(() => {
       fetchCustomers();
+      setCurrentPage(1); // Reset page on focus
       return () => {};
     }, [userScId])
   );
 
+  // Effect to filter and paginate customers whenever allCustomers, searchQuery, currentPage, or itemsPerPage changes
   useEffect(() => {    
-      fetchCustomers();
-    }, [userScId]);
+      let filteredData = allCustomers;
 
-   // console.log('customers:', customers);
+      if (searchQuery) {
+        const lowerCaseQuery = searchQuery.toLowerCase();
+        filteredData = allCustomers.filter(customer =>
+          customer.customerName?.toLowerCase().includes(lowerCaseQuery) ||
+          customer.mobile?.includes(lowerCaseQuery) ||
+          customer.vehicles?.toLowerCase().includes(lowerCaseQuery)
+        );
+      }
+
+      setTotalFilteredItems(filteredData.length); // Update total filtered items count
+
+      // Apply pagination
+      const startIndex = (currentPage - 1) * itemsPerPage;
+      const endIndex = startIndex + itemsPerPage;
+      setDisplayedCustomers(filteredData.slice(startIndex, endIndex));
+
+      // If current page becomes empty after filter/pagination, go back to first page
+      if (filteredData.slice(startIndex, endIndex).length === 0 && currentPage > 1) {
+        setCurrentPage(1);
+      }
+    }, [allCustomers, searchQuery, currentPage, itemsPerPage]);
 
   const handleDeleteCustomer = async (id) => {
     Alert.alert(
@@ -93,23 +120,6 @@ const CustomerListScreen = () => {
       { cancelable: true }
     );
   };
-
-  // Filter customers based on search query
-  const getFilteredCustomers = useCallback(() => {
-    if (!searchQuery) {
-      return customers; 
-    }
-
-    const lowerCaseQuery = searchQuery.toLowerCase();
-
-    return customers.filter(customer =>
-      customer.customerName?.toLowerCase().includes(lowerCaseQuery) ||
-      customer.mobile?.includes(lowerCaseQuery) ||
-      customer.vehicles?.toLowerCase().includes(lowerCaseQuery)
-    );
-  }, [customers, searchQuery]);
-
-  const filteredCustomers = getFilteredCustomers(); 
 
   const renderItem = ({ item }) => (
     <TouchableOpacity
@@ -180,7 +190,7 @@ const CustomerListScreen = () => {
 
   return (
     <View style={styles.container}>
-      <Appbar.Header style={styles.appBar}>
+      <Appbar.Header style={styles.appBar}> 
         {isSearchVisible ? ( 
           <>
             <Appbar.Action icon="arrow-left" color={COLORS.cardBackground} onPress={() => {
@@ -202,14 +212,14 @@ const CustomerListScreen = () => {
           </>
         ) : (
           <>
-            <Appbar.Content title="ग्राहक लिस्ट" titleStyle={styles.appBarTitle} />
+            <Appbar.Content title="ग्राहक लिस्ट" titleStyle={styles.appBarTitle} /> 
             <Appbar.Action icon="magnify" color={COLORS.cardBackground} onPress={() => setIsSearchVisible(true)} /> 
           </>
         )}
       </Appbar.Header>
 
       <FlatList
-        data={filteredCustomers} 
+        data={displayedCustomers}
         keyExtractor={(item) => item.id.toString()}
         renderItem={renderItem}
         contentContainerStyle={styles.listContent}
@@ -222,7 +232,7 @@ const CustomerListScreen = () => {
           />
         }
         ListEmptyComponent={
-          filteredCustomers.length === 0 && searchQuery ? ( 
+          totalFilteredItems === 0 && searchQuery ? ( 
             <View style={styles.center}>
               <MaterialIcons name="search-off" size={50} color={COLORS.lightText} style={{ marginBottom: 10 }} />
               <Text style={styles.emptyList}>No matching customers found for "{searchQuery}"</Text>
@@ -246,6 +256,16 @@ const CustomerListScreen = () => {
         }
       />
 
+      {/* Pagination Component */}
+      {!loading && !error && totalFilteredItems > 0 && (
+        <Pagination
+          currentPage={currentPage}
+          totalItems={totalFilteredItems}
+          itemsPerPage={itemsPerPage}
+          onPageChange={(page) => setCurrentPage(page)}
+        />
+      )}
+
       <FAB
         style={styles.fab}
         icon="plus"
@@ -267,16 +287,19 @@ const styles = StyleSheet.create({
   },
   appBar: {
     backgroundColor: COLORS.primary, 
+    height: 48,
+    justifyContent: 'center', 
+    marginTop: -48,
   },
   appBarTitle: {
     color: COLORS.cardBackground, 
-    fontSize: 20,
+    fontSize: 18, // Reduced font size from 20 to 18
     fontWeight: 'bold',
     marginLeft: 10,
   },
   searchInput: {
     flex: 1,
-    height: 20, 
+    height: 38, // Adjusted height to fit better in a 48dp appbar
     backgroundColor: COLORS.primary, 
     borderRadius: 8,
     paddingHorizontal: 8,
@@ -304,7 +327,7 @@ const styles = StyleSheet.create({
   listContent: {
     paddingVertical: 10,
     paddingHorizontal: 10,
-    paddingBottom: 90, 
+    paddingBottom: 90, // Increased padding to make space for the pagination component
   },
   customerCard: {
     backgroundColor: COLORS.cardBackground,
@@ -356,9 +379,9 @@ const styles = StyleSheet.create({
   },
   fab: {
     position: 'absolute',
-    margin: 20,
+    margin: 10,
     right: 0,
-    bottom: 0,
+    bottom: 80, // Adjusted FAB bottom to be above pagination
     backgroundColor: COLORS.primary,
     borderRadius: 30,
     shadowColor: COLORS.primary,
@@ -367,7 +390,7 @@ const styles = StyleSheet.create({
     shadowRadius: 10,
     elevation: 10,
     paddingHorizontal: 15,
-    paddingVertical: 10,
+    paddingVertical: 1,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',

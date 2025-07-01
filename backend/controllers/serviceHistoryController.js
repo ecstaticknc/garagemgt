@@ -10,6 +10,7 @@ const serviceHistoryRequiredFields = [
   "selectedServices",
   "serviceDate",
   "customerId",
+  "lastKM"
 ];
 
 const genericServiceHistoryController = createGenericController(
@@ -40,7 +41,8 @@ const serviceHistoryController = {
                     sh.selectedBike,
                     sh.selectedServices,
                     sh.serviceDate,
-                    sh.serviceRemark
+                    sh.serviceRemark,
+                    sh.lastKM
                 FROM 
                     customers c
                 LEFT JOIN 
@@ -71,6 +73,7 @@ const serviceHistoryController = {
             selectedServices: row.selectedServices,
             serviceDate: row.serviceDate,
             serviceRemark: row.serviceRemark,
+            lastKM: row.lastKM,
           });
         }
 
