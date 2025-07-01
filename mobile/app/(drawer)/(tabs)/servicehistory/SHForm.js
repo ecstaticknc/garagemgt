@@ -39,6 +39,7 @@ const ServiceHistoryFormScreen = () => {
     existingServiceHistory?.serviceDate ? existingServiceHistory.serviceDate.split('T')[0] : new Date().toISOString().split('T')[0]
   );
   const [serviceRemark, setServiceRemark] = useState(existingServiceHistory?.serviceRemark || '');
+  const [lastKM, setLastKM] = useState(existingServiceHistory?.lastKM ? String(existingServiceHistory.lastKM) : '');
 
   const [customerId, setCustomerId] = useState(existingServiceHistory?.customerId ? String(existingServiceHistory.customerId) : initialCustomerId);
   const [selectedCustomer, setSelectedCustomer] = useState(null);
@@ -113,6 +114,7 @@ const ServiceHistoryFormScreen = () => {
           : [];
         setCustomerVehicles(vehicles);
         setSelectedBike(existingServiceHistory.selectedBike || '');
+        setLastKM(existingServiceHistory.lastKM ? String(existingServiceHistory.lastKM) : ''); 
          initializedFromParams.current = true;
       }
     }
@@ -141,6 +143,7 @@ const ServiceHistoryFormScreen = () => {
       : [];
     setCustomerVehicles(vehicles);
     setSelectedBike('');
+    setLastKM('');
   };
 
   const onDateChange = (event, selectedDate) => {
@@ -171,7 +174,7 @@ const ServiceHistoryFormScreen = () => {
       finalRemark = miscellaneousServiceText;
     }
 
-    if (!selectedBike || selectedServices.length === 0 || !serviceDate || !selectedCustomer) {
+    if (!selectedBike || selectedServices.length === 0 || !serviceDate || !selectedCustomer || !lastKM) {
       Alert.alert('Validation Error', 'All required fields are needed. Please select at least one service type.');
       return;
     }
@@ -184,6 +187,7 @@ const ServiceHistoryFormScreen = () => {
         serviceDate,
         serviceRemark: finalRemark,
         customerId: parseInt(selectedCustomer.id),
+        lastKM: parseInt(lastKM),
       };
 
       if (existingServiceHistory) {
@@ -274,6 +278,17 @@ const ServiceHistoryFormScreen = () => {
             />
           )}
 
+          {/* Last KM Input */}
+          <TextInput
+            label="Last KM Reading"
+            value={lastKM}
+            onChangeText={(text) => setLastKM(text.replace(/[^0-9]/g, ''))} // Allow only numbers
+            mode="outlined"
+            keyboardType="numeric"
+            style={styles.input}
+            placeholder="e.g. 15000"
+          />
+
           {/* Service Type Checkboxes */}
           <View style={styles.radioGroup}>
   <Text style={styles.radioGroupLabel}>Select Service Type:</Text>
@@ -302,7 +317,7 @@ const ServiceHistoryFormScreen = () => {
           {/* Miscellaneous Input */}
           {selectedServices.includes('miscellaneous') && (
             <TextInput
-              label="Miscellaneous Details"
+              label="Other services Details"
               value={miscellaneousServiceText}
               onChangeText={setMiscellaneousServiceText}
               mode="outlined"

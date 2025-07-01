@@ -121,7 +121,8 @@ const ServiceHistoryListScreen = () => {
         const serviceHistoryMatches = customer.serviceHistory.some(sh =>
           sh.selectedBike?.toLowerCase().includes(lowerCaseQuery) ||
           sh.selectedServices?.toLowerCase().includes(lowerCaseQuery) ||
-          sh.serviceRemark?.toLowerCase().includes(lowerCaseQuery)
+          sh.serviceRemark?.toLowerCase().includes(lowerCaseQuery) ||
+          (sh.lastKM && String(sh.lastKM).includes(lowerCaseQuery))
         );
         return customerMatches || serviceHistoryMatches;
       }
@@ -171,6 +172,13 @@ const ServiceHistoryListScreen = () => {
                   <MaterialIcons name="two-wheeler" size={16} color={COLORS.lightText} />
                   <Paragraph style={styles.serviceText}>{sh.selectedBike}</Paragraph>
                 </View>
+
+                {sh.lastKM && ( // Display Last KM if available
+                  <View style={styles.serviceDetail}>
+                    <MaterialIcons name="speed" size={16} color={COLORS.lightText} />
+                    <Paragraph style={styles.serviceText}>Last KM: {sh.lastKM}</Paragraph>
+                  </View>
+                )}
                 
                 <View style={styles.serviceDetail}>
                   <MaterialIcons name="build" size={16} color={COLORS.lightText} />
