@@ -1,11 +1,11 @@
 export const SERVICE_TYPES = [
   {
     id: 'fullService',
-    label: 'Full Service',
+    label: 'सूंपर्ण सर्व्हिस',
   },
   {
     id: 'mediumService',
-    label: 'Half Service',
+    label: 'किरकोळ - सर्व्हिस',
   },
   // {
   //   id: 'oilChange',
@@ -13,6 +13,6 @@ export const SERVICE_TYPES = [
   // },
   {
     id: 'miscellaneous',
-    label: 'Other Services',
+    label: 'इतर  सर्व्हिस',
   },
 ];

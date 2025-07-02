@@ -168,14 +168,14 @@ const ServiceHistoryFormScreen = () => {
 
     if (selectedServices.includes('miscellaneous')) {
       if (!miscellaneousServiceText.trim()) {
-        Alert.alert('Validation Error', 'Miscellaneous details are required.');
+        Alert.alert('Validation Error', 'इतर विविध तपशील आवश्यक आहेत. कृपया तपशील भरा.');
         return;
       }
       finalRemark = miscellaneousServiceText;
     }
 
     if (!selectedBike || selectedServices.length === 0 || !serviceDate || !selectedCustomer || !lastKM) {
-      Alert.alert('Validation Error', 'All required fields are needed. Please select at least one service type.');
+      Alert.alert('Validation Error', 'सर्व आवश्यक माहिती आवश्यक आहे. कृपया किमान एक सेवा प्रकार निवडा.');
       return;
     }
 
@@ -211,7 +211,7 @@ const ServiceHistoryFormScreen = () => {
     <View style={styles.container}>
       <Appbar.Header>
         <Appbar.BackAction onPress={() => navigation.goBack()} />
-        <Appbar.Content title={existingServiceHistory ? 'Edit Service Entry' : 'Add Service Entry'} />
+        <Appbar.Content title={existingServiceHistory ? 'सर्व्हिस नोंद सुधारित करा' : 'सेवा नोंद जोडा'} />
       </Appbar.Header>
 
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.keyboardAvoidingView}>
@@ -301,7 +301,7 @@ const ServiceHistoryFormScreen = () => {
   >
     <View style={styles.checkboxWrapper}>
       <Checkbox
-        status={selectedServices.includes(service.id) ? 'checked' : 'unchecked'}
+        status={selectedServices.includes(service.id) ? 'निवडलेले' : 'निवडलेले नाही'}
         onPress={() => handleServiceCheckboxChange(service.id)}
         color="#6200ee"
         uncheckedColor="#888"
@@ -345,7 +345,7 @@ const ServiceHistoryFormScreen = () => {
             disabled={loading}
             style={styles.button}
           >
-            {existingServiceHistory ? 'Update' : 'Add'} Service Entry
+            {existingServiceHistory ? 'अद्यतनित करा' : 'जोडा'} सेवेची नोंद
           </Button>
         </ScrollView>
       </KeyboardAvoidingView>

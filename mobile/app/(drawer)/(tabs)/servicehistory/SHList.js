@@ -184,7 +184,7 @@ const ServiceHistoryListScreen = () => {
                 <Card.Content>
                   <View style={styles.serviceHeader}>
                     <MaterialIcons name="calendar-today" size={18} color={COLORS.text} />
-                    <Paragraph style={styles.serviceDate}>{moment(sh.serviceDate).format('DD MMMYYYY')}</Paragraph>
+                    <Paragraph style={styles.serviceDate}>{moment(sh.serviceDate).format('DD/MM/YYYY')}</Paragraph>
                   </View>
 
                   <View style={styles.serviceDetail}>
@@ -219,7 +219,7 @@ const ServiceHistoryListScreen = () => {
                       style={styles.editButton}
                       labelStyle={styles.buttonLabel}
                     >
-                      Edit
+                      सुधारा
                     </Button>
                     <Button
                       mode="contained-tonal"
@@ -228,7 +228,7 @@ const ServiceHistoryListScreen = () => {
                       style={styles.deleteButton}
                       labelStyle={styles.buttonLabel}
                     >
-                      Delete
+                      काढून टाका
                     </Button>
                   </View>
                 </Card.Content>
@@ -270,7 +270,7 @@ const ServiceHistoryListScreen = () => {
         ) : (
           <>
             <Appbar.Content
-              title="Service History"
+              title="सेवेचा इतिहास"
               titleStyle={styles.headerTitle}
             />
             <Appbar.Action icon="magnify" color={COLORS.card} onPress={() => setIsSearchVisible(true)} />

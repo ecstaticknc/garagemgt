@@ -323,7 +323,7 @@ const CustomerDetailScreen = () => {
             icon="history"
             contentStyle={styles.buttonContent}
           >
-            Service History
+            सेवेचा इतिहास
           </Button>
 
           <Button
@@ -333,7 +333,7 @@ const CustomerDetailScreen = () => {
             icon="pencil"
             contentStyle={styles.buttonContent}
           >
-            Edit Customer
+            सुधारा ग्राहक 
           </Button>
 
           {renderDeleteButton()}
