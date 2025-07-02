@@ -56,7 +56,7 @@ const ServiceHistoryFormScreen = () => {
 
   useEffect(() => {
     navigation.setOptions({
-      headerTitle: existingServiceHistory ? 'Edit Service Entry' : 'Add Service Entry',
+      headerTitle: existingServiceHistory ? 'सेवेची नोंद सुधारित करा' : 'सेवेची नोंद',
       headerShown: false,
     });
   }, [navigation, existingServiceHistory]);
@@ -192,10 +192,10 @@ const ServiceHistoryFormScreen = () => {
 
       if (existingServiceHistory) {
         await API._put(`/servicehistory/${existingServiceHistory.id}`, payload);
-        Alert.alert('Success', 'Service entry updated!');
+        Alert.alert('यशस्वी', 'सेवा नोंद अद्ययावत करण्यात आली!');
       } else {
         await API._post('/servicehistory', payload);
-        Alert.alert('Success', 'Service entry added!');
+        Alert.alert('यशस्वी', 'सेवा नोंद यशस्वीपणे जोडली!');
       }
 
       navigation.goBack();
@@ -219,12 +219,12 @@ const ServiceHistoryFormScreen = () => {
           {/* Customer Section */}
           {existingServiceHistory ? (
             <View style={styles.readOnlyBox}>
-              <Text style={styles.readOnlyLabel}>Customer Name</Text>
+              <Text style={styles.readOnlyLabel}>ग्राहक नाव </Text>
               <Text style={styles.readOnlyValue}>
                 {customerDataFromParams?.customerName || selectedCustomer?.customerName || 'N/A'}
               </Text>
 
-              <Text style={styles.readOnlyLabel}>Mobile</Text>
+              <Text style={styles.readOnlyLabel}>मोबाईल </Text>
               <Text style={styles.readOnlyValue}>
                 {customerDataFromParams?.mobile || selectedCustomer?.mobile || 'N/A'}
               </Text>
@@ -233,7 +233,7 @@ const ServiceHistoryFormScreen = () => {
           ) : (
             <TouchableOpacity onPress={() => setShowCustomerPicker(true)} style={styles.input}>
               <TextInput
-                label="Select Customer"
+                label="ग्राहक निवडा"
                 value={selectedCustomer ? selectedCustomer.customerName : ''}
                 mode="outlined"
                 editable={false}
@@ -261,8 +261,8 @@ const ServiceHistoryFormScreen = () => {
           {/* Date Picker */}
           <TouchableOpacity onPress={() => setShowDatePicker(true)} style={styles.input}>
             <TextInput
-              label="Service Date"
-              value={moment(serviceDate).format('DD MM YYYY')}
+              label="सर्व्हिस तारीख"
+              value={moment(serviceDate).format('DD/MM/YYYY')}
               mode="outlined"
               editable={false}
               right={<TextInput.Icon icon="calendar" />}
@@ -291,7 +291,7 @@ const ServiceHistoryFormScreen = () => {
 
           {/* Service Type Checkboxes */}
           <View style={styles.radioGroup}>
-  <Text style={styles.radioGroupLabel}>Select Service Type:</Text>
+  <Text style={styles.radioGroupLabel}>सर्व्हिस प्रकार निवडा</Text>
 {SERVICE_TYPES.map((service) => (
   <TouchableOpacity
     key={service.id}
@@ -354,11 +354,11 @@ const ServiceHistoryFormScreen = () => {
       <Modal visible={showCustomerPicker} animationType="slide" onRequestClose={() => setShowCustomerPicker(false)}>
         <Appbar.Header>
           <Appbar.BackAction onPress={() => setShowCustomerPicker(false)} />
-          <Appbar.Content title="Select Customer" />
+          <Appbar.Content title="ग्राहक निवडा" />
         </Appbar.Header>
         <View style={styles.modalContent}>
           <Searchbar
-            placeholder="Search by name, mobile or vehicle"
+            placeholder="नाव, मोबाइल किंवा वाहनाद्वारे शोधा"
             value={customerSearchQuery}
             onChangeText={setCustomerSearchQuery}
             style={styles.searchBar}
