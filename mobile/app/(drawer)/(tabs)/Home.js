@@ -11,6 +11,7 @@ import moment from 'moment';
 // Removed SVG and d3-shape imports:
 import Svg, { G, Path } from 'react-native-svg';
 import { pie, arc } from 'd3-shape';
+import BikeAnimation from '~/components/BikeAnimation';
 const screenWidth = Dimensions.get('window').width-10;
 
 export default function Home() {
@@ -200,17 +201,23 @@ const pieData = [
         end={{ x: 1, y: 1 }}
         style={styles.header}
       >
+        
+        
         <View style={styles.headerContent}>
           <View style={styles.headerTextContainer}>
+            
             <Text style={styles.welcomeText}>Welcome</Text>
             <Text style={styles.serviceCenterName}>
               {serviceCenterInfo?.serviceCenterName || 'Service Center'}
             </Text>
           </View>
 
-          <Animated.View style={[styles.iconContainer, { transform: [{ rotate: spin }] }]}>
+          {/* <Animated.View style={[styles.iconContainer, { transform: [{ rotate: spin }] }]}>
             <Icon name="tools" size={40} color="#fff" />
-          </Animated.View>
+          </Animated.View> */}
+          <BikeAnimation />
+
+          
         </View>
       </LinearGradient>
 
