@@ -50,7 +50,7 @@ const CustomerListScreen = () => {
     setLoading(true);
     setError(null);
     try {
-      const response = await API._get(`/customers/byServiceCenter?scId=${userScId}`);
+      const response = await API._get(`/servicecenters`);
       // Ensure each item has an 'id' for keyExtractor, filter out malformed data
       const validCustomers = (response.data.data || []).filter(item => item && item.id !== undefined && item.id !== null);
       setAllCustomers(validCustomers);
@@ -277,7 +277,7 @@ const CustomerListScreen = () => {
       <FAB
         style={styles.fab}
         icon="plus"
-        onPress={() => router.push('customers/CForm')}
+        onPress={() => router.push('servicecenters/SCForm')}
         color={COLORS.cardBackground}
         backgroundColor={COLORS.primary}
       />

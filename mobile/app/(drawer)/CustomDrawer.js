@@ -95,6 +95,7 @@ export default function CustomDrawer(props) {
 
   // Determine if the user is an admin
   const showAdminFeatures = loggedInUser && loggedInUser.role === 'admin';
+  console.log("Logged in user role:", loggedInUser?.role);
 
   const MenuItem = ({ label, iconName, routePath, iconLib = 'Feather' }) => {
     const isActive = isRouteActive(routePath);
