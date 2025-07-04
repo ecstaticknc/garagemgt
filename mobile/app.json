@@ -1,10 +1,9 @@
 {
   "expo": {
     "name": "Bike Clinic",
-    "slug": "Bike Clinic",
+    "slug": "bike-clinic",
     "version": "1.0.0",
-    "scheme": "Bike Clinick",
-    
+    "scheme": "Bike Clinic",
     "plugins": [
       "expo-router",
       [
@@ -57,8 +56,9 @@
     "extra": {
       "router": {},
       "eas": {
-        "projectId": ""
+        "projectId": "03ccd3b4-c91e-4ec1-bee2-a5f0283259bd"
       }
-    }
+    },
+    "owner": "angadmane007"
   }
 }
