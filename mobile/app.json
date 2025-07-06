@@ -49,16 +49,17 @@
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/icon.png",
-        "backgroundColor": "#ffffff"
+        "backgroundColor": "#ffffff",
+        "resizeMode": "contain"
       },
       "package": "com.ecstaticknc.BikeClinic"
     },
     "extra": {
       "router": {},
       "eas": {
-        "projectId": "03ccd3b4-c91e-4ec1-bee2-a5f0283259bd"
+        "projectId": "4f918ac5-abc6-4106-9008-f3e71f654c9b"
       }
     },
-    "owner": "angadmane007"
+    "owner": "ecstaticknc"
   }
 }

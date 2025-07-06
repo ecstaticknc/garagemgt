@@ -301,7 +301,7 @@ const ServiceHistoryFormScreen = () => {
   >
     <View style={styles.checkboxWrapper}>
       <Checkbox
-        status={selectedServices.includes(service.id) ? 'निवडलेले' : 'निवडलेले नाही'}
+        status={selectedServices.includes(service.id) ? 'checked' : 'unchecked'}
         onPress={() => handleServiceCheckboxChange(service.id)}
         color="#6200ee"
         uncheckedColor="#888"

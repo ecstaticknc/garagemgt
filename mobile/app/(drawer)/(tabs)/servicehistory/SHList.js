@@ -372,7 +372,7 @@ const styles = StyleSheet.create({
   header: {
     backgroundColor: COLORS.primary,
     height: 48,
-    marginTop: -28,
+    marginTop: 0,
     borderTopRightRadius: 15,
     borderTopLeftRadius: 15,
   },
