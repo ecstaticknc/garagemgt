@@ -34,7 +34,7 @@
     "expo-file-system": "~18.1.10",
     "expo-haptics": "^14.1.4",
     "expo-linear-gradient": "~14.1.5",
-    "expo-local-authentication": "^16.0.5",
+    "expo-local-authentication": "~16.0.5",
     "expo-print": "~14.1.4",
     "expo-router": "^5.1.2",
     "expo-sharing": "~13.1.5",
@@ -58,7 +58,8 @@
     "react-native-safe-area-context": "5.4.0",
     "react-native-screens": "^4.11.1",
     "react-native-svg": "15.11.2",
-    "react-native-web": "^0.20.0"
+    "react-native-web": "^0.20.0",
+    "expo-secure-store": "~14.2.3"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",
