@@ -1,13 +1,18 @@
-import React, { useRef, useEffect, useState } from 'react';
-import {View,Animated,Image,StyleSheet,TouchableOpacity,PanResponder,} from 'react-native';
+import React, { useRef, useEffect } from 'react';
+import {
+  View,
+  Animated,
+  Image,
+  StyleSheet,
+  TouchableOpacity,
+  PanResponder,
+} from 'react-native';
 
 const BikeAnimation = () => {
   const wheelSpin = useRef(new Animated.Value(0)).current;
-  const bikeX = useRef(new Animated.Value(0)).current;
+  const bikeX = useRef(new Animated.Value(0)).current; // ✅ use single Value
 
-  const [direction, setDirection] = useState(1); // ➕ control scaleX (1 or -1)
-
-  // ♻️ Wheel Rotation Loop
+  // ♻️ Wheel Rotation (Loop)
   useEffect(() => {
     Animated.loop(
       Animated.timing(wheelSpin, {
@@ -23,7 +28,7 @@ const BikeAnimation = () => {
     outputRange: ['0deg', '360deg'],
   });
 
-  // 🚴 Move bike and flip image
+  // 🚴‍♂️ Move bike left → right → back
   const moveBike = () => {
     Animated.sequence([
       Animated.timing(bikeX, {
@@ -36,10 +41,7 @@ const BikeAnimation = () => {
         duration: 800,
         useNativeDriver: true,
       }),
-    ]).start(() => {
-      // 🔁 Flip direction on return
-      setDirection((prev) => (prev === 1 ? -1 : 1));
-    });
+    ]).start();
   };
 
   // 👆 PanResponder for swipe gesture
@@ -61,14 +63,7 @@ const BikeAnimation = () => {
       <TouchableOpacity onPress={moveBike} activeOpacity={1} style={{ width: '170%' }}>
         <Animated.View
           {...panResponder.panHandlers}
-          style={[
-            {
-              transform: [
-                { translateX: bikeX },
-                { scaleX: direction }, // 🔁 Flip direction
-              ],
-            },
-          ]}
+          style={[{ transform: [{ translateX: bikeX }] }]} // ✅ only translateX
         >
           {/* 🏍️ Bike Body */}
           <Image
